@@ -534,10 +534,10 @@ body::before{
 /* WHITE BOX */
 .wb{background:var(--glass-fill);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-radius:var(--r-lg);padding:22px;border:var(--glass-border);box-shadow: var(--glass-outer), var(--glass-inner)}
 
-/* EDIT TOOLBAR — outer strip; glass on .edit-toolbar-inner. Bottom inset as fallback;
-   iOS PWA: js/app.js setupEditToolbarViewportAnchor() sets top !important from visualViewport. */
+/* EDIT TOOLBAR — outer strip; glass on inner. CSS bottom is fallback only:
+   js sets top !important from innerHeight (see setupEditToolbarViewportAnchor). z above sw-update-bar. */
 .edit-toolbar{
-  position:fixed;top:auto;left:0;right:0;width:auto;margin:0;z-index:1000;
+  position:fixed;top:auto;left:0;right:0;width:auto;margin:0;z-index:10050;
   bottom:12px;
   bottom:calc(12px + env(safe-area-inset-bottom, 0px));
   bottom:calc(12px + var(--safe-bottom, 0px));

@@ -2895,10 +2895,10 @@ window.doBackupDownload = doBackupDownload;
 window.startBackupRestore = startBackupRestore;
 
 /**
- * Pin the edit toolbar to the visible bottom edge. iOS WebKit often mis-positions
- * position:fixed + bottom when html/body use overflow:hidden and the URL bar /
- * home indicator shift the visual viewport — top ends up at 0. visualViewport + an
- * explicit top bypasses that.
+ * Pin the edit toolbar to the bottom of the **layout viewport** (window.innerHeight).
+ * WebKit often gives nonsense from visualViewport alone (toolbar ends up at top:0 or
+ * under the notch). We use innerHeight as the primary anchor, blend visualViewport only
+ * when it agrees with a lower screen position, and re-run after load/resize.
  */
 function setupEditToolbarViewportAnchor() {
   const bar = document.querySelector('.edit-toolbar');
@@ -2906,8 +2906,15 @@ function setupEditToolbarViewportAnchor() {
 
   function safeBottomPx() {
     const raw = getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom').trim();
-    const n = parseFloat(raw);
-    return Number.isFinite(n) ? n : 0;
+    let n = parseFloat(raw);
+    if (Number.isFinite(n) && n >= 0) return n;
+    const probe = document.createElement('div');
+    probe.style.cssText =
+      'position:fixed;left:-9999px;bottom:0;height:0;padding-bottom:env(safe-area-inset-bottom,0px);pointer-events:none;opacity:0;visibility:hidden';
+    document.body.appendChild(probe);
+    n = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+    probe.remove();
+    return n;
   }
 
   let raf = 0;
@@ -2921,8 +2928,9 @@ function setupEditToolbarViewportAnchor() {
 
   let layoutRetries = 0;
   function anchorNow() {
-    const h = bar.offsetHeight;
-    if (h < 4 && layoutRetries < 12) {
+    const rect = bar.getBoundingClientRect();
+    const h = Math.max(bar.offsetHeight, rect.height);
+    if (h < 4 && layoutRetries < 18) {
       layoutRetries++;
       requestAnimationFrame(anchorNow);
       return;
@@ -2931,20 +2939,37 @@ function setupEditToolbarViewportAnchor() {
 
     const gap = 12;
     const safe = safeBottomPx();
-    const vv = window.visualViewport;
-    let topPx;
-    if (vv) {
-      topPx = vv.offsetTop + vv.height - h - gap - safe;
-    } else {
-      topPx = window.innerHeight - h - gap - safe;
+    const innerH = window.innerHeight || document.documentElement.clientHeight || 0;
+    if (innerH < 80) {
+      schedule();
+      return;
     }
-    topPx = Math.max(8, topPx);
+
+    let topPx = innerH - h - gap - safe;
+
+    const vv = window.visualViewport;
+    if (vv && vv.height > 10) {
+      const vvTop = vv.offsetTop + vv.height - h - gap - safe;
+      if (vvTop >= innerH * 0.2 && vvTop <= innerH - h - 4) {
+        topPx = Math.max(topPx, vvTop);
+      }
+    }
+
+    if (topPx + h / 2 < innerH * 0.42) {
+      topPx = innerH - h - gap - safe;
+    }
+
+    topPx = Math.max(8, Math.min(topPx, innerH - h - Math.max(8, gap)));
+
     bar.style.setProperty('top', `${topPx}px`, 'important');
     bar.style.setProperty('bottom', 'auto', 'important');
   }
 
   schedule();
+  setTimeout(schedule, 80);
+  window.addEventListener('load', schedule, { passive: true });
   window.addEventListener('resize', schedule, { passive: true });
+  window.addEventListener('orientationchange', schedule, { passive: true });
   if (window.visualViewport) {
     window.visualViewport.addEventListener('resize', schedule, { passive: true });
     window.visualViewport.addEventListener('scroll', schedule, { passive: true });
