@@ -41,7 +41,7 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
   backdrop-filter:var(--glass-blur-heavy);-webkit-backdrop-filter:var(--glass-blur-heavy);
   border-right:1px solid rgba(255,255,255,.55);box-shadow: 6px 0 40px rgba(0,0,0,.05), inset -1px 0 0 rgba(255,255,255,.55);
   display:flex;flex-direction:column;z-index:100;overflow:hidden}
-.sb-header{padding:28px 22px 18px;border-bottom:1px solid rgba(0,0,0,.05);
+.sb-header{padding:calc(28px + env(safe-area-inset-top, 0px)) 22px 18px;border-bottom:1px solid rgba(0,0,0,.05);
   background:linear-gradient(180deg, rgba(255,255,255,.45) 0%, transparent 100%);flex-shrink:0}
 .sidebar-nav-scroll{flex:1;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-y:contain;padding-bottom:16px}
 .trip-badge{display:inline-flex;align-items:center;gap:5px;
@@ -229,6 +229,7 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 #sw-update-bar .sw-update-msg{max-width:min(520px,92vw);text-align:center;color:var(--text)}
 #sw-update-bar .sw-update-btn{flex-shrink:0;padding:8px 18px;font-size:13px;margin:0}
 
+.flight-board-stack{width:100%;max-width:100%;box-sizing:border-box}
 .flight-board-wrap{padding-bottom:8px}
 .flight-board-intro{display:flex;flex-direction:column;align-items:flex-start;gap:0}
 .flight-board-intro .sec-header{margin-bottom:0;width:100%}
@@ -241,12 +242,12 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
   box-shadow:var(--glass-hover),var(--glass-inner);transform:translateY(-1px);color:var(--blue-h)}
 .flight-add-btn-glass:active{transform:translateY(0)}
 .flight-cards-scroller{
-  display:flex;gap:14px;overflow-x:auto;overflow-y:visible;margin-top:12px;padding:8px 14px 14px;
-  scroll-snap-type:x mandatory;scroll-padding-inline:14px;
+  display:flex;gap:14px;overflow-x:auto;overflow-y:visible;margin-top:12px;padding:8px 0 14px;
+  scroll-snap-type:x mandatory;scroll-padding-inline:0;
   -webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .flight-cards-scroller::-webkit-scrollbar{height:5px}
 .flight-cards-scroller .flight-card{
-  flex:0 0 min(308px,calc(100vw - 56px));scroll-snap-align:start;max-width:100%}
+  flex:0 0 100%;width:100%;max-width:100%;min-width:0;scroll-snap-align:start}
 .flight-cards-scroller--empty{
   flex-direction:column;overflow-x:visible;scroll-snap-type:none}
 .flight-cards-scroller--empty .flight-empty--solo{
@@ -257,7 +258,7 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 .flight-card.glass-card{box-shadow:0 6px 28px rgba(0,0,0,.07), var(--glass-inner)}
 .flight-card-hd{
   display:grid;grid-template-columns:auto minmax(7.5rem,1fr) auto;align-items:center;gap:8px 10px;
-  margin-bottom:6px;padding-right:min(108px,30vw)}
+  margin-bottom:6px;padding-right:0}
 .flight-card-star{color:#ff9500;font-size:14px;line-height:1;flex-shrink:0}
 .flight-card-hd-mid{min-width:0;overflow:visible;justify-self:start;max-width:100%}
 .flight-card--simple .flight-card-hd-mid .flight-pill{
@@ -271,10 +272,10 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 .flight-card-when{
   font-size:13px;font-weight:500;color:var(--text-sec);line-height:1.25;
   text-align:right;white-space:nowrap;justify-self:end}
-.flight-card-tagline{font-size:12px;font-weight:500;color:var(--text-sec);line-height:1.35;margin:0 0 8px;padding-right:min(108px,30vw)}
+.flight-card-tagline{font-size:12px;font-weight:500;color:var(--text-sec);line-height:1.35;margin:0 0 8px;padding-right:0}
 .flight-card-route{
   font-size:clamp(17px,4.8vw,20px);font-weight:700;letter-spacing:-.4px;color:var(--text);
-  line-height:1.2;margin:0 0 14px;padding-right:min(108px,26vw)}
+  line-height:1.2;margin:0 0 14px;padding-right:0}
 .flight-card-times{display:flex;flex-direction:column;gap:10px}
 .flight-card-conn-gap{
   font-size:11px;font-weight:600;color:var(--text-sec);line-height:1.35;
@@ -356,12 +357,16 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
   border-color:rgba(0,113,227,.55);box-shadow:0 0 0 3px rgba(0,113,227,.12), inset 0 1px 2px rgba(0,0,0,.04)}
 .flight-modal select.flight-modal-input{margin-bottom:14px}
 
-.trip-countdown-banner{margin-top:6px;margin-bottom:4px}
+.trip-countdown-banner{margin-top:6px;margin-bottom:0}
 .trip-countdown-banner--empty{display:none}
+.trip-countdown-banner--placeholder{display:block}
 .trip-cd-bar{
   box-sizing:border-box;padding:7px 12px;text-align:center;font-size:13px;font-weight:600;line-height:1.35;
   color:var(--blue);background:rgba(0,113,227,.09);border:1px solid rgba(0,113,227,.22);border-radius:10px}
 .trip-cd-bar--past{color:var(--text-sec);background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.12);font-weight:500}
+.trip-cd-bar--dotted{
+  color:var(--text-sec);background:rgba(0,113,227,.06);border:1px dashed rgba(0,113,227,.42);
+  font-weight:500;font-size:13px}
 .flight-card-btns{position:absolute;top:8px;right:8px;display:flex;align-items:center;gap:6px;z-index:3}
 .flight-card .flight-card-btns .del-btn,
 .flight-card .flight-card-btns .flight-card-remove{

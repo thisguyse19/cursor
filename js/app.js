@@ -508,6 +508,16 @@ function renderTripCountdownBanner() {
     clearInterval(_tripCountdownTick);
     _tripCountdownTick = null;
   }
+
+  if (getEnrichedFlightRowsSorted().length === 0) {
+    el.classList.remove('trip-countdown-banner--empty');
+    el.classList.add('trip-countdown-banner--placeholder');
+    el.innerHTML = `<div class="trip-cd-bar trip-cd-bar--dotted">${flightEsc('Add your first flight above.')}</div>`;
+    return;
+  }
+
+  el.classList.remove('trip-countdown-banner--placeholder');
+
   const write = () => {
     const line = flightCountdownBannerLine();
     if (line == null) {
