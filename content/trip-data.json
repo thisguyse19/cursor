@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.24",
+  "appVersion": "1.0.25",
   "versions": [
     {
       "v": "1.0",
@@ -290,10 +290,20 @@
       "v": "1.0.24",
       "date": "2026-05-16",
       "title": "Maps: Leaflet + satellite",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Replaced MapLibre with Leaflet and Esri World Imagery — raster tiles do not depend on WebGL, fixing blank black maps when maplibregl.supported() was false (common on iOS PWA)",
         "Trip maps and flight cards keep great-circle routes, glow polylines, and numbered markers; tile layers use crossOrigin for cleaner PDF captures"
+      ]
+    },
+    {
+      "v": "1.0.25",
+      "date": "2026-05-16",
+      "title": "PWA bottom toolbar safe area",
+      "latest": true,
+      "changes": [
+        "Edit toolbar uses a minimum bottom inset in standalone/fullscreen mode so the frosted bar stays flush with the home indicator when env(safe-area-inset-bottom) incorrectly reads 0",
+        "Main scroll padding on narrow installed PWAs matches the same inset so content does not sit under a taller toolbar"
       ]
     }
   ],
