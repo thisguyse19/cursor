@@ -522,6 +522,10 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 .tb-danger:hover{background:rgba(255,59,48,.18);box-shadow:var(--btn-shadow-hover)}
 .tb-export{background:rgba(52,199,89,.14);color:#1e6b30;border-color:rgba(52,199,89,.28)}
 .tb-export:hover{background:rgba(52,199,89,.2);box-shadow:var(--btn-shadow-hover)}
+.tb-icon{
+  min-width:44px;padding:10px 12px;font-size:18px;line-height:1;letter-spacing:0}
+.tb-pdf-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.tb-pdf-glyph{font-weight:700;font-size:15px}
 .tb-sep{width:1px;height:22px;background:rgba(0,0,0,.08);flex-shrink:0}
 
 /* EDIT MODE */
