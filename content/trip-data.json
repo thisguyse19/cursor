@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.16",
+  "appVersion": "1.0.17",
   "versions": [
     {
       "v": "1.0",
@@ -196,7 +196,7 @@
       "v": "1.0.16",
       "date": "2026-05-16",
       "title": "Flights layout, connections detail, countdown & PWA spacing",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Next-flight countdown: slim blue bar — days or hours until departure, “Enjoy your trip!” under one hour, muted line after the trip ends",
         "No sample flights in bundled data — board starts empty; dotted hint “Add your first flight above.” when you have no legs yet",
@@ -207,6 +207,17 @@
         "Connecting itineraries: “Xh Ym connection time” from first-leg landing to second-leg departure; second segment uses the same arrow rows as the first; layover wording is scheduled (not “Landed”) for upcoming travel",
         "Header flight pill sized for typical 3-letter + 4-digit codes",
         "Live flights JSON still merges into cards on load; status line can appear under the board when the live file is or is not used"
+      ]
+    },
+    {
+      "v": "1.0.17",
+      "date": "2026-05-16",
+      "title": "Airport quick-search & automatic route titles",
+      "latest": true,
+      "changes": [
+        "World IATA airport index bundled as content/airports.json for fast offline lookup",
+        "Add / edit flight: From and To moved to the top — type a city, airport name, or code to see a frosted suggestion list (same for connection From and Connect at)",
+        "Manual trip label field removed; cards show an automatic title from origin city to final city (e.g. Singapore to Hobart), including connections"
       ]
     }
   ],
