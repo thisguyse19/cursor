@@ -1902,6 +1902,7 @@ function syncEditToolbarButton() {
 }
 
 function toggleEdit() {
+  closeTopToolsMenu();
   if(!isEditing) {
     isEditing = true;
     document.body.classList.add('editing');
@@ -1971,6 +1972,7 @@ function diffSnapshots(before, after) {
 }
 
 function openHistory() {
+  closeTopToolsMenu();
   const history = loadHistory();
   const list = document.getElementById('historyList');
   if(!history.length) {
@@ -2028,7 +2030,10 @@ function doRollback() {
   closeHistory();
 }
 
-function confirmRevert() { document.getElementById('revertModal').classList.add('open'); }
+function confirmRevert() {
+  closeTopToolsMenu();
+  document.getElementById('revertModal').classList.add('open');
+}
 
 function doRevertAll() {
   // Re-render everything from original data
@@ -2067,6 +2072,7 @@ function doRevertAll() {
 // PDF EXPORT
 // ═══════════════════════════════════════
 function exportPDF() {
+  closeTopToolsMenu();
   document.getElementById('pdfModal').classList.add('open');
 }
 
@@ -2135,6 +2141,7 @@ function applyTripleBackup(data) {
 }
 
 function openBackupModal() {
+  closeTopToolsMenu();
   document.getElementById('backupModal').classList.add('open');
 }
 
@@ -2511,6 +2518,7 @@ ${checklistHtml}
 // VERSION HISTORY
 // ═══════════════════════════════════════
 function openVersionModal() {
+  closeTopToolsMenu();
   if (!VERSIONS || !Array.isArray(VERSIONS)) return;
   const list = document.getElementById('versionList');
   list.innerHTML = VERSIONS.slice().sort(compareVersionDesc).map(v => `
@@ -2900,106 +2908,147 @@ window.doBackupDownload = doBackupDownload;
 window.startBackupRestore = startBackupRestore;
 window.startBackupRestoreFromLogin = startBackupRestoreFromLogin;
 
+function _safeBottomPx() {
+  const raw = getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom').trim();
+  let n = parseFloat(raw);
+  if (Number.isFinite(n) && n >= 0) return n;
+  const probe = document.createElement('div');
+  probe.style.cssText =
+    'position:fixed;left:-9999px;bottom:0;height:0;padding-bottom:env(safe-area-inset-bottom,0px);pointer-events:none;opacity:0;visibility:hidden';
+  document.body.appendChild(probe);
+  n = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+  probe.remove();
+  return n;
+}
+
 /**
- * Pin the edit toolbar to the bottom of the **layout viewport** (window.innerHeight).
- * WebKit often gives nonsense from visualViewport alone (toolbar ends up at top:0 or
- * under the notch). We use innerHeight as the primary anchor, blend visualViewport only
- * when it agrees with a lower screen position, and re-run after load/resize.
+ * Bottom insets for `.main` scroll padding and the SW update pill. No floating edit bar —
+ * padding grows only when the update strip is visible so content can scroll clear of it.
  */
-function setupEditToolbarViewportAnchor() {
-  const bar = document.querySelector('.edit-toolbar');
-  if (!bar) return;
-
-  function safeBottomPx() {
-    const raw = getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom').trim();
-    let n = parseFloat(raw);
-    if (Number.isFinite(n) && n >= 0) return n;
-    const probe = document.createElement('div');
-    probe.style.cssText =
-      'position:fixed;left:-9999px;bottom:0;height:0;padding-bottom:env(safe-area-inset-bottom,0px);pointer-events:none;opacity:0;visibility:hidden';
-    document.body.appendChild(probe);
-    n = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
-    probe.remove();
-    return n;
-  }
-
+function setupMainChromeInsets() {
   let raf = 0;
   function schedule() {
     if (raf) return;
     raf = requestAnimationFrame(() => {
       raf = 0;
-      anchorNow();
+      applyNow();
     });
   }
 
-  let layoutRetries = 0;
-  function anchorNow() {
-    const rect = bar.getBoundingClientRect();
-    const h = Math.max(bar.offsetHeight, rect.height);
-    if (h < 4 && layoutRetries < 18) {
-      layoutRetries++;
-      requestAnimationFrame(anchorNow);
-      return;
-    }
-    layoutRetries = 0;
-
-    const gap = 12;
-    const safe = safeBottomPx();
-    const innerH = window.innerHeight || document.documentElement.clientHeight || 0;
-    if (innerH < 80) {
-      schedule();
-      return;
-    }
-
-    let topPx = innerH - h - gap - safe;
-
-    const vv = window.visualViewport;
-    if (vv && vv.height > 10) {
-      const vvTop = vv.offsetTop + vv.height - h - gap - safe;
-      if (vvTop >= innerH * 0.2 && vvTop <= innerH - h - 4) {
-        topPx = Math.max(topPx, vvTop);
-      }
-    }
-
-    if (topPx + h / 2 < innerH * 0.42) {
-      topPx = innerH - h - gap - safe;
-    }
-
-    topPx = Math.max(8, Math.min(topPx, innerH - h - Math.max(8, gap)));
-
-    bar.style.setProperty('top', `${topPx}px`, 'important');
-    bar.style.setProperty('bottom', 'auto', 'important');
-
-    const clearanceBase = Math.ceil(h + gap + safe + 20);
-    let clearance = clearanceBase;
+  function applyNow() {
+    const safe = _safeBottomPx();
+    const narrow = window.matchMedia && window.matchMedia('(max-width:768px)').matches;
+    const basePad = (narrow ? 24 : 28) + safe;
+    let pad = basePad;
     const swBar = document.getElementById('sw-update-bar');
     if (swBar && swBar.classList.contains('sw-update-bar--visible')) {
       const inner = swBar.querySelector('.sw-update-inner');
       const uh = inner ? Math.max(inner.offsetHeight, inner.getBoundingClientRect().height) : swBar.offsetHeight;
-      if (uh > 4) clearance += Math.ceil(uh + 12);
+      if (uh > 4) pad += Math.ceil(uh + 12);
     }
-    document.documentElement.style.setProperty('--edit-toolbar-clearance', `${clearance}px`);
-
-    const swBottom = Math.max(48, Math.ceil(h + gap + safe + 12));
-    document.documentElement.style.setProperty('--sw-update-bottom', `${swBottom}px`);
+    document.documentElement.style.setProperty('--main-scroll-pad-bottom', `${pad}px`);
+    document.documentElement.style.setProperty('--sw-update-bottom', `${Math.ceil(12 + safe)}px`);
   }
+
+  function observeSwBarIfPresent() {
+    const swBar = document.getElementById('sw-update-bar');
+    if (!swBar || swBar.dataset.chromeInsetsObserved) return;
+    swBar.dataset.chromeInsetsObserved = '1';
+    if (typeof ResizeObserver !== 'undefined') {
+      const ro = new ResizeObserver(schedule);
+      ro.observe(swBar);
+      const inner = swBar.querySelector('.sw-update-inner');
+      if (inner) ro.observe(inner);
+    }
+  }
+
+  new MutationObserver(() => {
+    observeSwBarIfPresent();
+    schedule();
+  }).observe(document.body, { childList: true, subtree: false });
 
   schedule();
   setTimeout(schedule, 80);
   window.addEventListener('load', schedule, { passive: true });
   window.addEventListener('resize', schedule, { passive: true });
   window.addEventListener('orientationchange', schedule, { passive: true });
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', schedule, { passive: true });
-    window.visualViewport.addEventListener('scroll', schedule, { passive: true });
-  }
-  if (typeof ResizeObserver !== 'undefined') {
-    const ro = new ResizeObserver(schedule);
-    ro.observe(bar);
-    const inner = bar.querySelector('.edit-toolbar-inner');
-    if (inner) ro.observe(inner);
-  }
+  observeSwBarIfPresent();
 }
+
+function positionTopToolsMenu(trigger) {
+  const menu = document.getElementById('topToolsMenu');
+  if (!menu || !trigger) return;
+  const rect = trigger.getBoundingClientRect();
+  const estW = Math.min(320, window.innerWidth - 24);
+  let left = rect.right - estW;
+  left = Math.max(12, Math.min(left, window.innerWidth - estW - 12));
+  menu.style.left = `${left}px`;
+  menu.style.top = `${rect.bottom + 8}px`;
+  menu.classList.add('open');
+  requestAnimationFrame(() => {
+    const mh = menu.offsetHeight;
+    const spaceBelow = window.innerHeight - rect.bottom - 8;
+    if (mh > spaceBelow && rect.top > mh + 8) {
+      menu.style.top = `${Math.max(8, rect.top - mh - 8)}px`;
+      const t = parseFloat(menu.style.top) || 0;
+      if (t + mh > window.innerHeight - 8) {
+        menu.style.top = `${Math.max(8, window.innerHeight - mh - 8)}px`;
+      }
+    }
+  });
+}
+
+function closeTopToolsMenu() {
+  const menu = document.getElementById('topToolsMenu');
+  if (!menu) return;
+  menu.classList.remove('open');
+  menu.setAttribute('aria-hidden', 'true');
+  ['mobileTopCog', 'desktopTopCog'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('aria-expanded', 'false');
+  });
+}
+
+function toggleTopToolsMenu(ev) {
+  if (ev && typeof ev.stopPropagation === 'function') ev.stopPropagation();
+  const menu = document.getElementById('topToolsMenu');
+  const trigger = ev && ev.currentTarget;
+  if (!menu || !trigger) return;
+  if (menu.classList.contains('open')) {
+    closeTopToolsMenu();
+    return;
+  }
+  positionTopToolsMenu(trigger);
+  menu.setAttribute('aria-hidden', 'false');
+  ['mobileTopCog', 'desktopTopCog'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.setAttribute('aria-expanded', String(el === trigger));
+  });
+}
+
+function initTopToolsMenu() {
+  document.addEventListener(
+    'click',
+    (e) => {
+      const menu = document.getElementById('topToolsMenu');
+      if (!menu || !menu.classList.contains('open')) return;
+      if (menu.contains(e.target)) return;
+      if (e.target && e.target.closest && e.target.closest('#mobileTopCog, #desktopTopCog')) return;
+      closeTopToolsMenu();
+    },
+    true
+  );
+  document.addEventListener('keydown', (e) => {
+    if (e.key !== 'Escape') return;
+    closeTopToolsMenu();
+  });
+  window.addEventListener('resize', () => {
+    if (document.getElementById('topToolsMenu')?.classList.contains('open')) closeTopToolsMenu();
+  });
+}
+
+window.toggleTopToolsMenu = toggleTopToolsMenu;
+window.closeTopToolsMenu = closeTopToolsMenu;
 
 /** In-app PWA update: new worker waits until the user taps Update, then reloads once (localStorage is kept). */
 function setupServiceWorkerUpdates() {
@@ -3069,7 +3118,8 @@ function setupServiceWorkerUpdates() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  setupEditToolbarViewportAnchor();
+  setupMainChromeInsets();
+  initTopToolsMenu();
   initModalScrollLockObservers();
   setupServiceWorkerUpdates();
   buildAirlineSearchIndex();
