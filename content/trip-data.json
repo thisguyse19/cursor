@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.29",
+  "appVersion": "1.0.30",
   "versions": [
     {
       "v": "1.0",
@@ -339,9 +339,19 @@
       "v": "1.0.29",
       "date": "2026-05-16",
       "title": "PWA edit bar visualViewport",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Edit toolbar position is re-applied from window.visualViewport on load, resize, and when the bar resizes so iOS cannot leave it glued to the top when fixed+bottom breaks under overflow:hidden and the dynamic chrome"
+      ]
+    },
+    {
+      "v": "1.0.30",
+      "date": "2026-05-16",
+      "title": "PWA edit bar layout viewport",
+      "latest": true,
+      "changes": [
+        "Edit toolbar: anchor from window.innerHeight first — visualViewport alone was still placing the bar at the top (Safari over the sticky header) or in the notch band (standalone PWA); blend vv only when it agrees with a bottom placement",
+        "Safe-bottom fallback via env() probe if --safe-bottom does not resolve; extra schedule on load/orientationchange; toolbar z-index above the SW update strip"
       ]
     }
   ],
