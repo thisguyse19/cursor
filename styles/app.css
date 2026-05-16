@@ -234,8 +234,6 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 .flight-card{position:relative;padding:20px 18px 18px;min-height:120px}
 .flight-card-top{margin-bottom:10px}
 .flight-card-label{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px;margin-bottom:6px;padding-right:28px}
-.flight-countdown{font-size:21px;font-weight:800;color:var(--blue);letter-spacing:-.4px;line-height:1.15}
-.flight-countdown-sub{font-size:13px;font-weight:600;color:var(--text-sec);margin-top:4px}
 .flight-route{font-size:18px;font-weight:700;letter-spacing:.02em;margin-bottom:6px}
 .flight-meta{font-size:12px;color:var(--text-sec);margin-bottom:8px}
 .flight-times{font-size:12px;color:var(--text-sec);line-height:1.5}
@@ -245,6 +243,40 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 .flight-sync-hint{font-size:12px;color:var(--text-sec);margin-top:14px;line-height:1.5}
 .flight-empty{font-size:14px;color:var(--text-sec);padding:28px 16px;text-align:center;background:var(--glass-fill);border-radius:var(--r-lg);border:var(--glass-border)}
 .flight-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+.flight-modal.flight-modal .flight-modal-label{
+  display:block;text-align:left;font-size:11px;font-weight:700;letter-spacing:.55px;text-transform:uppercase;
+  color:var(--text-sec);margin-bottom:7px;margin-top:4px}
+.flight-modal .flight-modal-input{
+  width:100%;box-sizing:border-box;background:rgba(255,255,255,.94);color:var(--text);
+  border:1px solid rgba(0,0,0,.12);border-radius:var(--r-sm);padding:12px 14px;font-size:15px;font-family:var(--font);
+  outline:none;transition:border-color .2s, box-shadow .2s;margin-bottom:14px;
+  box-shadow:inset 0 1px 2px rgba(0,0,0,.04)}
+.flight-modal .flight-modal-input::placeholder{color:#aeaeb2}
+.flight-modal .flight-modal-input:focus{
+  border-color:rgba(0,113,227,.55);box-shadow:0 0 0 3px rgba(0,113,227,.12), inset 0 1px 2px rgba(0,0,0,.04)}
+
+.trip-countdown-banner{margin-top:6px;margin-bottom:4px;border-radius:var(--r-lg);overflow:hidden}
+.trip-countdown-banner--empty{display:none}
+.trip-cd-inner{
+  padding:28px 24px 26px;text-align:center;background:var(--glass-fill-strong);
+  backdrop-filter:var(--glass-blur-heavy);-webkit-backdrop-filter:var(--glass-blur-heavy);
+  border:var(--glass-border);border-radius:var(--r-lg);box-shadow:var(--glass-outer), var(--glass-inner)}
+.trip-cd-kicker{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--text-sec);margin-bottom:14px}
+.trip-cd-num{font-size:clamp(52px,14vw,76px);font-weight:800;letter-spacing:-.06em;color:var(--blue);line-height:.95}
+.trip-cd-num--sm{font-size:clamp(40px,11vw,56px)}
+.trip-cd-unit{font-size:17px;font-weight:600;color:var(--text);margin-top:8px}
+.trip-cd-sub{font-size:14px;color:var(--text-sec);margin-top:12px;line-height:1.5;max-width:440px;margin-left:auto;margin-right:auto}
+.trip-cd-inner--today .trip-cd-today{font-size:clamp(36px,10vw,52px);font-weight:800;color:var(--blue);letter-spacing:-.04em}
+.trip-cd-inner--away .trip-cd-kicker{color:var(--green)}
+.trip-cd-inner--past .trip-cd-past-msg{font-size:15px;color:var(--text-sec);margin-top:10px}
+.flight-card-btns{position:absolute;top:10px;right:10px;display:flex;align-items:center;gap:8px;z-index:3}
+.flight-card-edit{
+  border:none;border-radius:50px;padding:6px 14px;font-size:12px;font-weight:700;font-family:var(--font);cursor:pointer;
+  touch-action:manipulation;color:var(--blue);background:var(--glass-fill);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border:var(--glass-border);box-shadow:var(--glass-inner)}
+.flight-card-edit:hover{box-shadow:0 6px 20px rgba(0,113,227,.12), var(--glass-inner)}
+.flight-card .flight-card-label{padding-right:108px}
 
 /* WELCOME MODAL */
 .welcome-items{margin:0 -4px}
@@ -492,7 +524,7 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
   .day-content{display:block!important}
   .hero{height:280px;border-radius:0}
   body{background:#fff!important}
-  .stat-card,.card,.day-card,.stay-card,.wb,.budget-card,.chart-box,.tip-card,.map-card,.route-bar,.route-stop,.hl-box,.cl-items,.modal,.pdf-opt,.hist-item,.day-timeline-wrap,.conflict-item,.cl-sort-btn,.flight-card,.flight-empty{
+  .stat-card,.card,.day-card,.stay-card,.wb,.budget-card,.chart-box,.tip-card,.map-card,.route-bar,.route-stop,.hl-box,.cl-items,.modal,.pdf-opt,.hist-item,.day-timeline-wrap,.conflict-item,.cl-sort-btn,.flight-card,.flight-empty,.trip-cd-inner{
     background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
     box-shadow:none!important;border:1px solid #ddd!important}
   .hero-content{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;

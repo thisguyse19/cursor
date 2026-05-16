@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.10",
+  "appVersion": "1.0.11",
   "versions": [
     {
       "v": "1.0",
@@ -126,14 +126,30 @@
       "v": "1.0.10",
       "date": "2026-05-16",
       "title": "Flight Board — UX & Add Fix",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Add flight opens reliably — button is wired as soon as the page loads (not only after data init)",
         "Flight section layout: more space above the add control; liquid-glass styling on the add button",
         "Safer modal open when fields are missing in edge cases"
       ]
+    },
+    {
+      "v": "1.0.11",
+      "date": "2026-05-16",
+      "title": "Flights — Trip countdown, edit, readable forms",
+      "latest": true,
+      "changes": [
+        "One trip countdown to day one (days only) with a clear card; during the trip it shows which day you are on out of 15",
+        "Flight cards focus on route and times; edit opens the same form with your values (saved on device)",
+        "Add / edit flight modal uses high-contrast inputs so labels and fields stay readable on the glass panel"
+      ]
     }
   ],
+  "tripCountdown": {
+    "label": "Tasmania & Melbourne",
+    "start": { "year": 2026, "month": 12, "day": 7 },
+    "end": { "year": 2026, "month": 12, "day": 21 }
+  },
   "flights": [
     {
       "id": "fl-inbound-hba",
