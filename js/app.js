@@ -293,7 +293,7 @@ function deriveIataAndDigits(m) {
 
 function flightPillText(m) {
   const { code, digits } = deriveIataAndDigits(m);
-  if (code && digits) return `${code}${digits}`;
+  if (code && digits) return `${code} ${digits}`;
   const fn = String(m.flightNo || '').replace(/\s+/g, '');
   if (fn && fn !== '—') return fn;
   return '';
@@ -312,7 +312,7 @@ function connPillText(m) {
     m.connFlightDigits != null && String(m.connFlightDigits).trim() !== ''
       ? String(m.connFlightDigits).replace(/\s/g, '')
       : '';
-  if (code && digits) return `${code}${digits}`;
+  if (code && digits) return `${code} ${digits}`;
   return '';
 }
 
@@ -322,49 +322,125 @@ function connPillHtml(m) {
   return `<span class="flight-pill flight-pill--conn">${flightEsc(t)}</span>`;
 }
 
-function flightTimelineStripHtml(m) {
+function dayOffsetDepArr(depDt, arrDt) {
+  if (!depDt || !arrDt || Number.isNaN(depDt.getTime()) || Number.isNaN(arrDt.getTime())) return 0;
+  const a = new Date(depDt.getFullYear(), depDt.getMonth(), depDt.getDate());
+  const b = new Date(arrDt.getFullYear(), arrDt.getMonth(), arrDt.getDate());
+  return Math.round((b - a) / 86400000);
+}
+
+function formatFlightHeaderDate(dt) {
+  try {
+    return dt.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short' });
+  } catch {
+    return '';
+  }
+}
+
+function formatFlightClockShort(dt) {
+  try {
+    return dt.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  } catch {
+    return '—';
+  }
+}
+
+function flightLayoverBlockHtml(m) {
+  const k = m.connectionKind || 'direct';
+  if (k === 'direct') return '';
+  const hub =
+    (m.connArrAirport && m.connArrAirport.trim()) ||
+    (m.connDepAirport && m.connDepAirport.trim()) ||
+    (m.viaAirport && String(m.viaAirport).trim()) ||
+    '';
+  const kindLbl = FLIGHT_CONNECTION_LABELS[k] || 'Connection';
+  const connP = connPillText(m);
+  const parts = [];
+  if (connP) parts.push(connP);
+  if (m.connArrivalUtc) {
+    try {
+      parts.push(`Landed ${formatFlightClockShort(new Date(m.connArrivalUtc))}`);
+    } catch (_) {
+      /* skip */
+    }
+  }
+  if (hub) parts.push(`at ${hub}`);
+  const summary = parts.length ? parts.join(' · ') : kindLbl;
+  return `<div class="flight-card-divider" role="presentation"></div>
+    <div class="flight-card-layover">
+      <span class="flight-card-layover-text">${flightEsc(summary)}</span>
+      <span class="flight-card-layover-chev" aria-hidden="true">›</span>
+    </div>`;
+}
+
+function flightCardMainHtml(m) {
   const { depIso, arrIso } = effectiveDepArr(m);
   const depT = new Date(depIso);
   const arrT = arrIso ? new Date(arrIso) : null;
-  const k = m.connectionKind || 'direct';
-  const nonDirect = k !== 'direct';
+  const headerDate = formatFlightHeaderDate(depT);
+  const pill = flightPillHtml(m);
+  const pillFallback =
+    !pill && m.flightNo && String(m.flightNo).trim() && String(m.flightNo).trim() !== '—'
+      ? `<span class="flight-pill">${flightEsc(String(m.flightNo).trim())}</span>`
+      : '';
+  const route = `${flightEsc(m.depAirport || '—')} to ${flightEsc(m.arrAirport || '—')}`;
+  const depClock = formatFlightClockShort(depT);
+  const arrClock = arrT ? formatFlightClockShort(arrT) : '';
+  const arrPlus = arrT && dayOffsetDepArr(depT, arrT) > 0 ? `<sup class="flight-card-plus">+${dayOffsetDepArr(depT, arrT)}</sup>` : '';
+  const tagline =
+    m.label && String(m.label).trim()
+      ? `<div class="flight-card-tagline">${flightEsc(String(m.label).trim())}</div>`
+      : '';
+  const layover = flightLayoverBlockHtml(m);
 
-  const cell = (time, code, sub, dot, pill, hint) => {
-    const timestr = time ? formatFlightCardTime(time) : '—';
-    return `<div class="flight-tl-cell">
-      <div class="flight-tl-time">${flightEsc(timestr)}</div>
-      <div class="flight-tl-dot${dot === 'hollow' ? ' flight-tl-dot--hollow' : ''}"></div>
-      ${pill || ''}
-      <div class="flight-tl-code">${flightEsc(code || '—')}</div>
-      <div class="flight-tl-sub">${flightEsc(sub)}</div>
-      ${hint ? `<div class="flight-tl-hint">${flightEsc(hint)}</div>` : ''}
-    </div>`;
-  };
+  return `<div class="flight-card-hd">
+      <span class="flight-card-star" aria-hidden="true">★</span>
+      <div class="flight-card-hd-mid">${pill || pillFallback || `<span class="flight-card-no-fallback">${flightEsc('Flight')}</span>`}</div>
+      <span class="flight-card-when">${flightEsc(headerDate || '—')}</span>
+    </div>
+    ${tagline}
+    <div class="flight-card-route">${route}</div>
+    <div class="flight-card-times">
+      <div class="flight-card-leg">
+        <span class="flight-card-ico flight-card-ico--dep" aria-hidden="true">↗</span>
+        <span class="flight-card-ap">${flightEsc(m.depAirport || '—')}</span>
+        <span class="flight-card-tm">${flightEsc(depClock)}</span>
+      </div>
+      <div class="flight-card-leg">
+        <span class="flight-card-ico flight-card-ico--arr" aria-hidden="true">↘</span>
+        <span class="flight-card-ap">${flightEsc(m.arrAirport || '—')}</span>
+        <span class="flight-card-tm">${arrClock ? flightEsc(arrClock) : '—'}${arrPlus}</span>
+      </div>
+    </div>
+    ${layover}`;
+}
 
-  const mid = pill =>
-    `<div class="flight-tl-cell flight-tl-cell--mid">
-      <div class="flight-tl-time flight-tl-time--route" aria-hidden="true">✈</div>
-      <div class="flight-tl-dot"></div>
-      ${pill || ''}
-    </div>`;
-
-  const parts = [];
-  parts.push(cell(depT, m.depAirport, 'Depart', 'fill', '', ''));
-  parts.push(mid(flightPillHtml(m)));
-  if (nonDirect) {
-    const cdt = m.connArrivalUtc ? new Date(m.connArrivalUtc) : null;
-    const hub =
-      (m.connArrAirport && m.connArrAirport.trim()) ||
-      (m.connDepAirport && m.connDepAirport.trim()) ||
-      (m.viaAirport && String(m.viaAirport).trim()) ||
-      '—';
-    const routeHint = [m.connDepAirport, m.connArrAirport].filter(Boolean).join(' → ');
-    const hint = routeHint || (cdt ? '' : 'Add connection landing time');
-    parts.push(cell(cdt, hub, 'Connect', 'hollow', connPillHtml(m), hint));
+function updateFlightScrollerFades(el) {
+  if (!el || !el.classList.contains('flight-cards-scroller')) return;
+  if (el.classList.contains('flight-cards-scroller--empty')) {
+    el.classList.remove('flight-scroller--fade-left', 'flight-scroller--fade-right');
+    return;
   }
-  parts.push(cell(arrT, m.arrAirport, 'Arrive', 'hollow', '', !arrT ? 'Time TBD' : ''));
+  const max = el.scrollWidth - el.clientWidth;
+  const tol = 3;
+  if (max <= tol) {
+    el.classList.remove('flight-scroller--fade-left', 'flight-scroller--fade-right');
+    return;
+  }
+  el.classList.toggle('flight-scroller--fade-left', el.scrollLeft > tol);
+  el.classList.toggle('flight-scroller--fade-right', el.scrollLeft < max - tol);
+}
 
-  return `<div class="flight-tl-scroll"><div class="flight-tl-strip">${parts.join('')}</div></div>`;
+function ensureFlightScrollerFadeBinding(el) {
+  if (!el || el.dataset.flightFadeBound) return;
+  el.dataset.flightFadeBound = '1';
+  const run = () => updateFlightScrollerFades(el);
+  el.addEventListener('scroll', run, { passive: true });
+  window.addEventListener('resize', run);
+  if (typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(run);
+    ro.observe(el);
+  }
 }
 
 function normalizeBodyScroll() {
@@ -530,14 +606,8 @@ function flightCardHtml(m) {
     m.delayMinutes != null && m.delayMinutes > 0
       ? `<div class="flight-delay">+${flightEsc(m.delayMinutes)}m delay (from live file)</div>`
       : '';
-  const connKind =
-    m.connectionKind && m.connectionKind !== 'direct'
-      ? `<div class="flight-conn-kind"><span>${flightEsc(
-          FLIGHT_CONNECTION_LABELS[m.connectionKind] || 'Connection'
-        )}</span></div>`
-      : '';
 
-  return `<div class="flight-card glass-card" data-flight-id="${flightEsc(m.id)}">
+  return `<div class="flight-card flight-card--simple glass-card" data-flight-id="${flightEsc(m.id)}">
     <div class="flight-card-btns">
       <button type="button" class="flight-card-edit" title="Edit details" aria-label="Edit flight" onclick="openFlightEditModal('${flightEsc(
         m.id
@@ -546,9 +616,7 @@ function flightCardHtml(m) {
         m.id
       )}')">×</button>
     </div>
-    <div class="flight-card-label">${flightEsc(m.label)}</div>
-    ${connKind}
-    ${flightTimelineStripHtml(m)}
+    ${flightCardMainHtml(m)}
     ${delayNote}
     ${statusLine ? `<div class="flight-live-status">${flightEsc(statusLine)}</div>` : ''}
   </div>`;
@@ -583,6 +651,10 @@ function renderFlights() {
   }
 
   renderTripCountdownBanner();
+
+  ensureFlightScrollerFadeBinding(grid);
+  updateFlightScrollerFades(grid);
+  requestAnimationFrame(() => updateFlightScrollerFades(grid));
 }
 
 function openFlightAddModal() {
