@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.12",
+  "appVersion": "1.0.13",
   "versions": [
     {
       "v": "1.0",
@@ -148,12 +148,25 @@
       "v": "1.0.12",
       "date": "2026-05-16",
       "title": "PWA content refresh, flight UI, liquid-glass buttons",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Installed app: trip and flight content now loads network-first so Update + reload shows the same data as in the browser (no stale JSON cache)",
         "Flight add/edit modal fits narrow screens without sideways scrolling; overlay scrolls vertically only",
         "Flight card Edit sits beside Remove — the delete control no longer stacks on top of Edit",
         "Toolbar, sidebar nav, auth unlock, checklist filters, modals, and other controls use consistent liquid-glass buttons"
+      ]
+    },
+    {
+      "v": "1.0.13",
+      "date": "2026-05-16",
+      "title": "Flights timeline strip, connections, calmer buttons, pinned toolbar",
+      "latest": true,
+      "changes": [
+        "Flight cards scroll horizontally with snap and a day-style timeline (depart / arrive, carrier & number between)",
+        "Add/edit flight: connection type menu, optional via airport and connection notes; shown compactly on the card",
+        "Softer button styling; edit toolbar is a frosted bar fixed to the bottom safe area (iOS-style), content padded above it",
+        "Flight modal locks page scroll while open; viewport disallows pinch-zoom; reduced glass on controls overall",
+        "Removed the old gate-merge blurb under Your flights"
       ]
     }
   ],

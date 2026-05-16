@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
 <title>Triple · Tasmania & Melbourne</title>
 <meta name="description" content="Triple trip planner — Tasmania & Melbourne, December 2026">
 <meta name="theme-color" content="#0071e3">
@@ -131,12 +131,11 @@
       <div class="sec-header">
         <div class="sec-tag">Schedule</div>
         <h2 class="sec-title">Your flights</h2>
-        <p class="sec-sub">Live gate-style notes merge from a small file on this site when you open the app. Official changes stay with the airline.</p>
       </div>
       <button type="button" class="btn flight-add-btn-glass" id="flight-add-btn">+ Add flight</button>
     </div>
     <div id="trip-countdown-banner" class="trip-countdown-banner" role="region" aria-label="Trip countdown"></div>
-    <div id="flight-cards-grid" class="flight-cards-grid"></div>
+    <div id="flight-cards-grid" class="flight-cards-scroller"></div>
     <p class="flight-sync-hint" id="flight-sync-hint"></p>
   </div>
 
@@ -460,13 +459,15 @@
 
 <!-- ═══ EDIT TOOLBAR ═══ -->
 <div class="edit-toolbar">
-  <button class="tb-btn tb-ghost" id="historyBtn" onclick="openHistory()">⏱ History</button>
-  <div class="tb-sep"></div>
-  <button class="tb-btn tb-danger" id="revertBtn" onclick="confirmRevert()">↺ Revert All</button>
-  <div class="tb-sep"></div>
-  <button class="tb-btn tb-primary" id="editBtn" onclick="toggleEdit()">✏️ Edit</button>
-  <div class="tb-sep"></div>
-  <button class="tb-btn tb-export" onclick="exportPDF()">↓ PDF</button>
+  <div class="edit-toolbar-inner">
+    <button class="tb-btn tb-ghost" id="historyBtn" onclick="openHistory()">⏱ History</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn tb-danger" id="revertBtn" onclick="confirmRevert()">↺ Revert All</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn tb-primary" id="editBtn" onclick="toggleEdit()">✏️ Edit</button>
+    <div class="tb-sep"></div>
+    <button class="tb-btn tb-export" onclick="exportPDF()">↓ PDF</button>
+  </div>
 </div>
 
 <!-- ═══ MODAL: HISTORY ═══ -->
@@ -548,10 +549,34 @@
         <input id="flight-f-arr-ap" class="flight-modal-input" type="text" placeholder="SIN" maxlength="4" autocomplete="off">
       </div>
     </div>
-    <label class="flight-modal-label" for="flight-f-dep">Departure (local)</label>
-    <input id="flight-f-dep" class="flight-modal-input" type="datetime-local">
-    <label class="flight-modal-label" for="flight-f-arr">Arrival (local, optional)</label>
-    <input id="flight-f-arr" class="flight-modal-input" type="datetime-local">
+    <label class="flight-modal-label" for="flight-f-connection">Connection</label>
+    <select id="flight-f-connection" class="flight-modal-input flight-modal-select">
+      <option value="direct">Direct (single leg)</option>
+      <option value="same_pnr">Same booking / protected connection</option>
+      <option value="self_transfer">Self-transfer (separate tickets)</option>
+      <option value="overnight">Overnight or long layover</option>
+      <option value="open_jaw">Open jaw / multi-city</option>
+    </select>
+    <div class="flight-form-row">
+      <div>
+        <label class="flight-modal-label" for="flight-f-via">Connect via (IATA, optional)</label>
+        <input id="flight-f-via" class="flight-modal-input" type="text" placeholder="e.g. SIN" maxlength="4" autocomplete="off">
+      </div>
+      <div>
+        <label class="flight-modal-label" for="flight-f-connection-notes">Connection notes</label>
+        <input id="flight-f-connection-notes" class="flight-modal-input" type="text" placeholder="Layover time, terminal change…" autocomplete="off">
+      </div>
+    </div>
+    <div class="flight-datetime-row">
+      <div class="flight-datetime-field">
+        <label class="flight-modal-label" for="flight-f-dep">Departure (local)</label>
+        <input id="flight-f-dep" class="flight-modal-input flight-modal-datetime" type="datetime-local">
+      </div>
+      <div class="flight-datetime-field">
+        <label class="flight-modal-label" for="flight-f-arr">Arrival (local, optional)</label>
+        <input id="flight-f-arr" class="flight-modal-input flight-modal-datetime" type="datetime-local">
+      </div>
+    </div>
     <label class="flight-modal-label" for="flight-f-notes">Notes</label>
     <input id="flight-f-notes" class="flight-modal-input" type="text" placeholder="Seat, booking ref, …" autocomplete="off">
     <div class="modal-actions" style="margin-top:18px">

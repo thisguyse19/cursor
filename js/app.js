@@ -11,7 +11,49 @@ let flightHiddenIds = new Set();
 let flightEdits = {};
 let flightModalEditingId = null;
 const FLIGHT_OVERLAY_KEY = 'tripleFlightOverlay';
-const FLIGHT_PATCH_KEYS = ['label', 'airline', 'flightNo', 'depAirport', 'arrAirport', 'departureUtc', 'arrivalUtc', 'notes'];
+const FLIGHT_PATCH_KEYS = [
+  'label',
+  'airline',
+  'flightNo',
+  'depAirport',
+  'arrAirport',
+  'departureUtc',
+  'arrivalUtc',
+  'notes',
+  'connectionKind',
+  'viaAirport',
+  'connectionDetail',
+];
+const FLIGHT_CONNECTION_LABELS = {
+  direct: 'Direct',
+  same_pnr: 'Same booking',
+  self_transfer: 'Self-transfer',
+  overnight: 'Long layover',
+  open_jaw: 'Multi-city',
+};
+
+let modalScrollLockCount = 0;
+let modalScrollLockY = 0;
+function lockModalScroll() {
+  if (modalScrollLockCount === 0) {
+    modalScrollLockY = window.scrollY || window.pageYOffset || 0;
+    document.documentElement.classList.add('modal-scroll-lock');
+    document.body.classList.add('modal-scroll-lock');
+    document.body.style.top = `-${modalScrollLockY}px`;
+  }
+  modalScrollLockCount++;
+}
+function unlockModalScroll() {
+  if (modalScrollLockCount <= 1) {
+    modalScrollLockCount = 0;
+    document.documentElement.classList.remove('modal-scroll-lock');
+    document.body.classList.remove('modal-scroll-lock');
+    document.body.style.removeProperty('top');
+    window.scrollTo(0, modalScrollLockY);
+  } else {
+    modalScrollLockCount--;
+  }
+}
 let _tripCountdownTick = null;
 let TRIP_COUNTDOWN_META = null;
 
@@ -53,6 +95,25 @@ function flightEsc(s) {
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
     .replace(/"/g, '&quot;');
+}
+
+function formatFlightCardTime(dt) {
+  try {
+    return dt.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+  } catch {
+    return '';
+  }
+}
+
+function flightConnectionBlock(m) {
+  const k = m.connectionKind || 'direct';
+  const via = (m.viaAirport && String(m.viaAirport).trim()) ? String(m.viaAirport).trim().toUpperCase() : '';
+  const detail = m.connectionDetail && String(m.connectionDetail).trim();
+  if (k === 'direct' && !via && !detail) return '';
+  const label = FLIGHT_CONNECTION_LABELS[k] || 'Connection';
+  const viaPart = via ? ` · via ${flightEsc(via)}` : '';
+  const notePart = detail ? `<div class="flight-connection-note">${flightEsc(detail)}</div>` : '';
+  return `<div class="flight-connection"><span class="flight-connection-tag">${flightEsc(label)}</span>${viaPart}${notePart}</div>`;
 }
 
 function mergeLiveIntoFlight(base) {
@@ -250,20 +311,37 @@ function flightCardHtml(m) {
     m.delayMinutes != null && m.delayMinutes > 0
       ? `<div class="flight-delay">+${flightEsc(m.delayMinutes)}m delay (from live file)</div>`
       : '';
+  const depStr = formatFlightCardTime(depT);
+  const arrStr = arrT ? formatFlightCardTime(arrT) : '—';
 
   return `<div class="flight-card glass-card" data-flight-id="${flightEsc(m.id)}">
     <div class="flight-card-btns">
       <button type="button" class="flight-card-edit" title="Edit details" aria-label="Edit flight" onclick="openFlightEditModal('${flightEsc(m.id)}')">Edit</button>
       <button type="button" class="del-btn flight-card-remove" title="Remove from board" aria-label="Remove from board" onclick="removeFlightCard('${flightEsc(m.id)}')">×</button>
     </div>
-    <div class="flight-card-top">
-      <div class="flight-card-label">${flightEsc(m.label)}</div>
+    <div class="flight-card-label">${flightEsc(m.label)}</div>
+    <div class="flight-mini-tl">
+      <div class="flight-tl-track">
+        <div class="flight-tl-stop">
+          <div class="flight-tl-time">${flightEsc(depStr)}</div>
+          <div class="flight-tl-dot"></div>
+          <div class="flight-tl-code">${flightEsc(m.depAirport)}</div>
+          <div class="flight-tl-sub">Depart</div>
+        </div>
+        <div class="flight-tl-mid">
+          <div class="flight-tl-line"></div>
+          <div class="flight-tl-plane" aria-hidden="true">✈</div>
+          <div class="flight-tl-meta">${flightEsc(m.airline)}<span class="flight-tl-meta-sep"> · </span>${flightEsc(m.flightNo)}</div>
+        </div>
+        <div class="flight-tl-stop">
+          <div class="flight-tl-time">${flightEsc(arrStr)}</div>
+          <div class="flight-tl-dot flight-tl-dot--hollow"></div>
+          <div class="flight-tl-code">${flightEsc(m.arrAirport)}</div>
+          <div class="flight-tl-sub">Arrive</div>
+        </div>
+      </div>
     </div>
-    <div class="flight-route"><span>${flightEsc(m.depAirport)}</span> → <span>${flightEsc(m.arrAirport)}</span></div>
-    <div class="flight-meta">${flightEsc(m.airline)} · ${flightEsc(m.flightNo)}</div>
-    <div class="flight-times">Out ${flightEsc(depT.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }))}${
-    arrT ? ` · In ${flightEsc(arrT.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }))}` : ''
-  }</div>
+    ${flightConnectionBlock(m)}
     ${delayNote}
     ${statusLine ? `<div class="flight-live-status">${flightEsc(statusLine)}</div>` : ''}
     ${m.liveNote ? `<div class="flight-live-note">${flightEsc(m.liveNote)}</div>` : ''}
@@ -282,9 +360,10 @@ function renderFlights() {
     .sort((a, b) => new Date(a.departureUtc).getTime() - new Date(b.departureUtc).getTime())
     .map(enrichFlightRow);
 
+  grid.classList.toggle('flight-cards-scroller--empty', rows.length === 0);
   grid.innerHTML = rows.length
     ? rows.map(flightCardHtml).join('')
-    : '<div class="flight-empty">No flights here yet. Use <strong>+ Add flight</strong> or restore data from a backup.</div>';
+    : '<div class="flight-empty flight-empty--solo">No flights here yet. Use <strong>+ Add flight</strong> or restore data from a backup.</div>';
 
   if (hint) {
     if (FLIGHTS_LIVE && FLIGHTS_LIVE.updatedAt) {
@@ -321,12 +400,26 @@ function openFlightAddModal() {
   }
   const submitEl = document.getElementById('flight-modal-submit');
   if (submitEl) submitEl.textContent = 'Save flight';
-  const ids = ['flight-f-label', 'flight-f-airline', 'flight-f-no', 'flight-f-dep-ap', 'flight-f-arr-ap', 'flight-f-dep', 'flight-f-arr', 'flight-f-notes'];
+  const ids = [
+    'flight-f-label',
+    'flight-f-airline',
+    'flight-f-no',
+    'flight-f-dep-ap',
+    'flight-f-arr-ap',
+    'flight-f-dep',
+    'flight-f-arr',
+    'flight-f-notes',
+    'flight-f-via',
+    'flight-f-connection-notes',
+  ];
   for (const id of ids) {
     const el = document.getElementById(id);
     if (el) el.value = '';
   }
+  const conn = document.getElementById('flight-f-connection');
+  if (conn) conn.value = 'direct';
   modal.classList.add('open');
+  lockModalScroll();
   setTimeout(() => document.getElementById('flight-f-label')?.focus(), 50);
 }
 
@@ -361,13 +454,19 @@ function openFlightEditModal(id) {
   document.getElementById('flight-f-dep').value = isoToDatetimeLocal(src.departureUtc);
   document.getElementById('flight-f-arr').value = src.arrivalUtc ? isoToDatetimeLocal(src.arrivalUtc) : '';
   document.getElementById('flight-f-notes').value = src.notes || '';
+  const conn = document.getElementById('flight-f-connection');
+  if (conn) conn.value = src.connectionKind && FLIGHT_CONNECTION_LABELS[src.connectionKind] ? src.connectionKind : 'direct';
+  document.getElementById('flight-f-via').value = src.viaAirport || '';
+  document.getElementById('flight-f-connection-notes').value = src.connectionDetail || '';
   modal.classList.add('open');
+  lockModalScroll();
   setTimeout(() => document.getElementById('flight-f-label')?.focus(), 50);
 }
 
 function closeFlightAddModal() {
   flightModalEditingId = null;
   document.getElementById('flightAddModal')?.classList.remove('open');
+  unlockModalScroll();
   const titleEl = document.getElementById('flight-modal-title');
   if (titleEl) titleEl.textContent = 'Add flight';
   const submitEl = document.getElementById('flight-modal-submit');
@@ -387,6 +486,8 @@ function submitFlightAdd() {
   let arrIso = null;
   const arrVal = document.getElementById('flight-f-arr').value;
   if (arrVal) arrIso = new Date(arrVal).toISOString();
+  const viaRaw = document.getElementById('flight-f-via').value.trim().toUpperCase();
+  const connectionKind = document.getElementById('flight-f-connection')?.value || 'direct';
   const patch = {
     label,
     airline: document.getElementById('flight-f-airline').value.trim() || '—',
@@ -396,6 +497,9 @@ function submitFlightAdd() {
     departureUtc: depIso,
     arrivalUtc: arrIso,
     notes: document.getElementById('flight-f-notes').value.trim(),
+    connectionKind,
+    viaAirport: viaRaw ? viaRaw.slice(0, 4) : '',
+    connectionDetail: document.getElementById('flight-f-connection-notes').value.trim(),
   };
 
   if (flightModalEditingId) {
