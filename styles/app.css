@@ -107,7 +107,9 @@ body::before{
   overscroll-behavior-y:none;
   overscroll-behavior-x:none;
   scroll-behavior:smooth;
-  padding-bottom:calc(92px + var(--safe-bottom))}
+  /* Toolbar is JS-positioned; measured clearance sets --edit-toolbar-clearance on :root */
+  padding-bottom:var(--edit-toolbar-clearance, calc(92px + var(--safe-bottom)));
+  scroll-padding-bottom:var(--edit-toolbar-clearance, calc(92px + var(--safe-bottom)))}
 .page{display:none}.page.active{display:block}
 
 /* HERO */
@@ -690,7 +692,8 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
     margin-left:0;
     scroll-padding-top:calc(54px + env(safe-area-inset-top, 0px));
     padding-top:calc(54px + env(safe-area-inset-top, 0px));
-    padding-bottom:calc(96px + var(--safe-bottom))}
+    padding-bottom:var(--edit-toolbar-clearance, calc(108px + var(--safe-bottom)));
+    scroll-padding-bottom:var(--edit-toolbar-clearance, calc(108px + var(--safe-bottom)))}
 
   /* Hero */
   .hero{height:240px;border-radius:0 0 var(--r-lg) var(--r-lg)}
