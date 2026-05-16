@@ -172,13 +172,6 @@ function getEnrichedFlightRowsSorted() {
     .map(enrichFlightRow);
 }
 
-function getTripStartDateFromFlights() {
-  const rows = getEnrichedFlightRowsSorted();
-  if (!rows.length) return null;
-  const d = new Date(rows[0].departureUtc);
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate());
-}
-
 function getTripEndDate() {
   const m = TRIP_COUNTDOWN_META;
   if (m && m.end && m.end.year && m.end.month && m.end.day) {
@@ -463,21 +456,35 @@ function calendarDiffDays(d0, d1) {
   return Math.round((b - a) / 86400000);
 }
 
-function tripCountdownState() {
-  const label = (TRIP_COUNTDOWN_META && TRIP_COUNTDOWN_META.label) || 'Your trip';
-  let start = getTripStartDateFromFlights();
-  if (!start && TRIP_COUNTDOWN_META && TRIP_COUNTDOWN_META.start) {
-    const s = TRIP_COUNTDOWN_META.start;
-    if (s.year && s.month && s.day) start = new Date(s.year, s.month - 1, s.day);
+function getNextFlightDepartureMs() {
+  const now = Date.now();
+  for (const f of getEnrichedFlightRowsSorted()) {
+    const t = new Date(f.departureUtc).getTime();
+    if (!Number.isNaN(t) && t > now) return t;
   }
+  return null;
+}
+
+function isTripCalendarPast() {
   const end = getTripEndDate();
-  if (!start || !end) return null;
-  const today = new Date();
-  const until = calendarDiffDays(today, start);
-  const totalDays = calendarDiffDays(start, end) + 1;
-  const dayIndex = calendarDiffDays(start, today) + 1;
-  const afterEnd = calendarDiffDays(end, today) > 0;
-  return { until, totalDays, dayIndex, afterEnd, start, end, label };
+  if (!end) return false;
+  return calendarDiffDays(end, new Date()) > 0;
+}
+
+function flightCountdownBannerLine() {
+  const nextAt = getNextFlightDepartureMs();
+  if (nextAt != null) {
+    const ms = nextAt - Date.now();
+    if (ms < 3600000) return 'Enjoy your trip!';
+    if (ms < 86400000) {
+      const h = Math.floor(ms / 3600000);
+      return `${h} more hour${h === 1 ? '' : 's'} until your flight`;
+    }
+    const d = Math.floor(ms / 86400000);
+    return `${d} more day${d === 1 ? '' : 's'} until your flight`;
+  }
+  if (isTripCalendarPast()) return 'Hope you brought the stories home. ✈️';
+  return null;
 }
 
 function renderTripCountdownBanner() {
@@ -487,56 +494,26 @@ function renderTripCountdownBanner() {
     clearInterval(_tripCountdownTick);
     _tripCountdownTick = null;
   }
-  const st = tripCountdownState();
-  if (!st) {
-    el.innerHTML = '';
-    el.classList.add('trip-countdown-banner--empty');
-    return;
-  }
-  el.classList.remove('trip-countdown-banner--empty');
   const write = () => {
-    const s = tripCountdownState();
-    if (!s) return;
-    const { until, totalDays, dayIndex, afterEnd, start, label } = s;
-    let inner;
-    if (afterEnd) {
-      inner = `<div class="trip-cd-inner trip-cd-inner--past">
-        <div class="trip-cd-kicker">${flightEsc(label)}</div>
-        <div class="trip-cd-past-msg">Hope you brought the stories home ✈️</div>
-      </div>`;
-    } else if (until > 1) {
-      inner = `<div class="trip-cd-inner">
-        <div class="trip-cd-kicker">Countdown to first flight</div>
-        <div class="trip-cd-num" aria-hidden="true">${until}</div>
-        <div class="trip-cd-unit">days to go</div>
-        <div class="trip-cd-sub">${start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</div>
-      </div>`;
-    } else if (until === 1) {
-      inner = `<div class="trip-cd-inner">
-        <div class="trip-cd-kicker">Almost there</div>
-        <div class="trip-cd-num trip-cd-num--sm">1</div>
-        <div class="trip-cd-unit">day to go</div>
-        <div class="trip-cd-sub">First flight is almost here.</div>
-      </div>`;
-    } else if (until === 0) {
-      inner = `<div class="trip-cd-inner trip-cd-inner--today">
-        <div class="trip-cd-kicker">This is it</div>
-        <div class="trip-cd-today">Day one</div>
-        <div class="trip-cd-sub">${flightEsc(label)} — first flight day.</div>
-      </div>`;
-    } else {
-      const d = Math.min(Math.max(dayIndex, 1), totalDays);
-      inner = `<div class="trip-cd-inner trip-cd-inner--away">
-        <div class="trip-cd-kicker">On the road</div>
-        <div class="trip-cd-num trip-cd-num--sm">${d}</div>
-        <div class="trip-cd-unit">of ${totalDays} days</div>
-        <div class="trip-cd-sub">${flightEsc(label)}</div>
-      </div>`;
+    const line = flightCountdownBannerLine();
+    if (line == null) {
+      el.innerHTML = '';
+      el.classList.add('trip-countdown-banner--empty');
+      if (_tripCountdownTick) {
+        clearInterval(_tripCountdownTick);
+        _tripCountdownTick = null;
+      }
+      return;
     }
-    el.innerHTML = inner;
+    el.classList.remove('trip-countdown-banner--empty');
+    const wrapPast = getNextFlightDepartureMs() == null && isTripCalendarPast();
+    const cls = wrapPast ? 'trip-cd-bar trip-cd-bar--past' : 'trip-cd-bar';
+    el.innerHTML = `<div class="${cls}">${flightEsc(line)}</div>`;
   };
   write();
-  _tripCountdownTick = setInterval(write, 60 * 1000);
+  if (getNextFlightDepartureMs() != null) {
+    _tripCountdownTick = setInterval(write, 60 * 1000);
+  }
 }
 
 function isoToDatetimeLocal(iso) {

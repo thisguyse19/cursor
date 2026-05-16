@@ -352,25 +352,12 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
   border-color:rgba(0,113,227,.55);box-shadow:0 0 0 3px rgba(0,113,227,.12), inset 0 1px 2px rgba(0,0,0,.04)}
 .flight-modal select.flight-modal-input{margin-bottom:14px}
 
-.trip-countdown-banner{margin-top:4px;margin-bottom:2px;border-radius:var(--r-md);overflow:hidden}
+.trip-countdown-banner{margin-top:6px;margin-bottom:4px}
 .trip-countdown-banner--empty{display:none}
-.trip-cd-inner{
-  padding:10px 14px 10px;text-align:center;background:var(--glass-fill-strong);
-  backdrop-filter:var(--glass-blur-heavy);-webkit-backdrop-filter:var(--glass-blur-heavy);
-  border:var(--glass-border);border-radius:var(--r-md);
-  box-shadow:0 4px 20px rgba(0,0,0,.06), var(--glass-inner)}
-.trip-cd-kicker{
-  font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--text-sec);
-  margin-bottom:4px;line-height:1.2}
-.trip-cd-num{font-size:clamp(28px,8vw,40px);font-weight:800;letter-spacing:-.05em;color:var(--blue);line-height:.92}
-.trip-cd-num--sm{font-size:clamp(22px,6.5vw,32px)}
-.trip-cd-unit{font-size:13px;font-weight:600;color:var(--text);margin-top:2px;line-height:1.2}
-.trip-cd-sub{
-  font-size:12px;color:var(--text-sec);margin-top:4px;line-height:1.35;max-width:400px;margin-left:auto;margin-right:auto}
-.trip-cd-inner--today .trip-cd-today{
-  font-size:clamp(24px,7vw,36px);font-weight:800;color:var(--blue);letter-spacing:-.03em;line-height:1}
-.trip-cd-inner--away .trip-cd-kicker{color:var(--green)}
-.trip-cd-inner--past .trip-cd-past-msg{font-size:13px;color:var(--text-sec);margin-top:6px;line-height:1.4}
+.trip-cd-bar{
+  box-sizing:border-box;padding:7px 12px;text-align:center;font-size:13px;font-weight:600;line-height:1.35;
+  color:var(--blue);background:rgba(0,113,227,.09);border:1px solid rgba(0,113,227,.22);border-radius:10px}
+.trip-cd-bar--past{color:var(--text-sec);background:rgba(0,0,0,.04);border-color:rgba(0,0,0,.12);font-weight:500}
 .flight-card-btns{position:absolute;top:8px;right:8px;display:flex;align-items:center;gap:6px;z-index:3}
 .flight-card .flight-card-btns .del-btn,
 .flight-card .flight-card-btns .flight-card-remove{
@@ -669,7 +656,7 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
   .day-content{display:block!important}
   .hero{height:280px;border-radius:0}
   body{background:#fff!important}
-  .stat-card,.card,.day-card,.stay-card,.wb,.budget-card,.chart-box,.tip-card,.map-card,.route-bar,.route-stop,.hl-box,.cl-items,.modal,.pdf-opt,.hist-item,.day-timeline-wrap,.conflict-item,.cl-sort-btn,.flight-card,.flight-empty,.trip-cd-inner,.flight-cards-scroller{
+  .stat-card,.card,.day-card,.stay-card,.wb,.budget-card,.chart-box,.tip-card,.map-card,.route-bar,.route-stop,.hl-box,.cl-items,.modal,.pdf-opt,.hist-item,.day-timeline-wrap,.conflict-item,.cl-sort-btn,.flight-card,.flight-empty,.trip-cd-bar,.flight-cards-scroller{
     background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
     box-shadow:none!important;border:1px solid #ddd!important}
   .hero-content{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
