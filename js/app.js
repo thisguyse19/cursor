@@ -65,22 +65,58 @@ function modalBlockingOverlayCount() {
   return n;
 }
 
+/** Scrollable app column (not `window` — avoids elastic overscroll past fixed chrome). */
+function getMainScrollEl() {
+  return document.querySelector('main.main');
+}
+
 function syncModalScrollLock() {
+  const mainEl = getMainScrollEl();
   const n = modalBlockingOverlayCount();
   if (n > 0) {
     if (!modalScrollLockActive) {
-      modalScrollLockY = window.scrollY || window.pageYOffset || 0;
+      modalScrollLockY = mainEl ? mainEl.scrollTop : window.scrollY || window.pageYOffset || 0;
       modalScrollLockActive = true;
       document.documentElement.classList.add('modal-scroll-lock');
       document.body.classList.add('modal-scroll-lock');
-      document.body.style.top = `-${modalScrollLockY}px`;
+      if (mainEl) {
+        mainEl.classList.add('modal-scroll-lock');
+        const narrow = window.matchMedia('(max-width:768px)').matches;
+        mainEl.style.setProperty('position', 'fixed');
+        mainEl.style.setProperty('top', `-${modalScrollLockY}px`);
+        if (narrow) {
+          mainEl.style.setProperty('left', '0');
+          mainEl.style.setProperty('right', '0');
+          mainEl.style.setProperty('width', '100%');
+        } else {
+          mainEl.style.setProperty('left', 'var(--sidebar)');
+          mainEl.style.setProperty('right', '0');
+          mainEl.style.setProperty('width', 'auto');
+        }
+      } else {
+        document.body.style.setProperty('position', 'fixed');
+        document.body.style.setProperty('width', '100%');
+        document.body.style.setProperty('top', `-${modalScrollLockY}px`);
+      }
     }
   } else if (modalScrollLockActive) {
     modalScrollLockActive = false;
     document.documentElement.classList.remove('modal-scroll-lock');
     document.body.classList.remove('modal-scroll-lock');
-    document.body.style.removeProperty('top');
-    window.scrollTo(0, modalScrollLockY);
+    if (mainEl) {
+      mainEl.classList.remove('modal-scroll-lock');
+      mainEl.style.removeProperty('position');
+      mainEl.style.removeProperty('top');
+      mainEl.style.removeProperty('left');
+      mainEl.style.removeProperty('right');
+      mainEl.style.removeProperty('width');
+      mainEl.scrollTop = modalScrollLockY;
+    } else {
+      document.body.style.removeProperty('position');
+      document.body.style.removeProperty('width');
+      document.body.style.removeProperty('top');
+      window.scrollTo(0, modalScrollLockY);
+    }
   }
 }
 
@@ -766,8 +802,18 @@ function flightCardMainHtml(m) {
 
 function normalizeBodyScroll() {
   if (modalBlockingOverlayCount() > 0) return;
+  const mainEl = getMainScrollEl();
   document.documentElement.classList.remove('modal-scroll-lock');
   document.body.classList.remove('modal-scroll-lock');
+  if (mainEl) {
+    mainEl.classList.remove('modal-scroll-lock');
+    mainEl.style.removeProperty('position');
+    mainEl.style.removeProperty('top');
+    mainEl.style.removeProperty('left');
+    mainEl.style.removeProperty('right');
+    mainEl.style.removeProperty('width');
+    mainEl.style.removeProperty('overflow');
+  }
   document.body.style.overflow = '';
   document.body.style.removeProperty('top');
   document.body.style.removeProperty('position');
@@ -1465,9 +1511,11 @@ function toggleChecklistItem(cb) {
   const state = loadChecklistState();
   state[cb.dataset.id] = cb.checked;
   localStorage.setItem('checklistState', JSON.stringify(state));
-  const scrollY = window.scrollY;
+  const mainEl = getMainScrollEl();
+  const scrollY = mainEl ? mainEl.scrollTop : window.scrollY;
   renderChecklist();
-  window.scrollTo(0, scrollY);
+  if (mainEl) mainEl.scrollTop = scrollY;
+  else window.scrollTo(0, scrollY);
 }
 
 function updateChecklistProgress() {
@@ -1580,7 +1628,9 @@ function showPage(id, btn) {
     const btns = document.querySelectorAll('.nav-item');
     btns.forEach(b => { if(b.getAttribute('onclick') && b.getAttribute('onclick').includes("'"+id+"'")) b.classList.add('active'); });
   }
-  window.scrollTo(0,0);
+  const mainEl = getMainScrollEl();
+  if (mainEl) mainEl.scrollTop = 0;
+  else window.scrollTo(0, 0);
   closeMobileMenu();
   if(id === 'budget') setTimeout(initCharts, 100);
   if(id === 'overview' && window._mapTas) setTimeout(() => window._mapTas.invalidateSize(), 50);
@@ -1596,6 +1646,7 @@ function toggleMobileMenu() {
     sidebar.classList.add('drawer-open');
     overlay.classList.add('active');
     document.body.style.overflow = 'hidden';
+    getMainScrollEl()?.style.setProperty('overflow', 'hidden');
   }
 }
 
