@@ -954,12 +954,13 @@ function initFlightCardMiniMaps() {
     const map = L.map(el, {
       zoomControl: false,
       attributionControl: false,
-      dragging: true,
+      dragging: false,
+      touchZoom: false,
       scrollWheelZoom: false,
-      doubleClickZoom: true,
+      doubleClickZoom: false,
       boxZoom: false,
       keyboard: false,
-      tap: true,
+      tap: false,
     });
     L.tileLayer(TRIP_SATELLITE_TILE_URL, tileOpts).addTo(map);
     L.polyline(latlngs, { color: '#22d3ee', weight: 10, opacity: 0.34, lineJoin: 'round' }).addTo(map);

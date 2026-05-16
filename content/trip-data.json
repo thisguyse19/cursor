@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.37",
+  "appVersion": "1.0.38",
   "versions": [
     {
       "v": "1.0",
@@ -416,10 +416,21 @@
       "v": "1.0.37",
       "date": "2026-05-16",
       "title": "Scroll column background / safe inset",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Main column now shares the same fixed mesh as the page so iOS does not paint a flat grey band in the bottom padding / overscroll region",
         "Installed mode uses large viewport height (lvh) for body and sidebar to avoid a thin unpainted gutter with dvh; safe-area padding uses env() without an extra 34px floor, with JS still probing env when needed"
+      ]
+    },
+    {
+      "v": "1.0.38",
+      "date": "2026-05-16",
+      "title": "Mobile bottom band + flight map gestures",
+      "latest": true,
+      "changes": [
+        "Narrow layouts use small viewport height (svh) for html/body in the browser, with lvh when installed, plus body/mesh background tweaks so a grey strip is less likely under iOS UI",
+        "Main column uses a local (scrolled) mesh on phones — fixed backgrounds inside overflow scroll are brittle on WebKit",
+        "Flight card satellite maps no longer pan, pinch-zoom, or double-tap zoom; touch drags pass vertically to the page"
       ]
     }
   ],

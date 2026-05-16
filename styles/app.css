@@ -49,7 +49,7 @@ html{
 html.modal-scroll-lock,body.modal-scroll-lock{overflow:hidden;touch-action:none}
 body{font-family:var(--font);color:var(--text);display:flex;min-height:0;height:100vh;height:100dvh;max-height:100dvh;
   overflow:hidden;overscroll-behavior:none;-webkit-font-smoothing:antialiased;line-height:1.68;letter-spacing:0.012em;
-  background:transparent}
+  background-color:var(--page-mesh-base)}
 body::before{
   content:'';
   position:fixed;top:0;left:0;right:0;bottom:0;z-index:-1;pointer-events:none;
@@ -383,7 +383,10 @@ body::before{
   border:1px solid rgba(0,0,0,.06);background:rgba(255,255,255,.35);
   position:relative;z-index:0;isolation:isolate}
 .flight-card-map{height:112px;width:100%;min-height:80px;background:#0a1628}
-.flight-card-map .leaflet-container{font-family:var(--font);background:#0a1628}
+.flight-card-map .leaflet-container{
+  font-family:var(--font);background:#0a1628;
+  /* Vertical drags pass to the page scroller; map does not pan */
+  touch-action:pan-y}
 .flight-card-map .leaflet-control,.flight-card-map .leaflet-control-attrib{display:none}
 .flight-card-conn-gap{
   font-size:11px;font-weight:600;color:var(--text-sec);line-height:1.35;
@@ -694,6 +697,9 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
 
 /* MOBILE RESPONSIVE */
 @media(max-width:768px){
+  /* Mobile Safari: dvh often exceeds the visible layout frame, leaving a dead band below; svh tracks the small viewport */
+  html{height:100svh;max-height:100svh;min-height:100svh}
+  body{height:100svh;max-height:100svh;min-height:100svh}
   /* Show mobile header, hide sidebar by default */
   .mobile-header{display:flex}
   .mobile-overlay{
@@ -714,7 +720,9 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
     scroll-padding-top:calc(54px + env(safe-area-inset-top, 0px));
     padding-top:calc(54px + env(safe-area-inset-top, 0px));
     padding-bottom:var(--main-scroll-pad-bottom, calc(24px + var(--safe-bottom)));
-    scroll-padding-bottom:var(--main-scroll-pad-bottom, calc(24px + var(--safe-bottom)))}
+    scroll-padding-bottom:var(--main-scroll-pad-bottom, calc(24px + var(--safe-bottom)));
+    /* iOS: fixed attachment inside overflow:auto is unreliable — scroll paints the mesh through padding */
+    background-attachment:scroll}
   .sb-actions{display:none}
 
   /* Hero */
@@ -809,6 +817,11 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
   /* Modals */
   .modal{padding:24px 20px;border-radius:var(--r-lg)}
   .modal-title{font-size:18px}
+}
+
+/* Phone installed: prefer large viewport height over svh */
+@media(max-width:768px) and (display-mode:standalone),(max-width:768px) and (display-mode:fullscreen){
+  html,body{height:100lvh;max-height:100lvh;min-height:100lvh}
 }
 
 /* CUSTOM SCROLLBARS */
