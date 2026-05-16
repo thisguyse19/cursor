@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.11",
+  "appVersion": "1.0.12",
   "versions": [
     {
       "v": "1.0",
@@ -137,11 +137,23 @@
       "v": "1.0.11",
       "date": "2026-05-16",
       "title": "Flights — Trip countdown, edit, readable forms",
-      "latest": true,
+      "latest": false,
       "changes": [
         "One trip countdown to day one (days only) with a clear card; during the trip it shows which day you are on out of 15",
         "Flight cards focus on route and times; edit opens the same form with your values (saved on device)",
         "Add / edit flight modal uses high-contrast inputs so labels and fields stay readable on the glass panel"
+      ]
+    },
+    {
+      "v": "1.0.12",
+      "date": "2026-05-16",
+      "title": "PWA content refresh, flight UI, liquid-glass buttons",
+      "latest": true,
+      "changes": [
+        "Installed app: trip and flight content now loads network-first so Update + reload shows the same data as in the browser (no stale JSON cache)",
+        "Flight add/edit modal fits narrow screens without sideways scrolling; overlay scrolls vertically only",
+        "Flight card Edit sits beside Remove — the delete control no longer stacks on top of Edit",
+        "Toolbar, sidebar nav, auth unlock, checklist filters, modals, and other controls use consistent liquid-glass buttons"
       ]
     }
   ],

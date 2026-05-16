@@ -1,5 +1,14 @@
 /* Minimal service worker for installability and offline shell (GitHub Pages–friendly). */
-const CACHE = 'triple-v9';
+const CACHE = 'triple-v10';
+
+function isContentJsonUrl(url) {
+  try {
+    const u = new URL(url);
+    return u.pathname.includes('/content/') && u.pathname.endsWith('.json');
+  } catch {
+    return false;
+  }
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -53,6 +62,22 @@ self.addEventListener('fetch', (event) => {
 
   if (req.url.includes('flights-live.json')) {
     event.respondWith(fetch(req));
+    return;
+  }
+
+  /* Trip data and other bundled JSON: network-first so PWA updates show new flights/content after Reload. */
+  if (isContentJsonUrl(req.url)) {
+    event.respondWith(
+      fetch(req, { cache: 'no-store' })
+        .then((res) => {
+          if (res.ok) {
+            const copy = res.clone();
+            caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {});
+          }
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
     return;
   }
 

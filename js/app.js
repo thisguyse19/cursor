@@ -21,7 +21,7 @@ function contentUrl(path) {
 }
 
 async function loadTripData() {
-  const res = await fetch(contentUrl('content/trip-data.json'));
+  const res = await fetch(contentUrl('content/trip-data.json'), { cache: 'no-store' });
   if (!res.ok) throw new Error(`trip-data.json HTTP ${res.status}`);
   const d = await res.json();
   APP_VERSION = d.appVersion;
