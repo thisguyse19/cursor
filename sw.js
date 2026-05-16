@@ -1,5 +1,5 @@
 /* Minimal service worker for installability and offline shell (GitHub Pages–friendly). */
-const CACHE = 'triple-v5';
+const CACHE = 'triple-v6';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -21,8 +21,19 @@ self.addEventListener('install', (event) => {
           console.warn('[Triple SW] precache partial', err);
         });
       })
-      .then(() => self.skipWaiting())
+      .then(() => {
+        // First install: take control immediately. Updates: stay in "waiting" until the page sends SKIP_WAITING.
+        if (!self.registration.active) {
+          return self.skipWaiting();
+        }
+      })
   );
+});
+
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
 
 self.addEventListener('activate', (event) => {

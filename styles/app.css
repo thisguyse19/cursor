@@ -207,6 +207,17 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
   opacity:0;transition:opacity .15s;line-height:1.4;white-space:normal;margin-top:-4px}
 #touch-tip.tt-show{opacity:1}
 
+/* PWA in-app update (service worker) */
+#sw-update-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:10001;
+  display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
+  padding:12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
+  background:var(--glass-fill-strong);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border-top:var(--glass-border);box-shadow:0 -10px 40px rgba(0,0,0,.08), var(--glass-inner);
+  font-size:13px;font-weight:500;color:var(--text);line-height:1.45;font-family:var(--font)}
+#sw-update-bar .sw-update-msg{max-width:min(520px,92vw);text-align:center;color:var(--text)}
+#sw-update-bar .sw-update-btn{flex-shrink:0;padding:8px 18px;font-size:13px;margin:0}
+
 /* WELCOME MODAL */
 .welcome-items{margin:0 -4px}
 .welcome-item{display:flex;gap:14px;align-items:flex-start;padding:14px 4px;border-bottom:1px solid var(--border)}

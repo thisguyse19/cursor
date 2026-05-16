@@ -1271,12 +1271,67 @@ window.doExportPDF = doExportPDF;
 window.setClSort = setClSort;
 window.doRevertAll = doRevertAll;
 
-window.addEventListener('DOMContentLoaded', () => {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker
-      .register(contentUrl('sw.js'))
-      .catch((err) => console.warn('[Triple] service worker registration failed', err));
+/** In-app PWA update: new worker waits until the user taps Update, then reloads once (localStorage is kept). */
+function setupServiceWorkerUpdates() {
+  if (!('serviceWorker' in navigator)) return;
+
+  let sawController = !!navigator.serviceWorker.controller;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!sawController) {
+      sawController = true;
+      return;
+    }
+    window.location.reload();
+  });
+
+  let updateBarShown = false;
+  function showSwUpdateBar(onActivate) {
+    if (updateBarShown) return;
+    updateBarShown = true;
+    const bar = document.createElement('div');
+    bar.id = 'sw-update-bar';
+    bar.setAttribute('role', 'status');
+    bar.innerHTML =
+      '<span class="sw-update-msg">A new version is ready. Your saved trip data stays on this device.</span>' +
+      '<button type="button" class="btn btn-blue sw-update-btn">Update</button>';
+    bar.querySelector('.sw-update-btn').addEventListener('click', () => onActivate());
+    document.body.appendChild(bar);
   }
+
+  navigator.serviceWorker
+    .register(contentUrl('sw.js'))
+    .then((reg) => {
+      const pingWaiting = () => {
+        if (reg.waiting) {
+          showSwUpdateBar(() => reg.waiting.postMessage({ type: 'SKIP_WAITING' }));
+        }
+      };
+
+      reg.addEventListener('updatefound', () => {
+        const inst = reg.installing;
+        if (!inst) return;
+        inst.addEventListener('statechange', () => {
+          if (inst.state === 'installed' && navigator.serviceWorker.controller) {
+            pingWaiting();
+          }
+        });
+      });
+
+      pingWaiting();
+
+      const check = () => {
+        reg.update();
+      };
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') check();
+      });
+      window.addEventListener('focus', check);
+    })
+    .catch((err) => console.warn('[Triple] service worker registration failed', err));
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  setupServiceWorkerUpdates();
 
   (function setupTouchTips() {
     const tip = document.createElement('div');
