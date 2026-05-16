@@ -30,13 +30,13 @@
   --safe-bottom:0px;
   --safe-bottom:env(safe-area-inset-bottom, 0px);
   --safe-bottom:max(constant(safe-area-inset-bottom), env(safe-area-inset-bottom, 0px));
-}
-@media (display-mode:standalone),(display-mode:fullscreen){
-  :root{
-    /* iOS WebApps: reserve the home-indicator band for padding when env() under-reports */
-    --safe-bottom:max(34px, constant(safe-area-inset-bottom), env(safe-area-inset-bottom, 0px));
-  }
-}
+  /* Shared by html, body::before, and .main — avoids a flat “slab” in the scrollable column on iOS */
+  --page-mesh-base:#eceef2;
+  --page-mesh-image:
+    radial-gradient(ellipse 120% 90% at 5% -15%, rgba(0,113,227,.13), transparent 52%),
+    radial-gradient(ellipse 90% 70% at 100% 8%, rgba(88,86,214,.09), transparent 48%),
+    radial-gradient(ellipse 80% 55% at 50% 105%, rgba(52,199,89,.09), transparent 42%),
+    linear-gradient(188deg, #f6f7fa 0%, #eceef2 42%, #f4f5f8 100%)}
 html{
   font-size:16px;
   height:100%;
@@ -45,7 +45,7 @@ html{
   overflow:hidden;
   overscroll-behavior:none;
   /* Same base as body::before so inset / overscroll gaps are not browser-default white */
-  background-color:#eceef2}
+  background-color:var(--page-mesh-base)}
 html.modal-scroll-lock,body.modal-scroll-lock{overflow:hidden;touch-action:none}
 body{font-family:var(--font);color:var(--text);display:flex;min-height:0;height:100vh;height:100dvh;max-height:100dvh;
   overflow:hidden;overscroll-behavior:none;-webkit-font-smoothing:antialiased;line-height:1.68;letter-spacing:0.012em;
@@ -53,12 +53,13 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:0;height:
 body::before{
   content:'';
   position:fixed;top:0;left:0;right:0;bottom:0;z-index:-1;pointer-events:none;
-  background-color:#eceef2;
-  background-image:
-    radial-gradient(ellipse 120% 90% at 5% -15%, rgba(0,113,227,.13), transparent 52%),
-    radial-gradient(ellipse 90% 70% at 100% 8%, rgba(88,86,214,.09), transparent 48%),
-    radial-gradient(ellipse 80% 55% at 50% 105%, rgba(52,199,89,.09), transparent 42%),
-    linear-gradient(188deg, #f6f7fa 0%, #eceef2 42%, #f4f5f8 100%)}
+  background-color:var(--page-mesh-base);
+  background-image:var(--page-mesh-image)}
+@media (display-mode:standalone),(display-mode:fullscreen){
+  /* dvh can leave a thin unpainted gutter in installed mode; lvh matches the stable full screen */
+  body{height:100lvh;height:100vh;max-height:100lvh;max-height:100vh}
+  .sidebar{height:100lvh;height:100vh;max-height:100lvh;max-height:100vh}
+}
 
 /* SIDEBAR */
 .sidebar{width:var(--sidebar);height:100vh;height:100dvh;position:fixed;left:0;top:0;
@@ -116,7 +117,11 @@ body::before{
   scroll-behavior:smooth;
   /* JS sets --main-scroll-pad-bottom when SW update pill visible; else fallback */
   padding-bottom:var(--main-scroll-pad-bottom, calc(28px + var(--safe-bottom)));
-  scroll-padding-bottom:var(--main-scroll-pad-bottom, calc(28px + var(--safe-bottom)))}
+  scroll-padding-bottom:var(--main-scroll-pad-bottom, calc(28px + var(--safe-bottom)));
+  background-color:var(--page-mesh-base);
+  background-image:var(--page-mesh-image);
+  background-attachment:fixed;
+  background-repeat:no-repeat}
 .page{display:none}.page.active{display:block}
 
 /* HERO */
@@ -829,6 +834,7 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
   .hero{height:280px;border-radius:0}
   body{background:#fff!important}
   body::before{display:none!important}
+  .main{background:none!important;background-image:none!important}
   .flight-card-map-host{display:none!important}
   .stat-card,.card,.day-card,.stay-card,.wb,.budget-card,.chart-box,.tip-card,.map-card,.route-bar,.route-stop,.hl-box,.cl-items,.modal,.pdf-opt,.hist-item,.day-timeline-wrap,.conflict-item,.cl-sort-btn,.flight-card,.flight-empty,.trip-cd-bar,.flight-cards-scroller{
     box-shadow:none!important;border:1px solid #ddd!important}
