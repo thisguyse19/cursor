@@ -480,9 +480,11 @@
     <div class="tb-sep"></div>
     <button type="button" class="tb-btn tb-danger tb-icon" id="revertBtn" onclick="confirmRevert()" aria-label="Revert all changes" title="Revert all">↺</button>
     <div class="tb-sep"></div>
-    <button type="button" class="tb-btn tb-primary tb-icon" id="editBtn" onclick="toggleEdit()" aria-label="Edit page content" title="Edit">✏️</button>
+    <button type="button" class="tb-btn tb-primary tb-icon" id="editBtn" aria-label="Edit page content" title="Edit">
+      <span id="editBtnGlyph" class="tb-edit-glyph" aria-hidden="true"></span>
+    </button>
     <div class="tb-sep"></div>
-    <button type="button" class="tb-btn tb-ghost tb-icon" onclick="openBackupModal()" aria-label="Backup or restore data" title="Backup & restore">💾</button>
+    <button type="button" class="tb-btn tb-ghost tb-icon" id="backupToolbarBtn" aria-label="Backup or restore data" title="Backup & restore">💾</button>
     <div class="tb-sep"></div>
     <button type="button" class="tb-btn tb-export tb-pdf-btn" onclick="exportPDF()"><span class="tb-pdf-glyph" aria-hidden="true">↓</span> PDF</button>
   </div>
@@ -547,24 +549,24 @@
 </div>
 
 <!-- ═══ MODAL: BACKUP / RESTORE ═══ -->
-<div class="modal-overlay" id="backupModal" onclick="if(event.target===this)closeBackupModal()">
+<div class="modal-overlay" id="backupModal">
   <div class="modal">
     <div class="modal-title">Backup & restore</div>
     <p class="modal-sub">Download everything saved on this device — flight board changes, checklist progress, page edits, and history — or load a file you saved earlier.</p>
     <div class="pdf-options">
-      <button type="button" class="pdf-opt" onclick="doBackupDownload()">
+      <button type="button" class="pdf-opt" id="backupOptDownload">
         <div class="pdf-opt-icon">⬇️</div>
         <div class="pdf-opt-name">Back up</div>
         <div class="pdf-opt-desc">Download a JSON file you can store in Files, iCloud Drive, or email. Use it to move your data to another device or keep a snapshot.</div>
       </button>
-      <button type="button" class="pdf-opt" onclick="startBackupRestore()">
+      <button type="button" class="pdf-opt" id="backupOptRestore">
         <div class="pdf-opt-icon">⬆️</div>
         <div class="pdf-opt-name">Restore</div>
         <div class="pdf-opt-desc">Choose a backup file exported from this app. Current data on this device will be replaced, then the page reloads.</div>
       </button>
     </div>
     <div class="modal-actions">
-      <button type="button" class="btn btn-outline" onclick="closeBackupModal()">Cancel</button>
+      <button type="button" class="btn btn-outline" id="backupModalCancel">Cancel</button>
     </div>
   </div>
 </div>

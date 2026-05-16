@@ -54,6 +54,12 @@ const FLIGHT_CONNECTION_LABELS = {
   open_jaw: 'Multi-city',
 };
 
+/** Toolbar edit button glyphs (avoid emoji + platform “Edit” annotations) */
+const TB_SVG_PENCIL =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/></svg>';
+const TB_SVG_CHECK =
+  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>';
+
 /** Lock page scroll while any modal (or the auth gate) is visible. */
 let modalScrollLockActive = false;
 let modalScrollLockY = 0;
@@ -1646,13 +1652,17 @@ function applySnapshot(s) {
 
 function syncEditToolbarButton() {
   const b = document.getElementById('editBtn');
+  const glyph = document.getElementById('editBtnGlyph');
   if (!b) return;
+  if (glyph) {
+    glyph.innerHTML = isEditing ? TB_SVG_CHECK : TB_SVG_PENCIL;
+  } else {
+    b.textContent = isEditing ? '✓' : '\u270E';
+  }
   if (isEditing) {
-    b.textContent = '✓';
     b.setAttribute('aria-label', 'Finish editing');
     b.title = 'Done';
   } else {
-    b.textContent = '✏️';
     b.setAttribute('aria-label', 'Edit page content');
     b.title = 'Edit';
   }
@@ -1892,7 +1902,7 @@ function applyTripleBackup(data) {
 }
 
 function openBackupModal() {
-  document.getElementById('backupModal').classList.add('open');
+  document.getElementById('backupModal')?.classList.add('open');
 }
 
 function closeBackupModal() {
@@ -1918,8 +1928,10 @@ function doBackupDownload() {
 }
 
 function startBackupRestore() {
+  const input = document.getElementById('backupFileInput');
+  /* File picker must open in the same user-gesture turn (especially iOS Safari). */
+  if (input) input.click();
   closeBackupModal();
-  document.getElementById('backupFileInput')?.click();
 }
 
 async function doExportPDF(isLandscape) {
@@ -2708,6 +2720,32 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('flight-f-connection')?.addEventListener('change', updateConnectionFormVisibility);
 
   initFlightBoardSectionToggle();
+
+  document.getElementById('backupToolbarBtn')?.addEventListener('click', e => {
+    e.preventDefault();
+    openBackupModal();
+  });
+  document.getElementById('backupModal')?.addEventListener('click', e => {
+    if (e.target === e.currentTarget) closeBackupModal();
+  });
+  document.getElementById('backupOptDownload')?.addEventListener('click', e => {
+    e.preventDefault();
+    doBackupDownload();
+  });
+  document.getElementById('backupOptRestore')?.addEventListener('click', e => {
+    e.preventDefault();
+    startBackupRestore();
+  });
+  document.getElementById('backupModalCancel')?.addEventListener('click', e => {
+    e.preventDefault();
+    closeBackupModal();
+  });
+
+  document.getElementById('editBtn')?.addEventListener('click', e => {
+    e.preventDefault();
+    toggleEdit();
+  });
+  syncEditToolbarButton();
 
   const backupInput = document.getElementById('backupFileInput');
   if (backupInput) {
