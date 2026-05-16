@@ -33,7 +33,7 @@
 }
 @media (display-mode:standalone),(display-mode:fullscreen){
   :root{
-    /* iOS installed WebApps sometimes lie about env(safe-area-inset-bottom); floor matches toolbar / background clip */
+    /* iOS WebApps: reserve the home-indicator band for padding when env() under-reports */
     --safe-bottom:max(34px, constant(safe-area-inset-bottom), env(safe-area-inset-bottom, 0px));
   }
 }
@@ -44,7 +44,8 @@ html{
   min-height:-webkit-fill-available;
   overflow:hidden;
   overscroll-behavior:none;
-}
+  /* Same base as body::before so inset / overscroll gaps are not browser-default white */
+  background-color:#eceef2}
 html.modal-scroll-lock,body.modal-scroll-lock{overflow:hidden;touch-action:none}
 body{font-family:var(--font);color:var(--text);display:flex;min-height:0;height:100vh;height:100dvh;max-height:100dvh;
   overflow:hidden;overscroll-behavior:none;-webkit-font-smoothing:antialiased;line-height:1.68;letter-spacing:0.012em;
@@ -58,10 +59,6 @@ body::before{
     radial-gradient(ellipse 90% 70% at 100% 8%, rgba(88,86,214,.09), transparent 48%),
     radial-gradient(ellipse 80% 55% at 50% 105%, rgba(52,199,89,.09), transparent 42%),
     linear-gradient(188deg, #f6f7fa 0%, #eceef2 42%, #f4f5f8 100%)}
-@media (display-mode:standalone),(display-mode:fullscreen){
-  html{background:transparent}
-  body::before{bottom:var(--safe-bottom)}
-}
 
 /* SIDEBAR */
 .sidebar{width:var(--sidebar);height:100vh;height:100dvh;position:fixed;left:0;top:0;
