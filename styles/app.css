@@ -218,6 +218,26 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 #sw-update-bar .sw-update-msg{max-width:min(520px,92vw);text-align:center;color:var(--text)}
 #sw-update-bar .sw-update-btn{flex-shrink:0;padding:8px 18px;font-size:13px;margin:0}
 
+.flight-board-wrap{padding-bottom:8px}
+.flight-board-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:4px}
+.flight-board-header .sec-title{margin-bottom:6px}
+.flight-add-btn{flex-shrink:0}
+.flight-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:16px;margin-top:12px}
+.flight-card{position:relative;padding:20px 18px 18px;min-height:120px}
+.flight-card-top{margin-bottom:10px}
+.flight-card-label{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.2px;margin-bottom:6px;padding-right:28px}
+.flight-countdown{font-size:21px;font-weight:800;color:var(--blue);letter-spacing:-.4px;line-height:1.15}
+.flight-countdown-sub{font-size:13px;font-weight:600;color:var(--text-sec);margin-top:4px}
+.flight-route{font-size:18px;font-weight:700;letter-spacing:.02em;margin-bottom:6px}
+.flight-meta{font-size:12px;color:var(--text-sec);margin-bottom:8px}
+.flight-times{font-size:12px;color:var(--text-sec);line-height:1.5}
+.flight-live-status{font-size:12px;font-weight:600;color:var(--blue);margin-top:10px}
+.flight-live-note,.flight-notes{font-size:12px;color:var(--text-sec);margin-top:6px;line-height:1.55}
+.flight-delay{font-size:11px;font-weight:600;color:var(--orange);margin-top:8px}
+.flight-sync-hint{font-size:12px;color:var(--text-sec);margin-top:14px;line-height:1.5}
+.flight-empty{font-size:14px;color:var(--text-sec);padding:28px 16px;text-align:center;background:var(--glass-fill);border-radius:var(--r-lg);border:var(--glass-border)}
+.flight-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
 /* WELCOME MODAL */
 .welcome-items{margin:0 -4px}
 .welcome-item{display:flex;gap:14px;align-items:flex-start;padding:14px 4px;border-bottom:1px solid var(--border)}
@@ -276,6 +296,7 @@ body.editing [data-key]:focus{outline:2px solid var(--blue);background:rgba(0,11
   background:rgba(255,59,48,.9);color:#fff;border:none;border-radius:50%;font-size:15px;
   cursor:pointer;z-index:10;align-items:center;justify-content:center;line-height:1;font-weight:700}
 body.editing .del-btn{display:flex}
+.flight-card .del-btn{display:flex}
 .card-hidden{display:none!important}
 body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .tip-card{outline:1px dashed rgba(0,0,0,.12)}
 
@@ -463,7 +484,7 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
   .day-content{display:block!important}
   .hero{height:280px;border-radius:0}
   body{background:#fff!important}
-  .stat-card,.card,.day-card,.stay-card,.wb,.budget-card,.chart-box,.tip-card,.map-card,.route-bar,.route-stop,.hl-box,.cl-items,.modal,.pdf-opt,.hist-item,.day-timeline-wrap,.conflict-item,.cl-sort-btn{
+  .stat-card,.card,.day-card,.stay-card,.wb,.budget-card,.chart-box,.tip-card,.map-card,.route-bar,.route-stop,.hl-box,.cl-items,.modal,.pdf-opt,.hist-item,.day-timeline-wrap,.conflict-item,.cl-sort-btn,.flight-card,.flight-empty{
     background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
     box-shadow:none!important;border:1px solid #ddd!important}
   .hero-content{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;

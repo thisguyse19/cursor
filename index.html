@@ -126,6 +126,19 @@
     </div>
   </div>
 
+  <div class="section flight-board-wrap">
+    <div class="sec-header flight-board-header">
+      <div>
+        <div class="sec-tag">Schedule</div>
+        <h2 class="sec-title">Your flights</h2>
+        <p class="sec-sub">Countdowns use your device clock. Status notes are merged from a small live file on the trip site each time you open the app (replace airlines’ apps for official gate changes).</p>
+      </div>
+      <button type="button" class="btn btn-blue flight-add-btn" id="flight-add-btn">+ Add flight</button>
+    </div>
+    <div id="flight-cards-grid" class="flight-cards-grid"></div>
+    <p class="flight-sync-hint" id="flight-sync-hint"></p>
+  </div>
+
   <div class="section">
     <div class="sec-header">
       <div class="sec-tag">The Journey</div>
@@ -509,6 +522,40 @@
     </div>
     <div class="modal-actions">
       <button class="btn btn-outline" onclick="document.getElementById('pdfModal').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: ADD FLIGHT ═══ -->
+<div class="modal-overlay" id="flightAddModal" onclick="if(event.target===this)closeFlightAddModal()">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-title">Add flight</div>
+    <p class="modal-sub">Saved only on this device. Enter departure and (optional) arrival in your local timezone; we store them as UTC for countdowns.</p>
+    <label class="auth-label" for="flight-f-label">Label</label>
+    <input id="flight-f-label" class="auth-input" type="text" placeholder="e.g. Return to Singapore" autocomplete="off">
+    <label class="auth-label" for="flight-f-airline">Airline</label>
+    <input id="flight-f-airline" class="auth-input" type="text" placeholder="e.g. Singapore Airlines" autocomplete="off">
+    <label class="auth-label" for="flight-f-no">Flight number</label>
+    <input id="flight-f-no" class="auth-input" type="text" placeholder="e.g. SQ218" autocomplete="off">
+    <div class="flight-form-row">
+      <div>
+        <label class="auth-label" for="flight-f-dep-ap">From (IATA)</label>
+        <input id="flight-f-dep-ap" class="auth-input" type="text" placeholder="MEL" maxlength="4" autocomplete="off">
+      </div>
+      <div>
+        <label class="auth-label" for="flight-f-arr-ap">To (IATA)</label>
+        <input id="flight-f-arr-ap" class="auth-input" type="text" placeholder="SIN" maxlength="4" autocomplete="off">
+      </div>
+    </div>
+    <label class="auth-label" for="flight-f-dep">Departure (local)</label>
+    <input id="flight-f-dep" class="auth-input" type="datetime-local">
+    <label class="auth-label" for="flight-f-arr">Arrival (local, optional)</label>
+    <input id="flight-f-arr" class="auth-input" type="datetime-local">
+    <label class="auth-label" for="flight-f-notes">Notes</label>
+    <input id="flight-f-notes" class="auth-input" type="text" placeholder="Seat, booking ref, …" autocomplete="off">
+    <div class="modal-actions" style="margin-top:18px">
+      <button type="button" class="btn btn-outline" onclick="closeFlightAddModal()">Cancel</button>
+      <button type="button" class="btn btn-blue" onclick="submitFlightAdd()">Save flight</button>
     </div>
   </div>
 </div>

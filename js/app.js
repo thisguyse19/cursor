@@ -4,6 +4,12 @@ let APP_VERSION;
 let VERSIONS;
 let DAYS_TAS1, DAYS_TAS2, DAYS_MELB;
 let STAYS, CHECKLIST, CL_META, COSTS, TIPS;
+let FLIGHTS = [];
+let FLIGHTS_LIVE = null;
+let flightUserExtras = [];
+let flightHiddenIds = new Set();
+const FLIGHT_OVERLAY_KEY = 'tripleFlightOverlay';
+let _flightTick = null;
 
 function contentUrl(path) {
   const base = document.baseURI || window.location.href;
@@ -24,7 +30,244 @@ async function loadTripData() {
   CL_META = d.clMeta;
   COSTS = d.costs;
   TIPS = d.tips;
+  FLIGHTS = Array.isArray(d.flights) ? d.flights : [];
 }
+
+async function refreshFlightsFromNetwork() {
+  FLIGHTS_LIVE = null;
+  try {
+    const res = await fetch(contentUrl('content/flights-live.json'), { cache: 'no-store' });
+    if (res.ok) FLIGHTS_LIVE = await res.json();
+  } catch (e) {
+    console.warn('[Triple] flights-live', e);
+  }
+}
+
+function flightEsc(s) {
+  return String(s ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/"/g, '&quot;');
+}
+
+function mergeLiveIntoFlight(base) {
+  const u = (FLIGHTS_LIVE && FLIGHTS_LIVE.updates && FLIGHTS_LIVE.updates[base.id]) || {};
+  return {
+    ...base,
+    departureUtc: u.departureUtc || base.departureUtc,
+    arrivalUtc: u.arrivalUtc !== undefined ? u.arrivalUtc : base.arrivalUtc,
+    status: u.status !== undefined ? u.status : base.status,
+    gate: u.gate !== undefined ? u.gate : base.gate,
+    terminal: u.terminal !== undefined ? u.terminal : base.terminal,
+    delayMinutes: u.delayMinutes !== undefined ? u.delayMinutes : base.delayMinutes,
+    checkIn: u.checkIn !== undefined ? u.checkIn : base.checkIn,
+    liveNote: u.note !== undefined ? u.note : base.liveNote,
+  };
+}
+
+function effectiveDepArr(f) {
+  let dep = new Date(f.departureUtc).getTime();
+  let arr = f.arrivalUtc ? new Date(f.arrivalUtc).getTime() : NaN;
+  const dm = f.delayMinutes != null && f.delayMinutes > 0 ? f.delayMinutes * 60000 : 0;
+  if (dm) {
+    dep += dm;
+    if (!Number.isNaN(arr)) arr += dm;
+  }
+  return {
+    depIso: new Date(dep).toISOString(),
+    arrIso: !Number.isNaN(arr) ? new Date(arr).toISOString() : '',
+  };
+}
+
+function formatFlightDuration(ms) {
+  const sec = Math.max(0, Math.floor(ms / 1000));
+  const d = Math.floor(sec / 86400);
+  const h = Math.floor((sec % 86400) / 3600);
+  const m = Math.floor((sec % 3600) / 60);
+  if (d > 0) return `${d}d ${h}h ${m}m`;
+  if (h > 0) return `${h}h ${m}m`;
+  return `${m}m`;
+}
+
+function flightCountdownPhrase(depIso, arrIso) {
+  const now = Date.now();
+  const dep = new Date(depIso).getTime();
+  const arr = arrIso ? new Date(arrIso).getTime() : NaN;
+  if (!Number.isNaN(arr) && now >= arr) return { primary: 'Arrived', sub: '' };
+  if (now >= dep && (Number.isNaN(arr) || now < arr)) {
+    if (!Number.isNaN(arr)) {
+      return { primary: 'In flight', sub: 'Lands in ' + formatFlightDuration(arr - now) };
+    }
+    return { primary: 'Departed', sub: '' };
+  }
+  return { primary: 'Departs in ' + formatFlightDuration(dep - now), sub: '' };
+}
+
+function loadFlightOverlay() {
+  try {
+    const raw = localStorage.getItem(FLIGHT_OVERLAY_KEY);
+    if (!raw) {
+      flightUserExtras = [];
+      flightHiddenIds = new Set();
+      return;
+    }
+    const o = JSON.parse(raw);
+    flightUserExtras = Array.isArray(o.extras) ? o.extras : [];
+    flightHiddenIds = new Set(Array.isArray(o.hidden) ? o.hidden : []);
+  } catch {
+    flightUserExtras = [];
+    flightHiddenIds = new Set();
+  }
+}
+
+function persistFlightOverlay() {
+  localStorage.setItem(
+    FLIGHT_OVERLAY_KEY,
+    JSON.stringify({ extras: flightUserExtras, hidden: [...flightHiddenIds] })
+  );
+}
+
+function removeFlightCard(id) {
+  if (id.startsWith('u-')) flightUserExtras = flightUserExtras.filter(f => f.id !== id);
+  else flightHiddenIds.add(id);
+  persistFlightOverlay();
+  renderFlights();
+}
+
+function updateFlightCountdownElements() {
+  document.querySelectorAll('[data-flight-countdown]').forEach(el => {
+    const dep = el.dataset.dep;
+    const arr = el.dataset.arr || '';
+    const cd = flightCountdownPhrase(dep, arr || null);
+    el.textContent = cd.primary;
+    const sub = el.parentElement && el.parentElement.querySelector('[data-flight-sub]');
+    if (sub) {
+      sub.textContent = cd.sub || '';
+      sub.style.display = cd.sub ? '' : 'none';
+    }
+  });
+}
+
+function flightCardHtml(f) {
+  const m = mergeLiveIntoFlight(f);
+  const { depIso, arrIso } = effectiveDepArr(m);
+  const cd = flightCountdownPhrase(depIso, arrIso || null);
+  const depT = new Date(depIso);
+  const arrT = arrIso ? new Date(arrIso) : null;
+  const bits = [m.status, m.terminal && `Terminal ${m.terminal}`, m.gate && `Gate ${m.gate}`, m.checkIn].filter(Boolean);
+  const statusLine = bits.join(' · ');
+  const delayNote =
+    m.delayMinutes != null && m.delayMinutes > 0
+      ? `<div class="flight-delay">+${flightEsc(m.delayMinutes)}m delay (from live file)</div>`
+      : '';
+
+  return `<div class="flight-card glass-card" data-flight-id="${flightEsc(m.id)}">
+    <button type="button" class="del-btn flight-card-remove" title="Remove from board" aria-label="Remove from board" onclick="removeFlightCard('${flightEsc(m.id)}')">×</button>
+    <div class="flight-card-top">
+      <div class="flight-card-label">${flightEsc(m.label)}</div>
+      <div class="flight-countdown" data-flight-countdown="1" data-dep="${flightEsc(depIso)}" data-arr="${flightEsc(arrIso || '')}">${flightEsc(cd.primary)}</div>
+      <div class="flight-countdown-sub" data-flight-sub="1"${cd.sub ? '' : ' style="display:none"'}>${flightEsc(cd.sub || '')}</div>
+    </div>
+    <div class="flight-route"><span>${flightEsc(m.depAirport)}</span> → <span>${flightEsc(m.arrAirport)}</span></div>
+    <div class="flight-meta">${flightEsc(m.airline)} · ${flightEsc(m.flightNo)}</div>
+    <div class="flight-times">Out ${flightEsc(depT.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }))}${
+    arrT ? ` · In ${flightEsc(arrT.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' }))}` : ''
+  }</div>
+    ${delayNote}
+    ${statusLine ? `<div class="flight-live-status">${flightEsc(statusLine)}</div>` : ''}
+    ${m.liveNote ? `<div class="flight-live-note">${flightEsc(m.liveNote)}</div>` : ''}
+    ${m.notes ? `<div class="flight-notes">${flightEsc(m.notes)}</div>` : ''}
+  </div>`;
+}
+
+function renderFlights() {
+  const grid = document.getElementById('flight-cards-grid');
+  const hint = document.getElementById('flight-sync-hint');
+  if (!grid) return;
+  if (_flightTick) {
+    clearInterval(_flightTick);
+    _flightTick = null;
+  }
+
+  const base = (FLIGHTS || []).filter(f => !flightHiddenIds.has(f.id)).map(f => ({ ...f }));
+  const user = flightUserExtras.map(f => ({ ...f }));
+  const rows = [...base, ...user].sort(
+    (a, b) => new Date(a.departureUtc).getTime() - new Date(b.departureUtc).getTime()
+  );
+
+  grid.innerHTML = rows.length
+    ? rows.map(flightCardHtml).join('')
+    : '<div class="flight-empty">No flights here yet. Use <strong>+ Add flight</strong> or restore data from a backup.</div>';
+
+  if (hint) {
+    if (FLIGHTS_LIVE && FLIGHTS_LIVE.updatedAt) {
+      try {
+        const d = new Date(FLIGHTS_LIVE.updatedAt);
+        hint.textContent =
+          'Live file merged · updated ' +
+          d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
+      } catch {
+        hint.textContent = 'Live file merged';
+      }
+    } else {
+      hint.textContent =
+        'Using itinerary times only — live status file was not loaded (offline, blocked, or missing).';
+    }
+  }
+
+  _flightTick = setInterval(updateFlightCountdownElements, 30000);
+  updateFlightCountdownElements();
+}
+
+function openFlightAddModal() {
+  document.getElementById('flight-f-label').value = '';
+  document.getElementById('flight-f-airline').value = '';
+  document.getElementById('flight-f-no').value = '';
+  document.getElementById('flight-f-dep-ap').value = '';
+  document.getElementById('flight-f-arr-ap').value = '';
+  document.getElementById('flight-f-dep').value = '';
+  document.getElementById('flight-f-arr').value = '';
+  document.getElementById('flight-f-notes').value = '';
+  document.getElementById('flightAddModal').classList.add('open');
+}
+
+function closeFlightAddModal() {
+  document.getElementById('flightAddModal').classList.remove('open');
+}
+
+function submitFlightAdd() {
+  const label = document.getElementById('flight-f-label').value.trim();
+  const depAp = document.getElementById('flight-f-dep-ap').value.trim().toUpperCase();
+  const arrAp = document.getElementById('flight-f-arr-ap').value.trim().toUpperCase();
+  const dep = document.getElementById('flight-f-dep').value;
+  if (!label || depAp.length < 3 || arrAp.length < 3 || !dep) {
+    showAlert('Add a label, both airport codes (3 letters), and a departure date & time.', 'Flight');
+    return;
+  }
+  const depIso = new Date(dep).toISOString();
+  let arrIso = null;
+  const arrVal = document.getElementById('flight-f-arr').value;
+  if (arrVal) arrIso = new Date(arrVal).toISOString();
+  flightUserExtras.push({
+    id: 'u-' + Date.now(),
+    label,
+    airline: document.getElementById('flight-f-airline').value.trim() || '—',
+    flightNo: document.getElementById('flight-f-no').value.trim() || '—',
+    depAirport: depAp.slice(0, 4),
+    arrAirport: arrAp.slice(0, 4),
+    departureUtc: depIso,
+    arrivalUtc: arrIso,
+    notes: document.getElementById('flight-f-notes').value.trim(),
+  });
+  persistFlightOverlay();
+  renderFlights();
+  closeFlightAddModal();
+}
+
+window.removeFlightCard = removeFlightCard;
+window.openFlightAddModal = openFlightAddModal;
+window.closeFlightAddModal = closeFlightAddModal;
+window.submitFlightAdd = submitFlightAdd;
 
 /** Newest-first semver sort for the version history modal. */
 function compareVersionDesc(a, b) {
@@ -565,8 +808,12 @@ function doRevertAll() {
     if(el) el.innerHTML = val;
   });
   saveHistory([]);
+  flightUserExtras = [];
+  flightHiddenIds = new Set();
+  localStorage.removeItem(FLIGHT_OVERLAY_KEY);
   document.getElementById('revertModal').classList.remove('open');
   setTimeout(updateCharts, 100);
+  renderFlights();
 }
 
 // ═══════════════════════════════════════
@@ -1106,6 +1353,12 @@ function init() {
   renderTips();
   renderChecklist();
 
+  loadFlightOverlay();
+  renderFlights();
+
+  const flightBtn = document.getElementById('flight-add-btn');
+  if (flightBtn) flightBtn.addEventListener('click', openFlightAddModal);
+
   checkVersionMerge(); // applies history + handles version-change merge
   setTimeout(initMaps, 200);
 }
@@ -1371,6 +1624,7 @@ window.addEventListener('DOMContentLoaded', () => {
     let dataLoaded = false;
     try {
       await loadTripData();
+      await refreshFlightsFromNetwork();
       dataLoaded = true;
     } catch (e) {
       console.error(e);

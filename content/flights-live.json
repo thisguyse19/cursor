@@ -1,0 +1,21 @@
+{
+  "updatedAt": "2026-05-16T00:00:00Z",
+  "updates": {
+    "fl-inbound-hba": {
+      "status": "Scheduled",
+      "note": "Connection via Sydney or Melbourne — confirm gates on your booking."
+    },
+    "fl-hba-mel": {
+      "status": "Scheduled",
+      "terminal": "Domestic",
+      "gate": "—",
+      "delayMinutes": 0,
+      "note": "Illustrative gate — airlines publish final details closer to Dec 2026."
+    },
+    "fl-mel-sin": {
+      "status": "Scheduled",
+      "checkIn": "Allow 3h for international",
+      "note": "22:35 MEL departure as in itinerary; adjust if your PNR changes."
+    }
+  }
+}
