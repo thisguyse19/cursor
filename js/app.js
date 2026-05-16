@@ -10,6 +10,7 @@ let flightUserExtras = [];
 let flightHiddenIds = new Set();
 let flightEdits = {};
 let flightModalEditingId = null;
+let _flightCardDotsObserver = null;
 const FLIGHT_OVERLAY_KEY = 'tripleFlightOverlay';
 const FLIGHT_PATCH_KEYS = [
   'airline',
@@ -534,8 +535,9 @@ function formatFlightLegDay(dt) {
 }
 
 function formatConnectionDurationMs(ms) {
-  if (ms == null || !Number.isFinite(ms) || ms <= 0) return '';
-  const totalMin = Math.max(1, Math.round(ms / 60000));
+  if (ms == null || !Number.isFinite(ms) || ms < 0) return '';
+  const totalMin = Math.round(ms / 60000);
+  if (totalMin <= 0) return '<1m connection time';
   const h = Math.floor(totalMin / 60);
   const mm = totalMin % 60;
   if (h > 0 && mm > 0) return `${h}h ${mm}m connection time`;
@@ -579,9 +581,14 @@ function flightCardConnectionFollowHtml(m) {
   if (k === 'direct') return '';
   const chunks = [];
   const { arrIso } = effectiveDepArr(m);
-  if (arrIso && m.connDepartureUtc) {
-    const gapMs = new Date(m.connDepartureUtc).getTime() - new Date(arrIso).getTime();
-    const gapFmt = formatConnectionDurationMs(gapMs);
+  const leg1EndIso =
+    arrIso ||
+    (m.arrivalUtc && String(m.arrivalUtc).trim()
+      ? String(m.arrivalUtc).trim()
+      : '');
+  if (leg1EndIso && m.connDepartureUtc) {
+    const gapMsRaw = new Date(m.connDepartureUtc).getTime() - new Date(leg1EndIso).getTime();
+    const gapFmt = formatConnectionDurationMs(Math.max(0, gapMsRaw));
     if (gapFmt) chunks.push(`<div class="flight-card-conn-gap">${flightEsc(gapFmt)}</div>`);
   }
   if (!m.connDepartureUtc && !m.connArrivalUtc) return chunks.join('');
@@ -786,6 +793,67 @@ function removeFlightCard(id) {
   renderFlights();
 }
 
+function setupFlightCardDots() {
+  const grid = document.getElementById('flight-cards-grid');
+  const dotsEl = document.getElementById('flight-card-dots');
+  if (!grid || !dotsEl) return;
+
+  if (_flightCardDotsObserver) {
+    _flightCardDotsObserver.disconnect();
+    _flightCardDotsObserver = null;
+  }
+  dotsEl.replaceChildren();
+
+  const cards = [...grid.querySelectorAll('.flight-card')];
+  if (cards.length <= 1) {
+    dotsEl.hidden = true;
+    dotsEl.setAttribute('aria-hidden', 'true');
+    return;
+  }
+
+  dotsEl.hidden = false;
+  dotsEl.setAttribute('aria-hidden', 'false');
+  for (let i = 0; i < cards.length; i++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'flight-card-dot' + (i === 0 ? ' is-active' : '');
+    b.dataset.index = String(i);
+    b.setAttribute('aria-label', `Go to flight ${i + 1}`);
+    dotsEl.appendChild(b);
+  }
+
+  const dots = [...dotsEl.querySelectorAll('.flight-card-dot')];
+  const setActive = idx => {
+    dots.forEach((d, j) => d.classList.toggle('is-active', j === idx));
+  };
+
+  _flightCardDotsObserver = new IntersectionObserver(
+    entries => {
+      let best = null;
+      for (const e of entries) {
+        if (!e.isIntersecting) continue;
+        const r = e.intersectionRatio;
+        if (!best || r > best.r) best = { r, t: e.target };
+      }
+      if (best) {
+        const idx = cards.indexOf(best.t);
+        if (idx >= 0) setActive(idx);
+      }
+    },
+    { root: grid, threshold: [0.2, 0.4, 0.6, 0.8, 1] }
+  );
+  cards.forEach(c => _flightCardDotsObserver.observe(c));
+
+  dotsEl.onclick = ev => {
+    const btn = ev.target.closest('.flight-card-dot');
+    if (!btn) return;
+    const i = parseInt(btn.dataset.index, 10);
+    const card = cards[i];
+    if (!card) return;
+    grid.scrollTo({ left: card.offsetLeft, behavior: 'smooth' });
+  };
+}
+
 function flightCardHtml(m) {
   const bits = [m.status, m.terminal && `Terminal ${m.terminal}`, m.gate && `Gate ${m.gate}`, m.checkIn].filter(Boolean);
   const statusLine = bits.join(' · ');
@@ -811,7 +879,6 @@ function flightCardHtml(m) {
 
 function renderFlights() {
   const grid = document.getElementById('flight-cards-grid');
-  const hint = document.getElementById('flight-sync-hint');
   if (!grid) return;
 
   const rows = getEnrichedFlightRowsSorted();
@@ -821,22 +888,7 @@ function renderFlights() {
     ? rows.map(flightCardHtml).join('')
     : '<div class="flight-empty flight-empty--solo">No flights here yet. Use <strong>+ Add flight</strong> or restore data from a backup.</div>';
 
-  if (hint) {
-    if (FLIGHTS_LIVE && FLIGHTS_LIVE.updatedAt) {
-      try {
-        const d = new Date(FLIGHTS_LIVE.updatedAt);
-        hint.textContent =
-          'Live file merged · updated ' +
-          d.toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
-      } catch {
-        hint.textContent = 'Live file merged';
-      }
-    } else {
-      hint.textContent =
-        'Using itinerary times only — live status file was not loaded (offline, blocked, or missing).';
-    }
-  }
-
+  setupFlightCardDots();
   renderTripCountdownBanner();
 }
 
