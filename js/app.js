@@ -857,11 +857,10 @@ function createEsriGlobeStyle() {
   return {
     version: 8,
     name: 'triple-esri-satellite',
-    glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
     sources: {
       esri: {
         type: 'raster',
-        tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
         tileSize: 256,
         attribution: '© Esri',
         maxzoom: 19,
@@ -871,35 +870,22 @@ function createEsriGlobeStyle() {
       {
         id: 'background',
         type: 'background',
-        paint: { 'background-color': '#020617' },
+        paint: { 'background-color': '#0a1628' },
       },
       {
         id: 'esri',
         type: 'raster',
         source: 'esri',
         paint: {
-          'raster-opacity': 0.9,
+          'raster-opacity': 1,
           'raster-fade-duration': 0,
-          'raster-brightness-min': 0.08,
-          'raster-brightness-max': 0.46,
-          'raster-contrast': 0.12,
-          'raster-saturation': -0.55,
+          /* Avoid aggressive brightness filters — on some GPUs they can flatten imagery to black */
+          'raster-saturation': -0.22,
+          'raster-contrast': 0.08,
         },
       },
     ],
   };
-}
-
-function maplibreBindGlobeProjection(map) {
-  const apply = () => {
-    try {
-      map.setProjection({ type: 'globe' });
-    } catch (_) {
-      /* older MapLibre builds */
-    }
-  };
-  if (map.isStyleLoaded && map.isStyleLoaded()) apply();
-  else map.once('style.load', apply);
 }
 
 function tripToRad(d) {
@@ -953,23 +939,6 @@ function tripLngLatBounds(coords) {
   const b = new maplibregl.LngLatBounds(coords[0], coords[0]);
   coords.forEach(c => b.extend(c));
   return b;
-}
-
-function tripMaplibreAddSky(map) {
-  if (map.getLayer('sky')) return;
-  try {
-    map.addLayer({
-      id: 'sky',
-      type: 'sky',
-      paint: {
-        'sky-type': 'atmosphere',
-        'sky-atmosphere-sun-intensity': 10,
-        'sky-atmosphere-color': 'rgb(6, 10, 24)',
-      },
-    });
-  } catch (_) {
-    /* sky unsupported */
-  }
 }
 
 function tripMaplibreAddRouteGlow(map, sourceId, coordsLngLat, colors, widths) {
@@ -1102,15 +1071,7 @@ function initFlightCardMiniMaps() {
       keyboard: false,
       renderWorldCopies: false,
     });
-    maplibreBindGlobeProjection(map);
-
     map.once('load', () => {
-      try {
-        tripMaplibreAddSky(map);
-      } catch (_) {
-        /* ignore */
-      }
-
       const line = tripGreatCircleLine(coords, 32);
       map.addSource('fc-route', {
         type: 'geojson',
@@ -2948,7 +2909,6 @@ function initMaps() {
       attributionControl: true,
       renderWorldCopies: false,
     });
-    maplibreBindGlobeProjection(mapTas);
     try {
       mapTas.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right');
     } catch (_) {
@@ -2982,11 +2942,6 @@ function initMaps() {
     const mainLngLat = tasStops.filter(s => !s.daytrip).map(s => [s.lng, s.lat]);
 
     mapTas.once('load', () => {
-      try {
-        tripMaplibreAddSky(mapTas);
-      } catch (_) {
-        /* ignore */
-      }
       tripMaplibreAddRouteGlow(mapTas, 'tas-main', mainLngLat, { core: '#7dd3fc', glow: '#0ea5e9' }, { core: 3.5, glow: 13 });
 
       tripMaplibreAddDashedLeg(mapTas, 'tas-dt-bruny', [tasStops[0].lng, tasStops[0].lat], [tasStops[1].lng, tasStops[1].lat], '#4ade80');
@@ -3027,7 +2982,6 @@ function initMaps() {
       attributionControl: true,
       renderWorldCopies: false,
     });
-    maplibreBindGlobeProjection(mapMelb);
     try {
       mapMelb.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right');
     } catch (_) {
@@ -3059,11 +3013,6 @@ function initMaps() {
     const gorLngLat = melbStops.map(s => [s.lng, s.lat]);
 
     mapMelb.once('load', () => {
-      try {
-        tripMaplibreAddSky(mapMelb);
-      } catch (_) {
-        /* ignore */
-      }
       tripMaplibreAddRouteGlow(mapMelb, 'melb-gor', gorLngLat, { core: '#fdba74', glow: '#fb923c' }, { core: 3.5, glow: 13 });
 
       melbStops.forEach((s, i) => {
