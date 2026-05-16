@@ -252,6 +252,8 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 .flight-cards-scroller--empty .flight-empty--solo{
   flex:1;width:100%;scroll-snap-align:none;min-width:0}
 .flight-card{position:relative;padding:42px 12px 12px;min-height:132px;border-radius:var(--r-lg)}
+/* Calmer elevation on flight cards (avoid “double” glass halo) */
+.flight-card.glass-card{box-shadow:0 6px 28px rgba(0,0,0,.07), var(--glass-inner)}
 .flight-mini-tl{margin:4px 0 10px;padding:12px 8px 10px;border-radius:var(--r-md);
   background:rgba(255,255,255,.45);border:1px solid rgba(255,255,255,.55)}
 .flight-tl-track{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;position:relative}
@@ -275,11 +277,16 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 .flight-tl-cell{
   flex:0 0 auto;min-width:106px;max-width:148px;padding:0 8px;text-align:center;display:flex;flex-direction:column;align-items:center}
 .flight-tl-cell--mid{
-  min-width:76px;max-width:108px;padding-top:2px;position:relative;justify-content:flex-start}
-.flight-tl-rail{
-  position:absolute;left:-18%;right:-18%;top:34px;height:3px;border-radius:3px;pointer-events:none;
+  min-width:76px;max-width:108px;padding-top:0;position:relative;justify-content:flex-start}
+/* Route column: same stack as depart/arrive (time row → dot → pill), rail passes through dot only */
+.flight-tl-time--route{
+  box-sizing:content-box;min-height:12px;display:flex;align-items:center;justify-content:center;
+  font-size:13px;line-height:1;font-weight:700;color:var(--blue);margin-bottom:6px}
+.flight-tl-cell--mid .flight-tl-rail{
+  position:absolute;left:-35%;right:-35%;top:22px;height:3px;border-radius:3px;pointer-events:none;z-index:0;
   background:linear-gradient(90deg,rgba(0,113,227,.2),var(--blue),rgba(0,113,227,.2))}
-.flight-tl-cell--mid .flight-tl-plane{position:relative;z-index:1;margin-bottom:4px}
+.flight-tl-cell--mid .flight-tl-dot{position:relative;z-index:1}
+.flight-tl-cell--mid .flight-pill{position:relative;z-index:1;margin-top:0}
 .flight-tl-hint{
   font-size:9px;font-weight:600;color:var(--text-ter);line-height:1.35;margin-top:4px;max-width:10rem;hyphens:auto}
 .flight-pill{
@@ -293,6 +300,7 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 .flight-conn-kind span{
   display:inline-block;font-size:10px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;
   color:var(--blue);background:rgba(0,113,227,.1);padding:3px 9px;border-radius:20px}
+.flight-conn-fields{
   box-sizing:border-box;max-width:100%;
   background:rgba(0,113,227,.05);border:1px solid rgba(0,113,227,.14);border-radius:var(--r-md);
   padding:12px 12px 2px;margin-bottom:12px}
@@ -308,8 +316,10 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 .flight-sync-hint{font-size:12px;color:var(--text-sec);margin-top:14px;line-height:1.5}
 .flight-empty{font-size:14px;color:var(--text-sec);padding:28px 16px;text-align:center;background:var(--glass-fill);border-radius:var(--r-lg);border:var(--glass-border)}
 .flight-form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.flight-datetime-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;max-width:100%}
-.flight-datetime-field{min-width:0;max-width:100%}
+.flight-datetime-row{
+  display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;width:100%;max-width:100%;min-width:0;
+  box-sizing:border-box}
+.flight-datetime-field{min-width:0;max-width:100%;width:100%;overflow:hidden;box-sizing:border-box}
 .flight-modal.modal{
   max-width:min(480px,calc(100vw - 24px));
   width:100%;
@@ -317,13 +327,19 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
   overflow-x:hidden;
   padding:clamp(22px,4.5vw,34px)}
 .flight-modal .flight-form-row > *{min-width:0}
-.flight-modal .flight-datetime-field .flight-modal-datetime{
-  display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;font-size:14px;padding:10px 12px}
+.flight-modal .flight-datetime-field .flight-modal-datetime,
+.flight-modal input.flight-modal-input[type="datetime-local"]{
+  display:block;width:100%;max-width:100%;min-width:0;box-sizing:border-box;font-size:14px;padding:10px 12px;
+  -webkit-appearance:none;appearance:none}
+.flight-modal input[type="datetime-local"]::-webkit-datetime-edit-fields-wrapper{
+  min-width:0;max-width:100%}
+.flight-modal input[type="datetime-local"]::-webkit-calendar-picker-indicator{
+  margin-inline-start:2px;flex-shrink:0}
 .flight-modal .flight-modal-select{
   appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%2386868b' d='M1 1.5L6 6l5-4.5'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 14px center;padding-right:36px}
 @media(max-width:520px){
-  .flight-datetime-row{grid-template-columns:1fr}
+  .flight-datetime-row{grid-template-columns:minmax(0,1fr)}
 }
 .flight-modal.flight-modal .flight-modal-label{
   display:block;text-align:left;font-size:11px;font-weight:700;letter-spacing:.55px;text-transform:uppercase;
