@@ -332,6 +332,12 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:0;height:
   font-size:clamp(17px,4.8vw,20px);font-weight:700;letter-spacing:-.4px;color:var(--text);
   line-height:1.2;margin:0 0 14px;padding-right:0}
 .flight-card-times{display:flex;flex-direction:column;gap:10px}
+.flight-card-map-host{
+  margin-top:12px;border-radius:var(--r-md);overflow:hidden;
+  border:1px solid rgba(0,0,0,.06);background:rgba(255,255,255,.35);
+  position:relative;z-index:0;isolation:isolate}
+.flight-card-map{height:112px;width:100%;min-height:80px}
+.flight-card-map .leaflet-container{font-family:var(--font);background:rgba(0,113,227,.06)}
 .flight-card-conn-gap{
   font-size:11px;font-weight:600;color:var(--text-sec);line-height:1.35;
   margin:4px 0 2px;padding:2px 0 2px 32px}
@@ -771,8 +777,8 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
   .day-content{display:block!important}
   .hero{height:280px;border-radius:0}
   body{background:#fff!important}
+  .flight-card-map-host{display:none!important}
   .stat-card,.card,.day-card,.stay-card,.wb,.budget-card,.chart-box,.tip-card,.map-card,.route-bar,.route-stop,.hl-box,.cl-items,.modal,.pdf-opt,.hist-item,.day-timeline-wrap,.conflict-item,.cl-sort-btn,.flight-card,.flight-empty,.trip-cd-bar,.flight-cards-scroller{
-    background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
     box-shadow:none!important;border:1px solid #ddd!important}
   .hero-content{background:transparent!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;
     box-shadow:none!important;border:none!important}

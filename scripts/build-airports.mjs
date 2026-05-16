@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Fetches OpenFlights airports.dat and writes content/airports.json
- * (IATA airports only: code, city, name).
+ * (IATA airports only: code, city, name, latitude, longitude).
  */
 import { createWriteStream } from 'fs';
 import { pipeline } from 'stream/promises';
@@ -63,7 +63,10 @@ for await (const line of rl) {
   seen.add(iata);
   const city = (f[2] || '').trim() || iata;
   const name = (f[1] || '').trim() || city;
-  rows.push([iata, city, name]);
+  const lat = parseFloat(f[6]);
+  const lon = parseFloat(f[7]);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) continue;
+  rows.push([iata, city, name, Math.round(lat * 1e5) / 1e5, Math.round(lon * 1e5) / 1e5]);
 }
 
 rows.sort((a, b) => a[0].localeCompare(b[0]));
@@ -71,7 +74,7 @@ rows.sort((a, b) => a[0].localeCompare(b[0]));
 const outPath = new URL('../content/airports.json', import.meta.url);
 const tmp = outPath.pathname + '.tmp';
 const stream = createWriteStream(tmp, { encoding: 'utf8' });
-stream.write('{"v":1,"a":');
+stream.write('{"v":2,"a":');
 stream.write(JSON.stringify(rows));
 stream.write('}\n');
 await new Promise((resolve, reject) => {
