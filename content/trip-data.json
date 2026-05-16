@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.15",
+  "appVersion": "1.0.16",
   "versions": [
     {
       "v": "1.0",
@@ -182,7 +182,7 @@
       "v": "1.0.15",
       "date": "2026-05-16",
       "title": "Flight board polish — airlines, connections, native chrome",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Status bar / PWA theme aligned with the frosted header (light theme-color, translucent status bar, safe-area padding)",
         "Countdown follows the first scheduled flight and refreshes every minute",
@@ -190,6 +190,23 @@
         "Add/edit flight uses airline picklists plus flight digits (e.g. JQ8); connection airline, route, and landing time; notes removed from the form and cards",
         "Navigation clears stuck scroll-lock so the bottom edit bar stays fixed to the viewport",
         "Tighter departure/arrival pickers and slimmer cards/countdown; controls use iOS-style blue, corner radius, and tap feedback"
+      ]
+    },
+    {
+      "v": "1.0.16",
+      "date": "2026-05-16",
+      "title": "Flights layout, connections detail, countdown & PWA spacing",
+      "latest": true,
+      "changes": [
+        "Next-flight countdown: slim blue bar — days or hours until departure, “Enjoy your trip!” under one hour, muted line after the trip ends",
+        "No sample flights in bundled data — board starts empty; dotted hint “Add your first flight above.” when you have no legs yet",
+        "Flight board stack so the countdown bar and cards share the same width; full-width cards in the scroller",
+        "Sidebar header respects safe-area-inset-top so the month badge clears the status bar when the drawer is open on iPhone",
+        "Flight legs show weekday + date beside times; header date lines up with the leg time column",
+        "Flight numbers support up to 4 digits; connection form stores both connection departure and arrival in UTC (connDepartureUtc + connArrivalUtc)",
+        "Connecting itineraries: “Xh Ym connection time” from first-leg landing to second-leg departure; second segment uses the same arrow rows as the first; layover wording is scheduled (not “Landed”) for upcoming travel",
+        "Header flight pill sized for typical 3-letter + 4-digit codes",
+        "Live flights JSON still merges into cards on load; status line can appear under the board when the live file is or is not used"
       ]
     }
   ],
