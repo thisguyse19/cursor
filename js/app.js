@@ -54,6 +54,68 @@ function saveHistory(h) {
 }
 
 // ═══════════════════════════════════════
+// CHECKLIST SORTING / GROUPING
+// ═══════════════════════════════════════
+let clSort = 'urgency';
+
+function setClSort(s) {
+  clSort = s;
+  document.querySelectorAll('.cl-sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === s));
+  renderChecklist();
+}
+
+function getChecklistGroups() {
+  if (!CHECKLIST || !Array.isArray(CHECKLIST)) return [];
+  const metaFor = id => (CL_META && CL_META[id]) || { cat: 'Other', catIcon: '📌', catColor: '#86868b', tripDate: 0 };
+  const state = loadChecklistState();
+  const allItems = CHECKLIST.flatMap(g => g.items.map(it => ({
+    ...it, ...metaFor(it.id),
+    urgencyId: g.id, urgencyLabel: g.label, urgencyColor: g.color, urgencySub: g.sub
+  })));
+
+  if (clSort === 'urgency') {
+    return CHECKLIST.map(g => ({
+      id: g.id, label: g.label, sub: g.sub, color: g.color,
+      items: g.items.map(it => ({ ...it, ...metaFor(it.id) }))
+    }));
+  }
+  if (clSort === 'category') {
+    const catOrder = ['Flights', 'Accommodation', 'Car Rental', 'Ferries & Transfers', 'Activities', 'Insurance', 'Essentials'];
+    const cats = [...new Set(allItems.map(it => it.cat))].sort((a, b) =>
+      (catOrder.indexOf(a) < 0 ? 99 : catOrder.indexOf(a)) - (catOrder.indexOf(b) < 0 ? 99 : catOrder.indexOf(b)));
+    return cats.map(cat => {
+      const items = allItems.filter(it => it.cat === cat);
+      const m = items[0];
+      return {
+        id: 'cat-' + cat.replace(/\s+/g, '-'),
+        label: m.catIcon + ' ' + cat,
+        sub: items.length + ' item' + (items.length !== 1 ? 's' : ''),
+        color: m.catColor,
+        items
+      };
+    });
+  }
+  if (clSort === 'date') {
+    const dates = [...new Set(allItems.map(it => it.tripDate))].sort((a, b) => a - b);
+    return dates.map(d => {
+      const items = allItems.filter(it => it.tripDate === d);
+      const label = d === 0 ? '📋 Pre-Trip (book now)' : '📅 Dec ' + d;
+      const color = d === 0 ? '#636366' : d <= 9 ? '#ff3b30' : d <= 13 ? '#ff9500' : d <= 17 ? '#34c759' : '#0071e3';
+      return { id: 'date-' + d, label, sub: items.length + ' item' + (items.length !== 1 ? 's' : ''), color, items };
+    });
+  }
+  if (clSort === 'status') {
+    const todo = allItems.filter(it => !state[it.id]);
+    const done = allItems.filter(it => state[it.id]);
+    return [
+      todo.length ? { id: 'todo', label: '⏳ Still to Book', sub: todo.length + ' item' + (todo.length !== 1 ? 's' : '') + ' remaining', color: '#ff9500', items: todo } : null,
+      done.length ? { id: 'done', label: '✅ Booked', sub: done.length + ' item' + (done.length !== 1 ? 's' : '') + ' complete', color: '#34c759', items: done } : null,
+    ].filter(Boolean);
+  }
+  return [];
+}
+
+// ═══════════════════════════════════════
 // RENDER
 // ═══════════════════════════════════════
 function renderDays(days, containerId) {
@@ -541,6 +603,7 @@ async function doExportPDF(isLandscape) {
     fontSize:'14px', fontFamily:'var(--font)', zIndex:9999, boxShadow:'0 4px 20px rgba(0,0,0,0.3)' });
   document.body.appendChild(toast);
 
+  try {
   const [mapTasUrl, mapMelbUrl] = await Promise.all([
     captureMap('map-tas',  'page-overview', window._mapTas),
     captureMap('map-melb', 'page-melb',     window._mapMelb),
@@ -820,7 +883,7 @@ ${checklistHtml}
 </body>
 </html>`;
 
-  document.body.removeChild(toast);
+  if (toast.parentNode) toast.parentNode.removeChild(toast);
 
   // Use a hidden iframe instead of window.open() — avoids Safari popup blocker
   const iframe = document.createElement('iframe');
@@ -833,6 +896,12 @@ ${checklistHtml}
     iframe.contentWindow.print();
     setTimeout(() => { if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 3000);
   }, 700);
+  } catch (e) {
+    console.error('doExportPDF', e);
+    showAlert('Could not build the PDF (' + (e.message || 'unknown error') + '). Try again on Wi‑Fi or use a desktop browser.', 'PDF export');
+  } finally {
+    if (toast.parentNode) toast.parentNode.removeChild(toast);
+  }
 }
 
 // ═══════════════════════════════════════
@@ -1045,6 +1114,11 @@ function init() {
 // MAPS
 // ═══════════════════════════════════════
 function initMaps() {
+  try {
+    if (typeof L === 'undefined') {
+      console.warn('Leaflet not loaded; maps disabled');
+      return;
+    }
   const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
   const tileOpts = { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 13 };
 
@@ -1119,6 +1193,14 @@ function initMaps() {
     L.marker([s.lat,s.lng], {icon}).addTo(mapMelb)
      .bindPopup(`<strong>${s.label}</strong>${s.note}`);
   });
+
+  requestAnimationFrame(() => {
+    mapTas.invalidateSize();
+    mapMelb.invalidateSize();
+  });
+  } catch (e) {
+    console.error('initMaps', e);
+  }
 }
 
 // ═══════════════════════════════════════
@@ -1183,9 +1265,11 @@ async function submitAuth() {
   }
 }
 
-/* Top-level `async function` is not always on `window` in classic scripts; inline handlers need this. */
+/* Inline handlers resolve on `window`; async fns and some engines need explicit assignment. */
 window.submitAuth = submitAuth;
 window.doExportPDF = doExportPDF;
+window.setClSort = setClSort;
+window.doRevertAll = doRevertAll;
 
 window.addEventListener('DOMContentLoaded', () => {
   (function setupTouchTips() {
