@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.7",
+  "appVersion": "1.0.8",
   "versions": [
     {
       "v": "1.0",
@@ -91,10 +91,23 @@
       "v": "1.0.7",
       "date": "2026-05-16",
       "title": "Softer Glass — Hero & Sidebar",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Hero titles no longer sit in a frosted panel — text uses the photo gradient plus shadow for readability, so nothing “cuts into” the top of the image or the mobile header area",
         "Sidebar links are flat again with simple hover/active tints and spacing between rows — no stacked glass tiles on each button"
+      ]
+    },
+    {
+      "v": "1.0.8",
+      "date": "2026-05-16",
+      "title": "PWA, Icons & In-App Updates",
+      "latest": true,
+      "changes": [
+        "Add to Home Screen on iPhone and iPad — opens like its own app with the Triple name, themed icon, and launch screens that match the trip planner look",
+        "Icons use a lowercase “triple” wordmark in Inter on a frosted liquid-glass pill over the mesh background",
+        "Offline-friendly shell — core pages and styles are cached so revisits feel snappy; trip data still loads from the live site when you are online",
+        "When a new build is published, a bottom bar can offer Update — one tap reloads to the latest version without reinstalling the shortcut; your checklist, edits, and history stay on this device",
+        "Favicon and web manifest tuned for bookmarks and install prompts on other browsers"
       ]
     }
   ],
