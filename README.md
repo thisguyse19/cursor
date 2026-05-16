@@ -1,415 +1,265 @@
 # Triple — Tasmania & Melbourne trip planner
 
-A static, installable **Progressive Web App (PWA)** for a December 2026 group trip: day-by-day itineraries, maps, budget, checklist, accommodation, tips, and a **flight board** with optional live merge data. Content is loaded from JSON; personalization (edits, checklist, flights overlay) is stored in **localStorage** on each device.
+**Triple** is a **static, installable web app** (PWA) for a December 2026 group trip to Tasmania and Melbourne. It bundles day-by-day itineraries, Leaflet maps, a budget with charts, a booking checklist, accommodation, tips, and a **flight board** with optional live data merge. Trip copy and structure live in JSON; personalization—edits, checklist state, custom flights, auth session—is stored in **`localStorage`** on each device only (no backend in this repo).
 
-## Deployment
+| | |
+|---|---|
+| **Production branch** | `main` |
+| **Shipped app version** | `1.0.39` (`content/trip-data.json` → `appVersion`) |
+| **Service worker cache id** | `triple-v49` (`sw.js` → `CACHE`) |
+| **Example GitHub Pages URL** | `https://thisguyse19.github.io/cursor/` |
 
-- **Source branch:** `main` (production).
-- **Last shipped app version:** `1.0.15` (see `content/trip-data.json` → `appVersion`).
-- **GitHub Pages:** If Pages is enabled for this repository with source `main` (usually `/ (root)`), the site is available at:
+> Replace the hostname/path if your GitHub user, org, or Pages base path differs. Confirm under **Repository → Settings → Pages**.
 
-  **`https://thisguyse19.github.io/cursor/`**
+---
 
-  (Replace with your actual username/org if different. Confirm under **GitHub → Settings → Pages**.)
+## Table of contents
 
-- After each push to `main`, allow a short interval for Pages to rebuild. Hard-refresh or use the in-app **Update** bar if a new service worker is waiting.
+1. [Highlights](#highlights)
+2. [Tech stack](#tech-stack)
+3. [Repository layout](#repository-layout)
+4. [Local development](#local-development)
+5. [Content & data files](#content--data-files)
+6. [Personalization & storage](#personalization--storage)
+7. [Backup & restore](#backup--restore)
+8. [Progressive Web App](#progressive-web-app)
+9. [UI layout & tools](#ui-layout--tools)
+10. [Security & privacy](#security--privacy)
+11. [Release checklist](#release-checklist)
+12. [JavaScript structure & globals](#javascript-structure--globals)
+13. [Styles & theming](#styles--theming)
+14. [Contributing / forking](#contributing--forking)
+15. [License / usage](#license--usage)
 
-## Features
+---
 
-| Area | Description |
-|------|-------------|
-| **Itinerary** | Three sections: Tasmania south, Tasmania east/west, Melbourne & Great Ocean Road; expandable day cards with timelines and imagery. |
-| **Maps** | Leaflet maps for Tasmania loop and GOR; invalidates size after navigation. |
-| **Stays** | Accommodation cards with images and copy from JSON. |
-| **Budget** | Editable cost table, Chart.js pie/bar, per-person and group totals. |
-| **Checklist** | Grouped items; sort by urgency, category, travel date, or status; progress bar; local state. |
-| **Tips** | Packing and money tips from JSON. |
-| **Flights** | Cards from `trip-data.json`, merged with user adds/hides/edits and optional `content/flights-live.json`; trip countdown banner; airline pickers (`js/airlines.js`); connection leg fields; horizontal timeline inside each card. |
-| **Edit mode** | `contenteditable` on marked fields; history snapshots; diff and rollback; PDF export (html2canvas + print CSS). |
-| **Auth** | Password gate (SHA-256); optional “remember me”. |
-| **Updates** | `appVersion` + semver changelog in JSON; welcome and “What’s new” modals; smart merge when defaults change; conflict UI. |
-| **PWA** | `manifest.webmanifest`, icons, splash screens, service worker cache and update UX. |
+## Highlights
+
+| Area | What you get |
+|------|----------------|
+| **Itinerary** | Three sections (Tasmania south, Tasmania east/west, Melbourne & GOR) with expandable day cards, timelines, imagery, and narrative from JSON. |
+| **Maps** | Full-width **Leaflet** sections (Tasmania loop, Great Ocean Road) with satellite-style tiles; size invalidated after page switches. |
+| **Flight board** | Horizontally scrolled cards: route, structured legs, connection metadata, optional **mini satellite route map** (decorative—pan/zoom disabled so scrolling the page stays natural). Optional merge from `content/flights-live.json`. **Hide / Show** runs in **two phases**: shared fade on stack + “Add flight”, then height collapse (reverse when opening). Trip **countdown** banner. |
+| **Stays, budget, tips** | Rendered from JSON; budget uses **Chart.js** (pie + bar) and an editable cost table in edit mode. |
+| **Checklist** | Grouped items; sort by urgency, category, travel date, or status; progress bar; persisted checks. |
+| **Edit mode** | `contenteditable` on marked fields; snapshot history, diff viewer, rollback, full revert modal, card hide-in-edit. |
+| **PDF** | Landscape or portrait export via **html2canvas** + dedicated print CSS (`styles/pdf-export.css`). |
+| **Auth** | Client-side password gate (SHA-256 compare); optional **Remember me** (token in `localStorage`). |
+| **Versioning** | `appVersion` + `versions[]` changelog drives welcome / “What’s new”, sidebar pill, and **smart merge** when defaults change (conflict UI). |
+| **Tools menu** | **PDF** and a **cog (⚙)** on mobile header and desktop sidebar open a menu: History, Revert all, Edit, Backup & restore (no bottom floating toolbar—avoids covering Safari drawer/modals). |
+| **Add to Home Screen** | One-time, dismissible modal (wording avoids “PWA” jargon); preference stored in `localStorage` and included in backups. |
+| **Updates** | Service worker precaches shell; floating **Update** strip when a new worker is waiting; trip JSON fetched **network-first** so data updates after deploy. |
+
+---
 
 ## Tech stack
 
-- **HTML/CSS/JS** (no build step).
-- **Charts:** Chart.js (CDN).
-- **Maps:** Leaflet (CDN).
-- **PDF / capture:** html2canvas (CDN).
-- **Fonts:** Inter (Google Fonts).
+| Layer | Choices |
+|-------|---------|
+| **App** | Hand-authored **HTML / CSS / JavaScript** — no bundler or compile step. |
+| **Charts** | [Chart.js](https://www.chartjs.org/) (CDN). |
+| **Maps** | [Leaflet](https://leafletjs.com/) + Esri-style satellite tiles (CDN). |
+| **PDF capture** | [html2canvas](https://html2canvas.hertzen.com/) (CDN). |
+| **Fonts** | [Inter](https://fonts.google.com/specimen/Inter) (Google Fonts). |
+
+---
 
 ## Repository layout
 
 | Path | Role |
 |------|------|
-| `index.html` | Shell: layout, sections, modals, script tags. |
-| `js/app.js` | All application logic (~2.1k lines). |
-| `js/airlines.js` | `window.AIRLINE_OPTIONS` — airline names + IATA codes for flight form `<select>`s. |
-| `styles/app.css` | Global styles, liquid-glass theme, responsive rules, print exclusions. |
-| `styles/pdf-export.css` | Print-oriented overrides for PDF export. |
-| `content/trip-data.json` | Itinerary, stays, costs, checklist, tips, flights seed, `tripCountdown`, `versions` / `appVersion`. |
-| `content/flights-live.json` | Optional per-flight live fields keyed by flight `id` (merged in the UI). |
+| `index.html` | Document shell: auth overlay, mobile header, sidebar, main column, modals, flight forms, hidden file input for restore. |
+| `js/app.js` | All application logic (~3.3k+ lines): data load, rendering, flights, charts, auth, merge, SW helpers, tools menu, backup, onboarding. |
+| `js/airlines.js` | `window.AIRLINE_OPTIONS` — airline labels + IATA codes for flight form selects. |
+| `styles/app.css` | Global design system: CSS variables, glass surfaces, sidebar/drawer, main scroll column, flight board, modals, print exclusions for on-screen chrome. |
+| `styles/pdf-export.css` | Print/PDF-specific overrides. |
+| `content/trip-data.json` | Canonical trip payload: `appVersion`, `versions`, itinerary days, stays, costs, checklist, `clMeta`, tips, seed `flights`, `tripCountdown`, etc. |
+| `content/airports.json` | IATA airport directory for flight form typeahead / validation (fetched with `cache: 'no-store'`). |
+| `content/flights-live.json` | Optional keyed updates merged into built-in flight rows in the UI. |
 | `content/README.md` | Notes for editors maintaining JSON. |
-| `sw.js` | Service worker: precache shell, network-first for `/content/*.json`, update messaging. |
-| `manifest.webmanifest` | PWA metadata. |
-| `icons/`, `splash/` | PWA and iOS assets. |
-| `scripts/` | Helpers (`extract-trip-data.mjs`, `generate-pwa-assets.py`). |
+| `sw.js` | Service worker: precache shell assets, **network-first** for `/content/*.json`, skip-waiting messaging. |
+| `manifest.webmanifest` | PWA manifest (`standalone`, icons, theme/background colors). |
+| `icons/`, `splash/` | App icons and iOS launch images. |
+| `scripts/` | Maintenance helpers (e.g. `extract-trip-data.mjs`, icon/airport build scripts). |
+
+---
 
 ## Local development
 
-Static hosting is required (browsers block `fetch` for local JSON from `file://`).
+Browsers block `fetch()` for local JSON from the **`file://`** protocol. Always use a static HTTP server from the repo root:
 
 ```bash
-# From repository root
 python3 -m http.server 8080
 # or
 npx serve .
 ```
 
-Open `http://localhost:8080` (or the URL your tool prints).
+Open the URL the tool_prints (e.g. `http://localhost:8080`). Without a server you will see a console error when loading `content/trip-data.json`.
 
-## Data & storage
+---
 
-### `content/trip-data.json` (high level)
+## Content & data files
 
-- **`appVersion`:** Compared with last seen version for What’s New and merge logic.
-- **`versions`:** Changelog entries (semver, date, title, changes[], `latest`).
-- **`itinerary`:** `tas1`, `tas2`, `melb` day arrays.
-- **`stays`:** Accommodation entries.
-- **`costs`:** Budget line items.
-- **`checklist`:** Urgency groups and items.
-- **`clMeta`:** Extra metadata per checklist item id.
-- **`tips`:** Tip sections.
-- **`flights`:** Seed flight rows for the board.
-- **`tripCountdown`:** Fallback label/start/end when no flights are scheduled.
+### `content/trip-data.json` (overview)
 
-See **`content/README.md`** for editor-focused notes.
+- **`appVersion`** — Compared with stored version for “What’s new”, merge, and changelog UX.
+- **`versions`** — Changelog entries: `v`, `date`, `title`, `changes[]`, and exactly one entry with `"latest": true`.
+- **`itinerary`** — `tas1`, `tas2`, `melb` day arrays.
+- **`stays`**, **`costs`**, **`checklist`**, **`clMeta`**, **`tips`** — Section payloads.
+- **`flights`** — Seed rows for the flight board (may be empty; user can add legs).
+- **`tripCountdown`** — Label and date range fallback when the board is empty.
 
-### localStorage keys (non-exhaustive)
+Editor-focused details: **`content/README.md`**.
+
+### `content/airports.json`
+
+Loaded at startup for airport search and flight validation. Regenerate with tooling in `scripts/` when refreshing the dataset.
+
+### `content/flights-live.json` (optional)
+
+If present and published, merged per flight `id` for live-style fields (times, status, gate, delays, etc.) without overwriting user edits wholesale.
+
+---
+
+## Personalization & storage
+
+All of the below is **per browser / per device**.
+
+### Keys backed up in **Backup & restore**
+
+The app exports a JSON object whose `entries` map includes every key in **`TRIPLE_BACKUP_KEYS`** (`js/app.js`):
 
 | Key | Purpose |
 |-----|---------|
-| `tripleFlightOverlay` | User flights (`extras`), hidden built-in ids (`hidden`), per-id edits (`edits`). |
+| `tripleFlightOverlay` | User flights, hidden built-in ids, per-flight edits. |
+| `tripleFlightBoardCollapsed` | Whether the flight board stack is collapsed. |
+| `checklistState` | Checked / dismissed checklist state. |
 | `tripHistory` | Edit-mode snapshot history. |
-| `tripWelcomeSeen` / `tripLastSeenVersion` | Onboarding and version prompts. |
-| `checklistState` / similar | Checklist checked state (see `loadChecklistState` in `app.js`). |
-| Auth | Hashed password verification and session flag (see `checkAuth` / `submitAuth`). |
+| `tripFreshSnapshot` | Last fetched default snapshot for merge. |
+| `tripAppVersion` | Last applied `appVersion` for merge logic. |
+| `tripAuthToken` | Remember-me token (hash-derived material). |
+| `tripWelcomeSeen` | Welcome modal dismissed. |
+| `tripLastSeenVersion` | Last changelog version shown. |
+| `tripAddToHomeDismissed` | “Add to Home Screen” tip dismissed. |
+| `tripleClSort` | Checklist sort mode. |
 
-### Flight overlay shape
+Other keys may exist in `localStorage` from older builds; backup/export is defined by the list above.
 
-Persisted JSON includes:
+### Flight overlay (inside `tripleFlightOverlay`)
 
-- **`extras`:** User-added flights (`id` prefixed with `u-`).
-- **`hidden`:** Built-in flight ids removed from the board.
-- **`edits`:** Patches for built-in flights (only keys in `FLIGHT_PATCH_KEYS`).
+- **`extras`** — User-added flights (`id` often prefixed `u-`).
+- **`hidden`** — Built-in flight ids removed from the board.
+- **`edits`** — Whitelisted patches for built-in rows (`FLIGHT_PATCH_KEYS` in `app.js`: airline, digits/no, airports, UTC times, connection fields, etc.).
 
-`FLIGHT_PATCH_KEYS` in `app.js` includes label, airline fields, airports, UTC times, `connectionKind`, connection airline/digits/airports/landing, etc. Notes were removed from the patch set and UI.
+---
+
+## Backup & restore
+
+- **In-app:** **⚙ → Backup & restore** — download a dated `.json` export or pick a file to restore (replaces keys above, then reloads when appropriate).
+- **Login screen:** **Restore from backup…** uses the same file format; if the backup contains `tripAuthToken` and matches the device hash flow, the app can unlock after reload.
+
+Format constants: `BACKUP_FORMAT` / `BACKUP_VERSION` in `js/app.js`.
+
+---
 
 ## Progressive Web App
 
-- **Install:** “Add to Home Screen” on iOS / install prompt on supporting browsers.
-- **`sw.js`:** Cache name bumped when shell assets change (e.g. `triple-v13`); precache includes `index.html`, `styles/app.css`, `js/airlines.js`, `js/app.js`, manifest, icons.
-- **Trip JSON:** Fetched **network-first** with `no-store` so data updates after deploy without stale cache.
-- **Updates:** `setupServiceWorkerUpdates` listens for waiting worker and can message `SKIP_WAITING`; UI bar may prompt to reload.
-
-## Security notes
-
-- The gate uses **SHA-256** of the entered password compared to an embedded hash (not a substitute for server-side auth — suitable only for casual privacy).
-- All trip “edits” are **client-side only** and never sent to a server by this app.
+- **Install** — Safari: Share → Add to Home Screen; Chromium: install / add prompt when supported. The app uses `viewport-fit=cover`, `display: standalone` in the manifest, and safe-area CSS variables for notched devices.
+- **Offline shell** — Precached: `index.html`, `styles/app.css`, `js/app.js`, `js/airlines.js`, manifest, core icons.
+- **Fresh content** — Any URL matching `**/content/*.json` is handled **network-first** with `no-store` so trip data and airports update after each deploy without stale SW cache.
+- **Updates** — When a waiting worker exists, an in-page **Update** control appears; activating it posts `SKIP_WAITING` and reloads once the new controller claims clients.
 
 ---
 
-## JavaScript API reference (`js/app.js`)
+## UI layout & tools
 
-Functions below are **function declarations** in the global script (available to inline `onclick` handlers). A small set is also assigned explicitly to **`window`** for clarity.
-
-### Explicit `window` exports
-
-| Global | Function |
-|--------|----------|
-| `removeFlightCard` | Remove or hide a flight card by id. |
-| `openFlightAddModal` | Open empty flight form. |
-| `openFlightEditModal` | Open flight form populated from user or merged row. |
-| `closeFlightAddModal` | Close flight modal and reset title/submit label. |
-| `submitFlightAdd` | Validate and save flight (add or patch). |
-| `submitAuth` | Validate password and dismiss auth overlay. |
-| `doExportPDF` | Generate PDF after modal picks landscape/portrait. |
-| `setClSort` | Set checklist sort mode and re-render. |
-| `doRevertAll` | Clear edit history and restore defaults from DOM reset path. |
-
-### Modal scroll lock
-
-| Function | Role |
-|----------|------|
-| `modalBlockingOverlayCount` | Counts open `.modal-overlay.open` plus visible `#auth-overlay`. |
-| `syncModalScrollLock` | Applies/removes `modal-scroll-lock` on `html`/`body` and restores scroll position. |
-| `initModalScrollLockObservers` | Watches overlay/auth class changes and syncs lock. |
-| `normalizeBodyScroll` | When no blocking overlay: clears stray `overflow`, `modal-scroll-lock`, and fixed-position leftovers (helps bottom toolbar stay fixed after nav). |
-
-### Content loading & URL
-
-| Function | Role |
-|----------|------|
-| `contentUrl(path)` | Resolve asset URL against `document.baseURI` (GitHub Pages–safe). |
-| `loadTripData` | `fetch` `content/trip-data.json`, populate globals (`DAYS_*`, `STAYS`, `CHECKLIST`, `FLIGHTS`, `TRIP_COUNTDOWN_META`, etc.). |
-| `refreshFlightsFromNetwork` | Optional `content/flights-live.json` into `FLIGHTS_LIVE`. |
-
-### Flights: escaping, merge, sort
-
-| Function | Role |
-|----------|------|
-| `flightEsc(s)` | Escape HTML for injected flight strings. |
-| `formatFlightCardTime(dt)` | `toLocaleString` with medium date + short time. |
-| `mergeLiveIntoFlight(base)` | Overlay `FLIGHTS_LIVE.updates[id]` onto a row (times, status, gate, delay, etc.). |
-| `pickFlightPatch(obj)` | Whitelist object to `FLIGHT_PATCH_KEYS`. |
-| `applyEditsToFlight(f)` | Merge `flightEdits[f.id]` for built-in rows. |
-| `enrichFlightRow(f)` | `applyEditsToFlight` + `mergeLiveIntoFlight`. |
-| `getEnrichedFlightRowsSorted` | Filter hidden, merge extras, sort by `departureUtc`. |
-| `getTripStartDateFromFlights` | Calendar date of first departing flight (for countdown). |
-| `getTripEndDate` | End date from `tripCountdown` meta or last flight arrival. |
-
-### Flights: form helpers
-
-| Function | Role |
-|----------|------|
-| `populateAirlineSelect(sel)` | Fill `<select>` from `AIRLINE_OPTIONS` (sorted by name) + “Other”. |
-| `syncAirlineCustomVisibility(prefix)` | Toggle custom IATA input when “Other” selected. |
-| `updateConnectionFormVisibility` | Show/hide `#flight-conn-block` from connection type. |
-| `airlineNameFromSelect(prefix, code)` | Human-readable airline label for storage. |
-| `readAirlineCode(prefix)` | IATA from select or custom field. |
-| `setAirlineSelectFromModel(prefix, m)` | Populate select + digits from `airlineCode` / `flightDigits` / `flightNo`. |
-| `deriveIataAndDigits(m)` | Parse IATA + digits from structured fields or combined `flightNo`. |
-| `flightPillText` / `flightPillHtml` | Main leg pill (e.g. `JQ8`). |
-| `connPillText` / `connPillHtml` | Connection pill. |
-| `flightTimelineStripHtml(m)` | Scrollable strip: depart, en route pill, optional connection column, arrive. |
-
-### Countdown banner
-
-| Function | Role |
-|----------|------|
-| `calendarDiffDays(d0, d1)` | Whole-day difference in local calendars. |
-| `tripCountdownState` | `{ until, totalDays, dayIndex, afterEnd, start, end, label }` or null. |
-| `renderTripCountdownBanner` | Renders `#trip-countdown-banner`, starts 60s interval. |
-
-### Flights: time & persistence
-
-| Function | Role |
-|----------|------|
-| `isoToDatetimeLocal(iso)` | For `<input type="datetime-local">`. |
-| `effectiveDepArr(f)` | Apply delay to dep/arrival for display. |
-| `loadFlightOverlay` / `persistFlightOverlay` | Read/write `tripleFlightOverlay`. |
-| `removeFlightCard` | Remove user leg or hide built-in + persist. |
-| `flightCardHtml` | HTML string for one card. |
-| `renderFlights` | Render grid, sync hint text, refresh countdown. |
-| `openFlightAddModal` / `openFlightEditModal` / `closeFlightAddModal` | Modal lifecycle. |
-| `getFlightFormSource` | Resolve row for editing (extra vs built-in + edits). |
-| `submitFlightAdd` | Build patch, validate airline + digits, save. |
-
-### Version sort
-
-| Function | Role |
-|----------|------|
-| `compareVersionDesc(a, b)` | Semver compare for changelog ordering. |
-
-### Checklist & rendering
-
-| Function | Role |
-|----------|------|
-| `loadHistory` / `saveHistory` | Edit history array in localStorage. |
-| `setClSort` | Active sort button + `renderChecklist`. |
-| `getChecklistGroups` | Regroup checklist items by current sort. |
-| `renderDays` | Inject day cards into a section container. |
-| `renderStays` | Accommodation grid. |
-| `renderCostTable` | Budget table from `COSTS` and editables. |
-| `renderChecklist` | Full checklist DOM. |
-| `toggleChecklistItem` | Checkbox handler + persist. |
-| `updateChecklistProgress` | Progress bar width. |
-| `loadChecklistState` / `resetChecklist` / `doResetChecklist` | Persisted checks + modal reset. |
-| `showAlert` | Themed alert modal. |
-| `renderTips` | Tips section. |
-
-### Budget & charts
-
-| Function | Role |
-|----------|------|
-| `getCostsByCategory` | Aggregate for charts. |
-| `getTotalPP` | Per-person total helper. |
-| `initCharts` / `updateCharts` | Chart.js pie + bar on Budget page. |
-
-### Navigation & chrome
-
-| Function | Role |
-|----------|------|
-| `showPage(id, btn)` | SPA-like page switch, scroll top, close drawer, map resize hooks, `normalizeBodyScroll`. |
-| `toggleMobileMenu` / `closeMobileMenu` | Drawer + overlay; calls `normalizeBodyScroll`. |
-| `toggleDay` | Accordion for day cards when not editing. |
-
-### Edit mode, history, PDF
-
-| Function | Role |
-|----------|------|
-| `captureSnapshot` / `applySnapshot` | Serialize/deserialize editable regions + deleted cards. |
-| `toggleEdit` | Enter/exit edit mode, toast, push history. |
-| `deleteCard` | Hide card in edit mode. |
-| `formatDate` / `stripHTML` | Helpers for diff display. |
-| `diffSnapshots` | Key-level diff for rollback UI. |
-| `openHistory` / `closeHistory` | History modal. |
-| `openDiff` / `closeDiff` | Diff modal + pending rollback index. |
-| `doRollback` | Apply historical snapshot. |
-| `confirmRevert` / `doRevertAll` | Wipe local personalized content per app logic. |
-| `exportPDF` / `doExportPDF` | html2canvas capture + print window. |
-
-### Version merge & conflicts
-
-| Function | Role |
-|----------|------|
-| `openVersionModal` | Render changelog from `VERSIONS`. |
-| `loadFreshSnap` | Snapshot defaults from server for merge. |
-| `checkVersionMerge` | Compare saved edits to fresh defaults; may open conflict modal. |
-| `showToast` / `showMergeToast` | Ephemeral messages. |
-| `openConflictModal` | Show conflicting keys. |
-| `chooseConflict` / `resolveAllConflicts` / `saveConflictChoices` | Conflict resolution + persist. |
-
-### Bootstrap & maps
-
-| Function | Role |
-|----------|------|
-| `init` | After auth: render pages, load overlays, maps, checklist, flights, merge check, onboarding. |
-| `initMaps` | Leaflet setup for Tasmania and Melbourne + `invalidateSize` hooks. |
-
-### Auth
-
-| Function | Role |
-|----------|------|
-| `_hashInput` | SHA-256 helper. |
-| `checkAuth` | Show/hide `#auth-overlay`. |
-| `submitAuth` | Verify hash, set remember-me, `init` + `maybeShowOnboarding`. |
-
-### Service worker & onboarding
-
-| Function | Role |
-|----------|------|
-| `setupServiceWorkerUpdates` | Register SW, listen for updates, visibility refresh. |
-| `maybeShowOnboarding` | Welcome vs What’s New from `localStorage` + `APP_VERSION`. |
-| `openWhatsNewModal` | Renders latest changelog entry. |
-
-### Event wiring
-
-| `DOMContentLoaded` listener | Modal observers, SW setup, flight add button, airline `select` listeners, `loadTripData`, `checkAuth`, `init`. |
+- **Desktop:** Fixed **sidebar** (navigation, version pill, **↓ PDF**, **⚙**). Main column is the **only vertical scroll surface** (reduces iOS overscroll glitches).
+- **Mobile:** **Top bar** (menu, title, PDF, cog). Sidebar becomes a **drawer**; the tools **dropdown** is positioned from the cog and closes on outside tap or Escape.
+- **Scroll / viewport** — CSS uses `100svh` / `100lvh` in narrow layouts where needed; main column may share the page mesh background for consistent gutters on iOS.
+- **Service worker strip** — Bottom-centered pill when an update is ready; JS adjusts `--main-scroll-pad-bottom` so content can scroll clear of it.
 
 ---
 
-## `js/airlines.js`
+## Security & privacy
 
-Exports **`window.AIRLINE_OPTIONS`**: an array of `{ n: name, c: iata }`. `populateAirlineSelect` copies and sorts by `n` at build time. “Other” uses a blank value and the custom IATA field.
-
----
-
-## `styles/app.css` (topics)
-
-- CSS variables for glass surfaces, blurs, radii, iOS-accent blue (`--ios-blue`).
-- Sidebar, mobile header (frosted, safe-area), main padding for toolbar.
-- Day cards, stats, maps, budget, checklist, modals, auth.
-- Flight board: horizontal scroller, cards, timeline strip, pills, countdown, connection form panel.
-- Print media query hides chrome not needed on paper.
+- The password gate uses **SHA-256** of the entered password compared to an embedded constant (suitable only for **casual privacy**, not server-grade secrets).
+- **No trip edits, backups, or passwords are sent** to a server by this repository’s code—all persistence is local unless you add your own hosting/analytics.
 
 ---
 
-## Change history
+## Release checklist
 
-The canonical changelog is **`content/trip-data.json` → `versions`**. The **sidebar version pill** and **Version history** modal read from this array. Summaries below mirror shipped releases.
-
-### Release checklist (do this on every push that ships user-visible changes)
+When shipping user-visible changes:
 
 1. **`content/trip-data.json`**
-   - Increment **`appVersion`** (semver, e.g. `1.0.17`).
-   - Append one object to **`versions`** with `v`, `date` (ISO `YYYY-MM-DD`), `title`, and `changes` (string array). Set **`"latest": true`** only on the new entry; set **`"latest": false`** on every older entry.
-2. **`sw.js`** — bump the **`CACHE`** constant whenever you change precached shell assets (`index.html`, `styles/app.css`, `js/app.js`, etc.) so installed PWAs pick up the new bundle.
-3. Optionally mirror the same title and bullets in this README **Change history** section so the doc stays skimmable.
+   - Bump **`appVersion`** (semver).
+   - Append one object to **`versions`** with `v`, `date` (`YYYY-MM-DD`), `title`, `changes[]`. Set **`"latest": true`** only on the new row; set **`"latest": false`** on every older row.
+2. **`sw.js`**
+   - Bump **`CACHE`** whenever precached shell files change (`index.html`, `styles/*.css`, `js/*.js`, manifest, icons in the precache list).
+3. **README** (optional) — Refresh the version table at the top of this file for skimmability.
 
-### 1.0 — Initial Release (2026-05-11)
+The full authoritative changelog is **`content/trip-data.json` → `versions`**.
 
-- Full 15-day planner, maps, budget, checklist, tips, PDF export, edit mode with history, password gate, mobile nav, car rental, themed modals, thin scrollbars, smart merge, version pill.
+---
 
-### 1.0.1 — Polish & Fixes (2026-05-11)
+## JavaScript structure & globals
 
-- Modal animations; removed inconsistent emoji from car rental headers.
+`js/app.js` is a single global script (no ES modules). Inline `onclick` handlers rely on function declarations on `window`.
 
-### 1.0.2 — Mobile Fixes (2026-05-11)
+### Explicit `window` assignments (representative)
 
-- Tap tooltips; PDF on iOS via iframe.
+| Global | Role |
+|--------|------|
+| `submitAuth` | Password verify; dismiss auth; continue bootstrap. |
+| `doExportPDF` | Run PDF pipeline after orientation choice. |
+| `setClSort` | Checklist sort mode + re-render. |
+| `doRevertAll` | Reset personalized content per app rules. |
+| `openBackupModal` / `closeBackupModal` | Backup UI. |
+| `doBackupDownload` | Trigger JSON download. |
+| `startBackupRestore` / `startBackupRestoreFromLogin` | File-driven restore flows. |
+| `removeFlightCard` | Remove user leg or hide built-in flight. |
+| `openFlightAddModal` / `openFlightEditModal` / `closeFlightAddModal` | Flight modal lifecycle. |
+| `submitFlightAdd` | Validate + save flight add/edit. |
+| `toggleTopToolsMenu` / `closeTopToolsMenu` | Cog dropdown. |
+| `dismissAddToHomeHint` | Permanently dismiss install tip. |
 
-### 1.0.3 — Edit Mode Toast (2026-05-11)
+### Major functional areas (search `js/app.js` by name)
 
-- Toast when entering edit mode.
+- **Bootstrap:** `loadTripData`, `loadAirports`, `refreshFlightsFromNetwork`, `checkAuth`, `init`, `DOMContentLoaded` wiring.
+- **Navigation:** `showPage`, `toggleMobileMenu`, `closeMobileMenu`, `normalizeBodyScroll`.
+- **Rendering:** `renderDays`, `renderStays`, `renderCostTable`, `renderChecklist`, `renderTips`, `renderFlights`, `initMaps`.
+- **Flights:** merge helpers (`mergeLiveIntoFlight`, `enrichFlightRow`, `getEnrichedFlightRowsSorted`), form (`submitFlightAdd`, `populateAirlineSelect`, …), mini maps (`initFlightCardMiniMaps`), board toggle (`initFlightBoardSectionToggle`), countdown (`renderTripCountdownBanner`).
+- **Edit / history / PDF:** `toggleEdit`, `captureSnapshot`, `openHistory`, `doRollback`, `exportPDF`, `doExportPDF`.
+- **Version merge:** `checkVersionMerge`, conflict UI (`openConflictModal`, `saveConflictChoices`, …).
+- **Chrome insets:** `setupMainChromeInsets`, `_safeBottomPx`.
+- **Service worker:** `setupServiceWorkerUpdates`.
+- **Onboarding:** `maybeShowOnboarding`, `openWhatsNewModal`, add-to-home scheduling helpers.
+- **Modal scroll lock:** `modalBlockingOverlayCount`, `syncModalScrollLock`, `initModalScrollLockObservers`.
 
-### 1.0.4 — Onboarding & Tooltips (2026-05-11)
+`js/airlines.js` exports **`window.AIRLINE_OPTIONS`**: `{ n: name, c: iata }[]` sorted by name in the UI, plus an “Other” path with a custom IATA field.
 
-- Welcome + What’s New; fixed dual tooltips on touch.
+---
 
-### 1.0.5 — Return flight details (2026-05-15)
+## Styles & theming
 
-- Day 15 MEL→SIN timing; Jordan early arrival note; checklist flight item.
+`styles/app.css` defines:
 
-### 1.0.6 — Liquid Glass UI (2026-05-16)
-
-- Frosted surfaces, mesh background, print still flat.
-
-### 1.0.7 — Softer glass hero & sidebar (2026-05-16)
-
-- Hero text on gradient; flatter sidebar rows.
-
-### 1.0.8 — PWA & in-app updates (2026-05-16)
-
-- Installability, icons, launch screens, offline shell, update bar, favicon/manifest.
-
-### 1.0.9 — Flight board & live file (2026-05-16)
-
-- Flight cards + optional live JSON merge; countdown per leg concepts; add/hide flights.
-
-### 1.0.10 — Flight add fix (2026-05-16)
-
-- Early wire-up for add button; layout and modal hardening.
-
-### 1.0.11 — Trip countdown & edit (2026-05-16)
-
-- Trip-level countdown; flight edit form; readable modal fields.
-
-### 1.0.12 — PWA content refresh & flight UI (2026-05-16)
-
-- Network-first trip JSON; modal fit; glass buttons.
-
-### 1.0.13 — Timeline strip & connections (2026-05-16)
-
-- Horizontal flight scroller; connection type + via/notes; pinned toolbar; modal scroll lock.
-
-### 1.0.14 — Scroll lock on all modals (2026-05-16)
-
-- Background scroll frozen for all dialogs including auth.
-
-### 1.0.15 — Flight board polish (2026-05-16)
-
-- Light `theme-color` + translucent status bar + safe-area header alignment.
-- Countdown from first flight, **1-minute** refresh.
-- Timeline scroll **inside** cards; connection column for non-direct trips.
-- Airline picklists + digit flight numbers (e.g. **JQ8**); structured connection fields; **notes removed** from flight UI.
-- `normalizeBodyScroll` on nav/drawer close for **fixed bottom toolbar**.
-- Slimmer cards/countdown; iOS-style primary buttons.
-
-### 1.0.16 — Flights layout, connections, countdown & PWA (2026-05-16) — **current**
-
-- Version history workflow documented; keep **`versions[]`** in sync with every release (see checklist above).
-- Thin blue **next-flight** countdown (days / hours / “Enjoy your trip!”); dotted placeholder when there are no flights; bundled **`flights`** defaults to empty.
-- Flight board stack width; legs show **dates**; **connection** layover duration + second-leg rows; **conn dep/arr** times in the form; pills and digits widened for real flight codes.
-- Sidebar **safe-area** so the badge clears the notch; optional live-merge caption under the board.
+- **Design tokens** — Glass fills, blurs, radii, shadows, `--ios-blue`, safe-area `--safe-bottom`, page mesh variables shared by `html`, `body::before`, and `.main` where applicable.
+- **Layout** — Sidebar, mobile header, drawer overlay, tools dropdown, flex main column.
+- **Sections** — Day cards, stats, maps, budget, checklist, flight scroller/cards/dots, modals (including auth, backup, flight form, PDF, history, conflicts, welcome, what’s new, add-to-home).
+- **Motion** — `prefers-reduced-motion` trims transitions (including flight board hide/show when reduced).
+- **Print** — Hides on-screen-only chrome; see also `styles/pdf-export.css`.
 
 ---
 
 ## Contributing / forking
 
-1. Follow the **Release checklist** in **Change history** (bump `appVersion`, append `versions`, set `latest` flags, bump `sw.js` `CACHE` when needed).
-2. Run a local HTTP server to verify `fetch` of JSON.
+1. Follow the [**Release checklist**](#release-checklist).
+2. Always verify with a **local HTTP server** so JSON and the service worker behave like production.
+3. For content-only edits, prefer changing **`content/trip-data.json`** and reading **`content/README.md`**.
+
+---
 
 ## License / usage
 
-Private trip planner; adjust the repository description and license to match your intent.
+Private trip planner template—adjust repository metadata, license, and deployment target to match your project.
