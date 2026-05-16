@@ -155,7 +155,7 @@ async function loadTripData() {
   TRIP_COUNTDOWN_META = d.tripCountdown && typeof d.tripCountdown === 'object' ? d.tripCountdown : null;
 }
 
-/** IATA → { code, city, name }; loaded from content/airports.json */
+/** IATA → { code, city, name, lat?, lng? }; loaded from content/airports.json */
 const AIRPORT_BY_CODE = new Map();
 let AIRPORT_SEARCH_ROWS = [];
 let AIRLINE_SEARCH_ROWS = [];
@@ -176,7 +176,13 @@ async function loadAirports() {
       const city = String(row[1] || '').trim() || code;
       const name = String(row[2] || '').trim() || city;
       if (AIRPORT_BY_CODE.has(code)) continue;
-      AIRPORT_BY_CODE.set(code, { code, city, name });
+      let lat = null;
+      let lng = null;
+      if (row.length >= 5 && typeof row[3] === 'number' && typeof row[4] === 'number') {
+        lat = row[3];
+        lng = row[4];
+      }
+      AIRPORT_BY_CODE.set(code, { code, city, name, lat, lng });
       rows.push({
         code,
         city,
@@ -797,7 +803,127 @@ function flightCardMainHtml(m) {
     <div class="flight-card-times">
       ${leg1Block}
       ${connectionFollow}
-    </div>`;
+    </div>
+    ${flightCardRouteMapHtml(m)}`;
+}
+
+function flightRouteAirportCodes(m) {
+  const norm = c => {
+    const u = (c && String(c).trim().toUpperCase()) || '';
+    return /^[A-Z]{3}$/.test(u) ? u : null;
+  };
+  const out = [];
+  const add = c => {
+    const x = norm(c);
+    if (x && (out.length === 0 || out[out.length - 1] !== x)) out.push(x);
+  };
+  add(m.depAirport);
+  if (m.connectionKind && m.connectionKind !== 'direct') {
+    add(m.connArrAirport);
+    add(m.connDepAirport);
+  }
+  add(m.arrAirport);
+  return out;
+}
+
+function flightRouteLatLngPoints(m) {
+  const codes = flightRouteAirportCodes(m);
+  const pts = [];
+  for (const c of codes) {
+    const info = AIRPORT_BY_CODE.get(c);
+    if (!info || info.lat == null || info.lng == null) continue;
+    pts.push({ code: c, lat: info.lat, lng: info.lng });
+  }
+  const deduped = [];
+  for (const p of pts) {
+    const last = deduped[deduped.length - 1];
+    if (!last || last.lat !== p.lat || last.lng !== p.lng) deduped.push(p);
+  }
+  return deduped;
+}
+
+function flightCardRouteMapHtml(m) {
+  const pts = flightRouteLatLngPoints(m);
+  if (pts.length < 2) return '';
+  const enc = encodeURIComponent(JSON.stringify(pts));
+  return `<div class="flight-card-map-host" aria-hidden="true"><div class="flight-card-map" data-route="${enc}"></div></div>`;
+}
+
+const _flightCardMiniMaps = [];
+
+function teardownFlightCardMiniMaps() {
+  for (const map of _flightCardMiniMaps) {
+    try {
+      map.remove();
+    } catch (_) {
+      /* ignore */
+    }
+  }
+  _flightCardMiniMaps.length = 0;
+}
+
+function refreshFlightCardMiniMapSizes() {
+  requestAnimationFrame(() => {
+    for (const map of _flightCardMiniMaps) {
+      try {
+        map.invalidateSize();
+      } catch (_) {
+        /* ignore */
+      }
+    }
+  });
+}
+
+function initFlightCardMiniMaps() {
+  teardownFlightCardMiniMaps();
+  if (typeof L === 'undefined') return;
+  const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+  const tileOpts = { attribution: '', maxZoom: 11 };
+
+  document.querySelectorAll('.flight-card-map[data-route]').forEach(el => {
+    let pts;
+    try {
+      pts = JSON.parse(decodeURIComponent(el.dataset.route));
+    } catch {
+      return;
+    }
+    if (!Array.isArray(pts) || pts.length < 2) return;
+
+    const map = L.map(el, {
+      zoomControl: false,
+      attributionControl: false,
+      dragging: false,
+      scrollWheelZoom: false,
+      doubleClickZoom: false,
+      boxZoom: false,
+      keyboard: false,
+      tap: false,
+    });
+    L.tileLayer(tileUrl, tileOpts).addTo(map);
+    const latlngs = pts.map(p => [p.lat, p.lng]);
+    const line = L.polyline(latlngs, { color: '#0071e3', weight: 3, opacity: 0.88, lineJoin: 'round' });
+    line.addTo(map);
+    pts.forEach((p, i) => {
+      const isEnd = i === 0 || i === pts.length - 1;
+      L.circleMarker([p.lat, p.lng], {
+        radius: isEnd ? 5 : 4,
+        color: '#ffffff',
+        weight: 2,
+        fillColor: isEnd ? '#0071e3' : '#34c759',
+        fillOpacity: 1,
+      }).addTo(map);
+    });
+    try {
+      map.fitBounds(line.getBounds(), { padding: [12, 12], maxZoom: 7 });
+    } catch {
+      map.setView(latlngs[0], 3);
+    }
+    _flightCardMiniMaps.push(map);
+  });
+
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => refreshFlightCardMiniMapSizes());
+  });
 }
 
 function normalizeBodyScroll() {
@@ -1018,6 +1144,7 @@ function setupFlightCardDots() {
     const card = cards[i];
     if (!card) return;
     grid.scrollTo({ left: card.offsetLeft, behavior: 'smooth' });
+    setTimeout(() => refreshFlightCardMiniMapSizes(), 400);
   };
 }
 
@@ -1057,6 +1184,7 @@ function renderFlights() {
 
   setupFlightCardDots();
   renderTripCountdownBanner();
+  requestAnimationFrame(() => initFlightCardMiniMaps());
 }
 
 function initFlightBoardSectionToggle() {
@@ -1073,6 +1201,7 @@ function initFlightBoardSectionToggle() {
     if (collapsed) {
       stack.setAttribute('inert', '');
       if (addBtn) addBtn.setAttribute('inert', '');
+      teardownFlightCardMiniMaps();
     } else {
       stack.removeAttribute('inert');
       if (addBtn) addBtn.removeAttribute('inert');
@@ -1080,9 +1209,13 @@ function initFlightBoardSectionToggle() {
   };
   apply();
   btn.addEventListener('click', () => {
-    const nextHidden = !(localStorage.getItem(FLIGHT_BOARD_COLLAPSED_KEY) === '1');
-    localStorage.setItem(FLIGHT_BOARD_COLLAPSED_KEY, nextHidden ? '1' : '0');
+    const wasCollapsed = localStorage.getItem(FLIGHT_BOARD_COLLAPSED_KEY) === '1';
+    const nextCollapsed = !wasCollapsed;
+    localStorage.setItem(FLIGHT_BOARD_COLLAPSED_KEY, nextCollapsed ? '1' : '0');
     apply();
+    if (wasCollapsed && !nextCollapsed) {
+      setTimeout(() => initFlightCardMiniMaps(), 300);
+    }
   });
 }
 
