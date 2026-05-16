@@ -1,0 +1,2077 @@
+{
+  "appVersion": "1.0.7",
+  "versions": [
+    {
+      "v": "1.0",
+      "date": "2026-05-11",
+      "title": "Initial Release",
+      "latest": false,
+      "changes": [
+        "Complete 15-day Tasmania & Melbourne trip planner for December 2026",
+        "Day-by-day itinerary with activities, timelines, images, and costs",
+        "Interactive Leaflet maps — Tasmania clockwise loop and GOR route",
+        "Budget breakdown with editable cost table and per-person/group totals",
+        "Booking checklist sortable by Urgency, Category, Travel Date, or Status",
+        "Accommodation guide across 8 stays with neighbourhood tips and pricing",
+        "Travel tips, packing guide, and money-saving advice section",
+        "PDF export — Landscape or Portrait — includes maps, checklist, and budget",
+        "Edit mode with field-level contenteditable, full history and rollback",
+        "Password protection using SHA-256 hashing with Remember me option",
+        "Mobile-responsive layout with slide-in drawer navigation",
+        "Car rental details for both Tasmania (HBA) and Melbourne (Tullamarine) legs",
+        "Themed modals for all dialogs — no browser default prompts or alerts",
+        "Custom thin scrollbars styled to match the app theme",
+        "Smart update merge — preserves your edits when the app is updated",
+        "Version history pill in sidebar with full changelog"
+      ]
+    },
+    {
+      "v": "1.0.1",
+      "date": "2026-05-11",
+      "title": "Polish & Fixes",
+      "latest": false,
+      "changes": [
+        "Added subtle fade-in and scale animation for all popup modals and the auth overlay",
+        "Removed inconsistent flag (🇦🇺) and city (🏙) emoji icons from Car Rental section leg sub-headers"
+      ]
+    },
+    {
+      "v": "1.0.2",
+      "date": "2026-05-11",
+      "title": "Mobile Fixes",
+      "latest": false,
+      "changes": [
+        "Touch-friendly tooltips on mobile — tap any underlined tooltip to show a small floating popup that auto-dismisses after 3 seconds",
+        "PDF export now works on iOS Safari — uses an inline iframe instead of a popup window, bypassing Safari's popup blocker"
+      ]
+    },
+    {
+      "v": "1.0.3",
+      "date": "2026-05-11",
+      "title": "Edit Mode Toast",
+      "latest": false,
+      "changes": [
+        "Toast notification on entering Edit mode — reminds you that edits are saved locally for your device only"
+      ]
+    },
+    {
+      "v": "1.0.4",
+      "date": "2026-05-11",
+      "title": "Onboarding & Tooltips",
+      "latest": false,
+      "changes": [
+        "First-time welcome popup — introduces key features to new visitors after login",
+        "What's New popup — shows changes since your last visit whenever the app is updated",
+        "Fixed tooltip conflict on mobile — touch devices now show only the tap popup, not both the CSS and JS tooltips simultaneously"
+      ]
+    },
+    {
+      "v": "1.0.5",
+      "date": "2026-05-15",
+      "title": "Itinerary Update — Return Flight Details",
+      "latest": false,
+      "changes": [
+        "Day 15 updated: evening departure 22:35 MEL→SIN, landing Singapore 03:20 — full last day in Melbourne now available",
+        "Jordan noted as arriving Dec 5 (2 days early, free & easy) before group lands Dec 7",
+        "Checklist return flight updated with specific departure time and landing details"
+      ]
+    },
+    {
+      "v": "1.0.6",
+      "date": "2026-05-16",
+      "title": "Liquid Glass UI",
+      "latest": false,
+      "changes": [
+        "Richer frosted-glass surfaces across cards, sidebar, hero content, maps, modals, and controls — layered blur, specular borders, and soft mesh background",
+        "Navigation pills, checklist sort chips, and route bars use translucent “liquid” styling to match Apple-style depth",
+        "Print view still uses flat white panels for clean hardcopy output"
+      ]
+    },
+    {
+      "v": "1.0.7",
+      "date": "2026-05-16",
+      "title": "Softer Glass — Hero & Sidebar",
+      "latest": true,
+      "changes": [
+        "Hero titles no longer sit in a frosted panel — text uses the photo gradient plus shadow for readability, so nothing “cuts into” the top of the image or the mobile header area",
+        "Sidebar links are flat again with simple hover/active tints and spacing between rows — no stacked glass tiles on each button"
+      ]
+    }
+  ],
+  "itinerary": {
+    "tas1": [
+      {
+        "id": "d1",
+        "num": "01",
+        "day": "Mon",
+        "date": "Dec 7",
+        "title": "Fly into Hobart — Arrive & First Impressions",
+        "meta": "Flight day · Hobart Airport 17 km from city · Collect rental RAV4 on arrival",
+        "img": "https://images.unsplash.com/photo-1560813962-ff3d8fcf59ba?w=900&q=80",
+        "imgAlt": "Hobart waterfront and Salamanca Place",
+        "desc": "Your Tasmanian adventure begins with a flight into Hobart Airport (HBA). Collect the RAV4 at the airport car rental desk and drive 20 minutes into the heart of one of Australia's most liveable and compact cities. Hobart sits dramatically at the foot of kunanyi / Mt Wellington, with the Derwent River curling through its sandstone centre. With the afternoon free after arrival, get your bearings on Salamanca Place — the beating cultural and culinary heart of the city.",
+        "timeline": [
+          {
+            "time": "Depart SG Dec 6",
+            "icon": "✈️",
+            "label": "Fly SIN → Hobart (via SYD/MEL)"
+          },
+          {
+            "time": "~Midday",
+            "icon": "🚗",
+            "label": "Collect RAV4"
+          },
+          {
+            "time": "13:30",
+            "icon": "🏠",
+            "label": "Check into Airbnb"
+          },
+          {
+            "time": "15:00",
+            "icon": "🏛",
+            "label": "Salamanca Place"
+          },
+          {
+            "time": "19:00",
+            "icon": "🐟",
+            "label": "Dinner, Const. Dock"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "✈️",
+            "name": "Fly Singapore → Hobart (via Sydney or Melbourne)",
+            "desc": "From Singapore (SIN), Hobart (HBA) requires a connection — typically via Sydney or Melbourne. Singapore Airlines, Scoot, and Jetstar International fly Singapore to Sydney or Melbourne; connect to Hobart on Qantas, Jetstar, or Virgin Australia. Total journey ~12–16 hours. A morning departure from Singapore (Dec 6) typically arrives Hobart by mid-afternoon Dec 7. Collect your pre-booked RAV4 from the airport car rental desk on arrival — you'll drop it off at Launceston Airport on Dec 17.",
+            "cost": "Book 3–4 months ahead · Book SIN→AUS + domestic separately · Taxi from airport ~$35 group"
+          },
+          {
+            "icon": "🏠",
+            "name": "Check into Airbnb — Battery Point or Sandy Bay",
+            "desc": "Aim for Battery Point (cobblestone streets, 10-minute walk to Salamanca and Constitution Dock — Hobart's most characterful neighbourhood) or Sandy Bay (quieter, 15 min walk to waterfront). Drop your bags and get your bearings. Stock up at Salamanca Fresh grocery for breakfast supplies.",
+            "cost": "~$220–380/night whole house · 4 nights here"
+          },
+          {
+            "icon": "🏛",
+            "name": "Explore Salamanca Place",
+            "desc": "Tasmania's most famous precinct — a row of Georgian sandstone warehouses built in the 1830s, now housing galleries, boutiques, bars, and restaurants. The Saturday market (8am–3pm) is unmissable if you're here on a weekend. For today, wander, browse, pick up a local beer at Salamanca Brewing Co.",
+            "cost": "Free to explore"
+          },
+          {
+            "icon": "🐟",
+            "name": "Dinner — Constitution Dock",
+            "desc": "Walk down to the working waterfront and eat at one of the floating punt restaurants. Fresh flathead, battered scallops, or the famous fish burger right beside the fishing boats. Simple, fresh, and quintessentially Hobart. Also try Mures Upper Deck for a slightly more elevated seafood meal.",
+            "cost": "~$20–30 pp (punts) or ~$45–60 pp (Mures)"
+          }
+        ]
+      },
+      {
+        "id": "d2",
+        "num": "02",
+        "day": "Tue",
+        "date": "Dec 8",
+        "title": "Hobart City — MONA, Battery Point & kunanyi Summit",
+        "meta": "Base: Hobart · No driving required · Full city day — start early",
+        "img": "https://images.unsplash.com/photo-1580393364744-2af9d80fc19e?w=900&q=80",
+        "imgAlt": "MONA Museum of Old and New Art carved into Hobart sandstone cliff",
+        "desc": "Hobart punches dramatically above its weight for a city of 250,000. Today you'll visit one of the world's most remarkable art museums (carved literally into a sandstone cliff above the Derwent River), explore convict-era laneways, and drive to a mountain summit towering above the entire city. This is a packed, wonderful day — get an early start and pre-book MONA entry online the night before.",
+        "timeline": [
+          {
+            "time": "08:45",
+            "icon": "⛴",
+            "label": "MONA ROMA ferry departs"
+          },
+          {
+            "time": "09:30",
+            "icon": "🎨",
+            "label": "MONA (4–5 hrs)"
+          },
+          {
+            "time": "14:30",
+            "icon": "🏘",
+            "label": "Battery Point & Kelly's Steps"
+          },
+          {
+            "time": "16:30",
+            "icon": "☕",
+            "label": "Criterion St coffee"
+          },
+          {
+            "time": "17:30",
+            "icon": "⛰",
+            "label": "kunanyi summit drive"
+          },
+          {
+            "time": "19:30",
+            "icon": "🍽",
+            "label": "Dinner — Franklin or Fico"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "⛴",
+            "name": "MONA ROMA Catamaran — depart 8:45am or 10:15am",
+            "desc": "Board the iconic MONA ROMA \"posh as\" catamaran from Brooke Street Pier, Sullivans Cove. The 30-minute trip upstream past sandstone cliffs to the museum is part of the experience — drinks on board, art installations on the deck. Book your ferry ($30 return pp) and timed museum entry ($39 pp) together at mona.net.au. Pre-booking is essential in December.",
+            "cost": "$39 museum + $30 ferry = $69 pp"
+          },
+          {
+            "icon": "🎨",
+            "name": "MONA — Museum of Old and New Art (4–5 hours)",
+            "desc": "Carved into three underground levels of a sandstone peninsula above the Derwent River, MONA is genuinely unlike any other museum on earth. Follow the O (your iPhone audio guide) through confronting, beautiful, and bewildering art. Don't miss: Bit.fall (news headlines in water), Cloaca Professional (a digestive system machine), the Ancient Egyptian collection, and James Turrell's luminous spaces. Allow a minimum of 4 hours.",
+            "cost": "Included in pre-booked entry"
+          },
+          {
+            "icon": "🏘",
+            "name": "Battery Point & Kelly's Steps Walk",
+            "desc": "Walk up the original convict-carved Kelly's Steps from Salamanca Place into Battery Point — Hobart's oldest surviving residential suburb. Cottages dating to the 1830s, Arthur's Circus (a tiny Georgian residential square around a village green), and the best harbour views in the city. Grab a flat white at Pilgrim Coffee on Criterion Street — one of Tasmania's best specialty coffee roasters.",
+            "cost": "Free"
+          },
+          {
+            "icon": "⛰",
+            "name": "kunanyi / Mt Wellington — Summit Drive",
+            "desc": "A 20-minute drive (21 km) up a winding sealed road from the city to a 1,271m summit. The 360° panorama extends over Hobart, the Derwent River, the D'Entrecasteaux Channel, Bruny Island, and on clear days south to the Southern Ocean. The summit is reliably 10–12°C colder than the city and often windy — bring a layer. Stay for sunset if the weather holds.",
+            "cost": "Free · Parking at the summit"
+          },
+          {
+            "icon": "🍽",
+            "name": "Dinner: Franklin, Fico, or Peppina",
+            "desc": "Franklin (2 Franklin Wharf): exceptional local produce bar — shucked oysters, hiramasa kingfish, Huon salmon. Fico (45 Molle St): modern Italian using Tasmanian ingredients — outstanding pasta. Peppina at The Tasman Hotel: upscale but elegant. All require dinner reservations — book via the restaurant websites.",
+            "cost": "~$60–90 pp with drinks · Reservations essential"
+          }
+        ]
+      },
+      {
+        "id": "d3",
+        "num": "03",
+        "day": "Wed",
+        "date": "Dec 9",
+        "title": "Bruny Island Full Day Trip",
+        "meta": "40 km south to Kettering ferry · Day trip from Hobart base · Leave by 8:00am",
+        "img": "https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=900&q=80",
+        "imgAlt": "Bruny Island dramatic dolerite sea cliffs and turquoise water",
+        "desc": "Bruny Island sits across the D'Entrecasteaux Channel from the Huon Valley, reached by a 20-minute car ferry from Kettering. It's a place of rugged coastal wilderness, extraordinary local food, and abundant wildlife. The boat tour through the sea caves is one of Tasmania's genuine highlights. Leave Hobart by 8am to make the most of the day — you return to your Hobart Airbnb tonight.",
+        "timeline": [
+          {
+            "time": "08:00",
+            "icon": "🚗",
+            "label": "Drive to Kettering"
+          },
+          {
+            "time": "09:00",
+            "icon": "⛴",
+            "label": "Ferry to Bruny"
+          },
+          {
+            "time": "09:30",
+            "icon": "🍞",
+            "label": "Bread Fridge — North Bruny"
+          },
+          {
+            "time": "10:30",
+            "icon": "🌊",
+            "label": "South Bruny explore"
+          },
+          {
+            "time": "11:30",
+            "icon": "🛥",
+            "label": "Wild Bruny boat tour (3hrs)"
+          },
+          {
+            "time": "14:30",
+            "icon": "🦪",
+            "label": "Get Shucked oysters"
+          },
+          {
+            "time": "15:30",
+            "icon": "🧀",
+            "label": "Cheese & wine producers"
+          },
+          {
+            "time": "17:30",
+            "icon": "🐧",
+            "label": "The Neck — penguins at dusk"
+          },
+          {
+            "time": "20:00",
+            "icon": "🚗",
+            "label": "Ferry back, drive to Hobart"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "⛴",
+            "name": "SeaLink Ferry — Kettering to Bruny Island",
+            "desc": "Drive 40 minutes south from Hobart on the Channel Highway to the Kettering terminal. Ferries run approximately every 30–60 minutes; the crossing takes 20 minutes. In December, vehicles must be pre-booked — do this at sealink.com.au before the trip. You drive your RAV4 directly onto the ferry. Return ferry tickets are purchased at the terminal.",
+            "cost": "~$55–70 vehicle return + $12 pp passenger"
+          },
+          {
+            "icon": "🍞",
+            "name": "Bruny Island Provisions — The Bread Fridge",
+            "desc": "One of Tasmania's most charming institutions: an unmanned farm fridge on the roadside at North Bruny Island, stocked daily with freshly baked organic sourdough loaves, local honey, eggs, and seasonal produce. Take what you want and leave the correct cash or tap the card reader. The sourdough is genuinely excellent — chewy, thick-crusted, made that morning. Stop here on the drive from the ferry terminal toward Adventure Bay. The honour-system fridge has run for years without issue.",
+            "cost": "~$8–14 per sourdough loaf"
+          },
+          {
+            "icon": "🛥",
+            "name": "Wild Bruny Boat Tour — Sea Caves & Wildlife (3 hours)",
+            "desc": "Departs from Adventure Bay on South Bruny. This 3-hour guided cruise weaves through towering dolerite sea cliffs and hidden sea caves along the island's exposed southern coastline — accessible only by boat. Spot Australian fur seals hauled out on rocks, white-bellied sea eagles hunting overhead, and colonies of seabirds. The sea cave photography is extraordinary. Book at wildbruny.com.au well in advance — December dates sell out.",
+            "cost": "~$135 pp · Book early"
+          },
+          {
+            "icon": "🦪",
+            "name": "Get Shucked Oyster Farm",
+            "desc": "Freshly harvested Pacific oysters eaten from the shell at outdoor waterside tables. The oysters are grown in the cold, clean waters of the D'Entrecasteaux Channel and shucked to order. A dozen oysters with a squeeze of lemon and a glass of Tasmanian Riesling is one of the great simple pleasures. Also try the smoked salmon board and the oyster shooters.",
+            "cost": "Oysters from $22/dozen · Wine ~$10/glass"
+          },
+          {
+            "icon": "🧀",
+            "name": "Bruny Island Cheese Co & Other Producers",
+            "desc": "Bruny Island has an unlikely concentration of outstanding artisan food producers in a small area. Bruny Island Cheese Co (Adventure Bay Rd) does cave-aged hard rinds and soft cheeses for tasting. Bruny Island Premium Wines for local cool-climate whites. Honey on the Hill for pure leatherwood honey — unique to Tasmanian old-growth forest.",
+            "cost": "Tastings from free to ~$5 pp"
+          },
+          {
+            "icon": "🐧",
+            "name": "The Neck Lookout & Little Penguin Viewing at Dusk",
+            "desc": "The Neck is the narrow sand isthmus connecting North and South Bruny Island, with a staircase lookout offering panoramic views over both sides. At dusk (around 8:30pm in December), little penguins (the world's smallest penguin) come ashore at the base of the dunes. Arrive early, sit quietly, bring a torch covered in red cellophane, and do not use flash or bright lights. One of Tasmania's most magical wildlife experiences.",
+            "cost": "Free · No flash photography"
+          }
+        ]
+      },
+      {
+        "id": "d4",
+        "num": "04",
+        "day": "Thu",
+        "date": "Dec 10",
+        "title": "Maria Island — Convict Ruins, Painted Cliffs & Wildlife Paradise",
+        "meta": "90 km northeast to Triabunna ferry · Day trip from Hobart base · Leave by 7:30am · No cars on island",
+        "img": "https://images.unsplash.com/photo-1494548162494-384bba4ab999?w=900&q=80",
+        "imgAlt": "Maria Island painted sandstone cliffs at low tide, Tasmania",
+        "desc": "Maria Island is Tasmania's hidden gem — a car-free UNESCO World Heritage island just 30 minutes by ferry from Triabunna on the east coast. Originally a British penal colony (1825), then a free settlement and cement-works town, it's now a national park home to Tasmania's most approachable wildlife. Wombats, Cape Barren geese, and Forester kangaroos roam freely around the historic settlement of Darlington, completely unafraid of people. The Painted Cliffs — sandstone stained by iron oxides into sweeping bands of red, orange and cream — are among Tasmania's most photogenic natural features. Bring everything you need; the island has no cafe, just a small ranger kiosk.",
+        "timeline": [
+          {
+            "time": "07:30",
+            "icon": "🚗",
+            "label": "Drive to Triabunna (90km)"
+          },
+          {
+            "time": "09:00",
+            "icon": "⛴",
+            "label": "Ferry to Maria Island"
+          },
+          {
+            "time": "09:30",
+            "icon": "🦘",
+            "label": "Arrive Darlington — wildlife"
+          },
+          {
+            "time": "10:30",
+            "icon": "🏛",
+            "label": "Convict ruins & heritage walk"
+          },
+          {
+            "time": "12:30",
+            "icon": "🖌",
+            "label": "Painted Cliffs (aim for low tide)"
+          },
+          {
+            "time": "14:30",
+            "icon": "⛰",
+            "label": "Bishop & Clerk hike (optional)"
+          },
+          {
+            "time": "16:30",
+            "icon": "⛴",
+            "label": "Ferry back to Triabunna"
+          },
+          {
+            "time": "19:00",
+            "icon": "🏠",
+            "label": "Return to Hobart"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "⛴",
+            "name": "Encounter Maria Ferry — Triabunna",
+            "desc": "Drive 90 minutes northeast from Hobart to Triabunna on the east coast. The Encounter Maria ferry departs at 9:00am — book in advance at mariaislandferry.com.au. The 30-minute crossing offers views toward the Freycinet Peninsula. You cannot take the RAV4 — leave it in the Triabunna terminal car park ($5/day). Bikes can be hired on the island; most attractions are walkable from Darlington. Book the 4:30pm return ferry at the same time.",
+            "cost": "~$50 pp return ferry · Car park $5/day · Bike hire ~$25/day"
+          },
+          {
+            "icon": "🦘",
+            "name": "Darlington — Wildlife at Arm's Length",
+            "desc": "Darlington's paddocks and historic buildings are shared with some of Tasmania's most fearless wildlife. Wombats graze openly throughout the day — they're nocturnal everywhere else in Tasmania. Cape Barren geese waddle between the convict-era buildings, and Forester kangaroos laze in large mobs on the grass. The wildlife has never been hunted on the island and shows zero fear of humans — you can sit within a metre of a wombat as it grazes. Tasmanian pademelons and native hens are also abundant. Bring your camera; this is exceptional close-up wildlife photography.",
+            "cost": "Free · Covered by National Parks Pass"
+          },
+          {
+            "icon": "🏛",
+            "name": "Darlington Convict Heritage — UNESCO World Heritage",
+            "desc": "The Darlington probation station (established 1825) is one of Australia's best-preserved convict sites and part of the Australian Convict Sites UNESCO World Heritage listing. Walk through the intact commissariat store, the miller's cottage, and the penitentiary ruins. The Coffee Palace (former convict barracks) and historic winery ruin tell the story of the island's later free-settlement era. Collect the self-guided walking booklet from the ranger station.",
+            "cost": "Free · Covered by National Parks Pass"
+          },
+          {
+            "icon": "🖌",
+            "name": "Painted Cliffs — Plan Around Low Tide",
+            "desc": "A 2.5km coastal walk south from Darlington leads to one of Tasmania's most extraordinary natural features. The sandstone has been carved into intricate honeycomb patterns and stained by iron oxides into striking bands of red, orange, cream, and purple. At low tide the tidal rock pools mirror the cliff colours perfectly — one of the most photogenic moments of the entire trip. Check tide times in advance at bom.gov.au.",
+            "cost": "Free · Check tide times beforehand"
+          },
+          {
+            "icon": "⛰",
+            "name": "Bishop and Clerk — Harder Hike Option (9 km return, 3.5–4.5 hrs)",
+            "desc": "For the energetic, Bishop and Clerk (620m) offers a spectacular ridge hike from Darlington. The summit panorama takes in Freycinet Peninsula to the north, the full sweep of the Tasman Sea to the east, and the Derwent estuary to the southwest. The upper section involves rocky scrambling. Only attempt in clear, stable weather. This fills most of the day on its own — choose between this and the Painted Cliffs walk.",
+            "cost": "Free · Covered by National Parks Pass"
+          }
+        ]
+      },
+      {
+        "id": "d5",
+        "num": "05",
+        "day": "Fri",
+        "date": "Dec 11",
+        "title": "Mt Field NP → Eaglehawk Neck → Port Arthur",
+        "meta": "65 km to Mt Field → then 165 km to Port Arthur · ~5 hrs total driving with stops",
+        "img": "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=900&q=80",
+        "imgAlt": "Russell Falls triple-tiered cascade through ancient Tasmanian tree fern forest",
+        "desc": "A spectacular day combining three very different Tasmanian icons. Start inland at Mt Field National Park for ancient rainforest and one of Australia's most beautiful waterfalls. Then head south-east to the geological drama of Eaglehawk Neck, arriving at Port Arthur by mid-afternoon. Australia's most significant convict heritage site is both historically fascinating and genuinely beautiful — and the evening ghost tour is not to be missed.",
+        "timeline": [
+          {
+            "time": "08:00",
+            "icon": "🚗",
+            "label": "Drive to Mt Field"
+          },
+          {
+            "time": "09:00",
+            "icon": "💧",
+            "label": "Russell Falls walk"
+          },
+          {
+            "time": "10:30",
+            "icon": "🌲",
+            "label": "Tall Trees loop"
+          },
+          {
+            "time": "12:00",
+            "icon": "🚗",
+            "label": "Drive to Eaglehawk Neck"
+          },
+          {
+            "time": "14:00",
+            "icon": "🌊",
+            "label": "Tessellated Pavement & Blowhole"
+          },
+          {
+            "time": "15:30",
+            "icon": "⛓",
+            "label": "Port Arthur Historic Site"
+          },
+          {
+            "time": "20:30",
+            "icon": "👻",
+            "label": "Ghost Tour (recommended)"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "💧",
+            "name": "Russell Falls & Tall Trees Walk — Mt Field NP",
+            "desc": "Russell Falls is a three-tiered curtain of water falling through a cathedral of tree ferns, some of which have been growing for over 300 years. The easy 1.4km return boardwalk (20–30 min) is sealed and flat. Continue to Horseshoe Falls (add 20 min) and the Tall Trees loop (add 45 min) — a detour to stand beneath 85-metre swamp gum forests, the tallest flowering plants on earth. Utterly beautiful.",
+            "cost": "Covered by Holiday Parks Pass (~$24 pp share of vehicle fee)"
+          },
+          {
+            "icon": "🌊",
+            "name": "Eaglehawk Neck — Tessellated Pavement, Blowhole & Devil's Kitchen",
+            "desc": "Three spectacular natural geological features within 10 minutes of each other on the isthmus connecting the Tasman Peninsula. The Tessellated Pavement looks like a tiled floor laid by nature — actually created by wave erosion along jointing planes. The Blowhole and Devil's Kitchen (a 60m deep sea slot through dolerite rock) are most dramatic when swell is running. Allow 45–60 minutes for all three.",
+            "cost": "Free · National Parks Pass for parking"
+          },
+          {
+            "icon": "⛓",
+            "name": "Port Arthur Historic Site — Afternoon Visit",
+            "desc": "Australia's best-preserved convict settlement, operating from 1833 to 1877. Your entry ticket is valid for 2 consecutive days, so don't rush — revisit tomorrow morning. Included: a 40-minute guided walking tour (excellent — don't skip), a 25-minute harbour cruise around the Isle of the Dead (the convict burial ground), and entry to all buildings. Key highlights: the ruined church, the Separate Prison (solitary confinement), and the Asylum. Pre-book online.",
+            "cost": "$53 pp · Includes cruise & walking tour · 2-day entry"
+          },
+          {
+            "icon": "👻",
+            "name": "Port Arthur Ghost Tour — Highly Recommended",
+            "desc": "Launched in 1996 and consistently one of Australia's highest-rated guided tours. Small groups (max 30) walk the moonlit ruins by lantern light, hearing first-hand historical accounts of trauma, punishment, and strange occurrences at the site. The Separate Prison at night is genuinely unsettling. Departs at dusk (around 8:30pm in December). Sell out weeks ahead — book at portarthur.org.au before the trip.",
+            "cost": "~$35 pp additional · 90-minute tour · Book online well ahead"
+          }
+        ]
+      },
+      {
+        "id": "d6",
+        "num": "06",
+        "day": "Sat",
+        "date": "Dec 12",
+        "title": "Tasman Peninsula → Freycinet National Park",
+        "meta": "~205 km north via Arthur Highway · ~2.5 hrs direct · Allow 4 hrs with stops",
+        "img": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80",
+        "imgAlt": "Pink granite Hazards mountains above Freycinet Peninsula at golden hour",
+        "desc": "Spend the morning revisiting Port Arthur with your 2-day ticket, then head north through the beautiful Tasman Peninsula landscape. The east coast road curves through farmland, vineyards, and past stunning estuary views before reaching Coles Bay — the small township at the entrance to Freycinet National Park. The pink granite Hazards mountains rising above the bay are one of Tasmania's most arresting sights.",
+        "timeline": [
+          {
+            "time": "09:00",
+            "icon": "⛓",
+            "label": "Port Arthur morning revisit"
+          },
+          {
+            "time": "10:30",
+            "icon": "🚗",
+            "label": "Drive north via Arthur Hwy"
+          },
+          {
+            "time": "12:30",
+            "icon": "🌊",
+            "label": "Spiky Bridge & Orford stop"
+          },
+          {
+            "time": "14:00",
+            "icon": "🏖",
+            "label": "Arrive Coles Bay"
+          },
+          {
+            "time": "15:30",
+            "icon": "🏊",
+            "label": "Honeymoon Bay swim"
+          },
+          {
+            "time": "18:00",
+            "icon": "🦞",
+            "label": "Freycinet Marine Farm dinner"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "⛓",
+            "name": "Port Arthur — Morning Revisit (2-day ticket still valid)",
+            "desc": "Your entry is valid for a second consecutive day — use it. Return to anything you rushed through yesterday, or explore the Model Prison (an experiment in \"moral architecture\") in depth. The morning light on the church ruins is spectacular for photography. The bookshop inside the visitor centre has excellent Tasmanian history titles.",
+            "cost": "Included in previous day's $53 ticket"
+          },
+          {
+            "icon": "🌊",
+            "name": "Spiky Bridge & Orford Estuary (en route)",
+            "desc": "The Spiky Bridge (1843) near Swansea was built by convicts using oddly spiked uncut stones — no-one knows why. A 5-minute stop off the A3. The drive through Orford offers beautiful Prosser River estuary views — good spot for a roadside pie from the local bakery.",
+            "cost": "Free"
+          },
+          {
+            "icon": "🍷",
+            "name": "East Coast Vineyards — Optional Stop",
+            "desc": "The Tasmanian east coast produces excellent cool-climate wines, particularly Pinot Noir and Riesling. Craigie Knowe Winery (near Cranbrook) and Milton Vineyard offer cellar door tastings with water views. A 30-minute detour if the group enjoys wine.",
+            "cost": "Tastings free or from $5 pp"
+          },
+          {
+            "icon": "🏊",
+            "name": "Honeymoon Bay — Freycinet National Park",
+            "desc": "A perfectly sheltered cove just inside the Freycinet park boundary, a short drive from Coles Bay. The water is extraordinarily clear and surprisingly warm in December. Pink granite boulders frame the swimming area. It's rarely crowded in the afternoon — far better than the main Wineglass Bay beach at this hour.",
+            "cost": "Covered by National Parks Pass"
+          },
+          {
+            "icon": "🦞",
+            "name": "Freycinet Marine Farm — Dinner",
+            "desc": "Fresh oysters, mussels steamed in white wine, and scallop pies eaten at outdoor picnic tables overlooking Great Oyster Bay. The produce is harvested that morning. Arrive at opening time (5pm in summer) — they sell out. BYOB is welcome (no corkage). Best to call ahead to confirm opening hours.",
+            "cost": "~$30–45 pp"
+          }
+        ]
+      }
+    ],
+    "tas2": [
+      {
+        "id": "d7",
+        "num": "07",
+        "day": "Sun",
+        "date": "Dec 13",
+        "title": "Freycinet Full Day — Wineglass Bay & The Hazards",
+        "meta": "Base: Coles Bay · Full hiking day · Car park fills by 9am — start early",
+        "img": "https://images.unsplash.com/photo-1526779259212-939e64788e3c?w=900&q=80",
+        "imgAlt": "Wineglass Bay from the saddle above — pink granite, turquoise water, white sand",
+        "desc": "This is the day Freycinet was made for. The iconic pink granite Hazards mountains rise directly from the shoreline above a landscape of pristine beaches and crystal-clear water. The Wineglass Bay Lookout circuit is one of the most photographed views in Australia; the full Hazards Beach circuit lets you swim at two of Tasmania's finest beaches in a single hike. Get out of bed early — the car park fills by 9am in peak December season.",
+        "timeline": [
+          {
+            "time": "06:30",
+            "icon": "🚗",
+            "label": "Drive to car park early"
+          },
+          {
+            "time": "07:00",
+            "icon": "🥾",
+            "label": "Start Hazards Beach circuit"
+          },
+          {
+            "time": "09:30",
+            "icon": "🏖",
+            "label": "Hazards Beach swim"
+          },
+          {
+            "time": "11:30",
+            "icon": "🏖",
+            "label": "Wineglass Bay swim"
+          },
+          {
+            "time": "13:30",
+            "icon": "🍱",
+            "label": "Lunch — Coles Bay"
+          },
+          {
+            "time": "15:30",
+            "icon": "🚣",
+            "label": "Afternoon kayak (optional)"
+          },
+          {
+            "time": "17:30",
+            "icon": "💡",
+            "label": "Cape Tourville sunset"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "🥾",
+            "name": "Hazards Beach & Wineglass Bay Circuit — Recommended (11.6 km, 4–5 hrs)",
+            "desc": "The best all-round Freycinet experience for a group who wants to do it properly. The circuit crosses between Hazards Beach (wild, surf-swept, boulder-strewn) and Wineglass Bay (sheltered, perfectly curved, pristine) via the isthmus through coastal scrub. Go clockwise — Hazards Beach first means you descend to Wineglass Bay, which is gentler and the views unfold beautifully. Swim at both beaches. Bring 2L of water each — no facilities on the track.",
+            "cost": "Covered by National Parks Pass"
+          },
+          {
+            "icon": "👁",
+            "name": "Wineglass Bay Lookout Only — Shorter Option (4.4 km, 1.5 hrs)",
+            "desc": "If the full circuit is too ambitious, the return walk to the Wineglass Bay Lookout saddle is still spectacular. The curved horseshoe bay from above is one of Australia's most iconic views. Many groups then descend to the beach for a swim (add 45 min each way from saddle to beach and back).",
+            "cost": "Covered by National Parks Pass"
+          },
+          {
+            "icon": "🏔",
+            "name": "Mount Amos — Hard Alternative (2.5–3 hrs return)",
+            "desc": "A steep scramble up the 454m pink-granite peak directly from the car park. Requires hands-and-feet climbing on bare granite slabs in sections — grippy shoes are essential, avoid after rain or when wet. The summit panorama (Wineglass Bay, Hazards Beach, and the entire Freycinet Peninsula from above) is arguably the best view in Tasmania. Demanding but enormously rewarding.",
+            "cost": "Covered by National Parks Pass"
+          },
+          {
+            "icon": "🚣",
+            "name": "Sea Kayaking with Freycinet Adventures — Afternoon",
+            "desc": "Explore the park's bays, granite walls, and sea caves from water level. Half-day tours ($115 pp) depart at 9am or 2pm from Coles Bay. Full day ($195 pp) includes a beach lunch on a remote stretch of coast. The afternoon 2pm departure works perfectly after a morning hike. Book at freycinetadventures.com.au.",
+            "cost": "$115–195 pp · Book in advance"
+          },
+          {
+            "icon": "💡",
+            "name": "Cape Tourville Lighthouse — Sunset",
+            "desc": "Drive 10 minutes beyond Coles Bay to the Cape Tourville car park for a 1km easy loop walk along clifftop boardwalks. Views extend north along the rocky coastline and south to Schouten Island. The lighthouse perches right on the headland above crashing surf. Golden hour here is exceptional.",
+            "cost": "Free (National Parks Pass for car park)"
+          }
+        ]
+      },
+      {
+        "id": "d8",
+        "num": "08",
+        "day": "Mon",
+        "date": "Dec 14",
+        "title": "East Coast Drive → Bay of Fires",
+        "meta": "125 km north via Great Eastern Drive · ~2 hrs direct · Allow 4–5 hrs with stops",
+        "img": "https://images.unsplash.com/photo-1622396481328-9b1b78cdd9fd?w=900&q=80",
+        "imgAlt": "Orange lichen granite boulders meeting turquoise Bay of Fires water",
+        "desc": "Drive north along the Great Eastern Drive — one of Australia's most scenic coastal roads. Stop in Bicheno to see Tasmanian wildlife, then arrive at the Bay of Fires: 50km of the most strikingly beautiful coastline in Australia. The signature orange-lichen boulders set against turquoise lagoon water and white sand is unlike anywhere else on earth. The name isn't from the geology — it came from the fires of Aboriginal people seen here by early European sailors.",
+        "timeline": [
+          {
+            "time": "09:00",
+            "icon": "🚗",
+            "label": "Depart Coles Bay"
+          },
+          {
+            "time": "10:30",
+            "icon": "😈",
+            "label": "Natureworld, Bicheno"
+          },
+          {
+            "time": "12:30",
+            "icon": "🚗",
+            "label": "Drive north on GED"
+          },
+          {
+            "time": "14:00",
+            "icon": "🪨",
+            "label": "Binalong Bay arrival"
+          },
+          {
+            "time": "14:30",
+            "icon": "🏖",
+            "label": "Explore boulders & lagoons"
+          },
+          {
+            "time": "16:30",
+            "icon": "🗺",
+            "label": "North to Eddystone Pt"
+          },
+          {
+            "time": "18:00",
+            "icon": "🏠",
+            "label": "Check in, St Helens"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "😈",
+            "name": "Natureworld Wildlife Sanctuary, Bicheno",
+            "desc": "One of the best places in Tasmania to see Tasmanian devils during daylight hours — in the wild, devils are almost entirely nocturnal. Also Eastern quolls, wombats, common brushtail possums, and an impressive range of native birds. The devil feeding talks are educational and genuinely gripping. Allow 90 minutes. Book the 11am or 1pm feeding presentation.",
+            "cost": "~$35 pp adult"
+          },
+          {
+            "icon": "🪨",
+            "name": "Bay of Fires — Binalong Bay & Cosy Corner",
+            "desc": "The Bay of Fires begins at Binalong Bay, a small township at the southern end of the 50km stretch. Park at Cosy Corner — the photogenic meeting point of the iconic orange lichen-encrusted granite boulders and a turquoise tidal lagoon. The contrast of orange, white, and that shade of blue-green has to be seen to believed. Swim, explore the boulder fields, and take your time.",
+            "cost": "Free"
+          },
+          {
+            "icon": "🏖",
+            "name": "Drive North: Jeanneret Beach, The Gardens & Eddystone Point",
+            "desc": "Drive the unsealed road (perfectly fine for RAV4) north from Binalong Bay. Stops: Jeanneret Beach (sheltered swimming, fewer people), The Gardens (calm bay with a perfect arc of white sand), and Eddystone Point at the northern tip — a remote, windswept lighthouse reserve where the orange boulders pile up dramatically against the Southern Ocean. One of the most beautiful and isolated places on the east coast.",
+            "cost": "Free · Gravel road — slow down"
+          },
+          {
+            "icon": "🦐",
+            "name": "Dinner in St Helens — Seafood & Supplies",
+            "desc": "St Helens (10 minutes from Binalong Bay) is the largest town on the east coast and has a Coles supermarket, bottle shop, and several restaurants. The Cray Pot does excellent fresh local seafood including live crayfish in season. Stock up here — it's the last full supermarket before Launceston tomorrow.",
+            "cost": "~$30–50 pp dining out"
+          }
+        ]
+      },
+      {
+        "id": "d9",
+        "num": "09",
+        "day": "Tue",
+        "date": "Dec 15",
+        "title": "Bay of Fires → Bridestowe Lavender → Launceston → Cradle Mountain",
+        "meta": "~360 km total via Scottsdale & Bass Highway · 5–6 hrs with stops · Longest driving day",
+        "img": "https://images.unsplash.com/photo-1504701954957-2010ec3bcec1?w=900&q=80",
+        "imgAlt": "Cataract Gorge First Basin Launceston",
+        "desc": "The longest driving day of the trip — but a beautiful one. Start with a sunrise swim at Binalong Bay (an unmissable golden-hour moment), then drive inland to Launceston for a lunch stop at the spectacular Cataract Gorge, wander through the mural town of Sheffield, and arrive at Cradle Mountain as the evening light hits the ancient dolerite peaks. Important: fill the tank in Sheffield or Deloraine — there is no fuel at Cradle Mountain.",
+        "timeline": [
+          {
+            "time": "06:30",
+            "icon": "🌅",
+            "label": "Sunrise swim — Binalong Bay"
+          },
+          {
+            "time": "08:30",
+            "icon": "🚗",
+            "label": "Drive north via Scottsdale"
+          },
+          {
+            "time": "10:30",
+            "icon": "💜",
+            "label": "Bridestowe Lavender Estate"
+          },
+          {
+            "time": "12:00",
+            "icon": "🚗",
+            "label": "Drive to Launceston"
+          },
+          {
+            "time": "13:00",
+            "icon": "🏙",
+            "label": "Cataract Gorge lunch"
+          },
+          {
+            "time": "15:00",
+            "icon": "⛽",
+            "label": "Fuel up — last chance"
+          },
+          {
+            "time": "16:30",
+            "icon": "🏔",
+            "label": "Arrive Cradle Mountain"
+          },
+          {
+            "time": "18:30",
+            "icon": "🦘",
+            "label": "Evening wombat spotting"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "🌅",
+            "name": "Sunrise Swim at Binalong Bay",
+            "desc": "Set your alarm for 6am. The Bay of Fires at sunrise — warm pink-orange granite glowing in the first light, no other people, glassy water reflecting the sky — is one of the trip's genuinely transcendent moments. A quick swim, then dry off, grab coffee and breakfast in St Helens (10 minutes), and hit the road.",
+            "cost": "Free"
+          },
+          {
+            "icon": "💜",
+            "name": "Bridestowe Lavender Estate — Nabowla",
+            "desc": "One of the world's largest lavender farms occupies rolling hills near Nabowla, northeast Tasmania, and is the southern hemisphere's largest producer of lavender essential oil. Taking the scenic northern route from St Helens via Scottsdale, Bridestowe is a natural stop on the way to Launceston. In December the fields are carpets of deep purple — some of Australia's most photogenic countryside. Wander the rows freely, visit the estate shop for lavender oil, shortbread, and the famous lavender ice cream. Note: peak bloom is typically late December–January; early-mid December may show partial bloom depending on the season.",
+            "cost": "Free entry · Estate shop ~$10–30"
+          },
+          {
+            "icon": "🏙",
+            "name": "Cataract Gorge, Launceston — Lunch Stop",
+            "desc": "An extraordinary natural gorge just 10 minutes' walk from Launceston's city centre. Suspended walkways hug the cliff face above the rushing South Esk River as it enters the gorge. Free entry to the gorge and the First Basin swimming pool (perfect for a quick dip). Take the historic chairlift ($20 pp) for aerial views of the gorge. The Gorge Restaurant does excellent wood-fired pizza and salads. Allow 90 minutes.",
+            "cost": "Free entry · Chairlift $20 pp optional"
+          },
+          {
+            "icon": "🎨",
+            "name": "Sheffield — Town of Murals",
+            "desc": "This small agricultural town (population ~1,200) on the slopes of Mt Roland has been transformed since 1986 by over 60 massive murals painted on building exteriors throughout the main street. Created by local and international artists, they tell stories of Tasmanian history, farming life, and the natural world. A quirky, photogenic 30-minute wander. Good bakery on the main street for a late-afternoon snack.",
+            "cost": "Free"
+          },
+          {
+            "icon": "⛽",
+            "name": "Fuel Up — Critical Reminder",
+            "desc": "There is NO fuel station at Cradle Mountain. The nearest fuel is in Deloraine (40 km south) or Devonport (70 km north). Fill up completely in Sheffield. Also buy dinner provisions from the Sheffield supermarket — the park lodge shop is very expensive for groceries.",
+            "cost": "~$2.30–2.50/L regional Tasmania"
+          },
+          {
+            "icon": "🦘",
+            "name": "Arrive Cradle Mountain — Evening Wombat Walk",
+            "desc": "Check into your accommodation before dark. As dusk falls, walk down to the area around the Discovery Ranger Station and the lodge meadows. Common wombats emerge from their burrows to graze and will walk within a metre of you completely unperturbed. Keep quiet, move slowly, and use only a dim red torch. Also watch for Bennett's wallabies and Tasmanian pademelons.",
+            "cost": "Free · Mobile signal very limited here"
+          }
+        ]
+      },
+      {
+        "id": "d10",
+        "num": "10",
+        "day": "Wed",
+        "date": "Dec 16",
+        "title": "Cradle Mountain Full Day — Dove Lake, Alpine Wilderness & Montezuma Option",
+        "meta": "Base: Cradle Mountain · No private cars beyond visitor centre · Buy shuttle pass at visitor centre",
+        "img": "https://images.unsplash.com/photo-1504198266287-1659872e6590?w=900&q=80",
+        "imgAlt": "Dove Lake Circuit — Cradle Mountain reflecting in still morning water",
+        "desc": "One of the absolute highlights of the entire trip. The ancient dolerite peaks of Cradle Mountain (1,545m) rise above a landscape of button grass moorland, alpine lakes, and cool-temperate rainforest that has barely changed since the last ice age. Wombats amble along the boardwalks in front of you. Wallabies graze beside the path. The whole place feels primordial and prehistoric — a landscape from another era. Get an early start: go clockwise on the Dove Lake Circuit for the best mountain reflections in morning light. Alternatively, dedicated adventurers can make a full-day trip to Montezuma Falls — one of Australia's tallest waterfalls at 115m, deep in Tasmania's wild west — with a 90-minute drive each way from Cradle Mountain.",
+        "timeline": [
+          {
+            "time": "06:30",
+            "icon": "🌿",
+            "label": "Enchanted Walk (sunrise)"
+          },
+          {
+            "time": "07:30",
+            "icon": "🚌",
+            "label": "Shuttle to Dove Lake"
+          },
+          {
+            "time": "08:00",
+            "icon": "🦘",
+            "label": "Dove Lake Circuit (2–2.5 hrs)"
+          },
+          {
+            "time": "10:30",
+            "icon": "🏔",
+            "label": "Summit or Barn Bluff (optional)"
+          },
+          {
+            "time": "14:00",
+            "icon": "🍵",
+            "label": "Rest & warm up"
+          },
+          {
+            "time": "17:30",
+            "icon": "🦘",
+            "label": "Evening wombat meadow"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "🌿",
+            "name": "Enchanted Walk — Sunrise (Easy, 20 min loop)",
+            "desc": "Start your day with this magical 20-minute loop through ancient cool-temperate rainforest directly behind the visitor centre. King Billy pines (endemic to Tasmania), Huon pines, and myrtles draped in moss. The dawn light filtering through the canopy is extraordinary. Wildlife peaks early — platypus have been spotted in the rainforest stream. No shuttle pass required.",
+            "cost": "Free"
+          },
+          {
+            "icon": "🚌",
+            "name": "Shuttle Bus — Required, No Private Cars Beyond Visitor Centre",
+            "desc": "Private vehicles are not permitted beyond the Cradle Mountain Visitor Centre in the main park area. Take the free shuttle buses to Dove Lake, Ronny Creek, Snake Hill, and Waldheim Huts. A shuttle pass is required: $15 pp (72-hour pass) or $29.80 pp (Icon Day Pass, includes a guided walk). Buy at the visitor centre on arrival. Shuttles run every 10–15 minutes in peak season.",
+            "cost": "$15 pp (72hr) or $29.80 pp (day pass)"
+          },
+          {
+            "icon": "🦘",
+            "name": "Dove Lake Circuit — Must Do (Easy–Moderate, 6 km, 2–2.5 hrs)",
+            "desc": "The quintessential Cradle Mountain experience. The circuit loops the mirror-still Dove Lake with the jagged dolerite silhouette of Cradle Mountain reflected in the water. Almost entirely on raised boardwalk — your feet stay dry. Wombats graze right beside the path, completely unconcerned by human presence. Go clockwise: take the northern shore first (past Glacier Rock and Twisted Lakes) for the best reflections in morning light.",
+            "cost": "Included in shuttle pass"
+          },
+          {
+            "icon": "🏔",
+            "name": "Cradle Mountain Summit — Full Day Option (Hard, 5–7 hrs return)",
+            "desc": "From the Dove Lake Circuit, the Cradle Mountain Summit Track branches off toward the main peak (1,545m). This is a serious full-day hike involving significant scrambling over dolerite boulders — not a defined path in sections. Only attempt in clear, stable weather (check BOM the previous evening). The summit view extends across the entire Central Plateau and west to the wild coast. Takes all day — not compatible with other walks.",
+            "cost": "Included in shuttle pass · Check weather night before"
+          },
+          {
+            "icon": "🦁",
+            "name": "Barn Bluff — Moderate Alternative (3.5–4 hrs return)",
+            "desc": "A rewarding walk from Dove Lake Circuit that climbs Barn Bluff (1,559m — actually slightly higher than Cradle Mountain itself). Less technical than the Cradle summit, with some straightforward rocky scrambling near the top. The panoramic view takes in the Overland Track country, Lake Windermere, and the surrounding wilderness. A great choice for a group of mixed fitness levels.",
+            "cost": "Included in shuttle pass"
+          },
+          {
+            "icon": "💧",
+            "name": "Montezuma Falls — Full Day Alternative (7.4 km return, ~2.5 hrs walk)",
+            "desc": "For a completely different full-day experience from the Cradle Mountain base, drive 90 minutes southwest via the Murchison Highway to Montezuma Falls near Rosebery. At 115 metres, Montezuma is one of Australia's highest accessible waterfalls — a thundering curtain of water plunging through dense temperate rainforest draped in ferns and moss. The 7.4km return trail follows an old mining tramway with historical interpretive stops along the way. Leave Cradle Mountain base by 7:30am to complete the walk and return by mid-afternoon. Cradle hiking + Montezuma in one day is too ambitious — treat it as an either/or choice for the group.",
+            "cost": "Free · 90 min drive each way via Rosebery (Murchison Highway)"
+          }
+        ]
+      },
+      {
+        "id": "d11",
+        "num": "11",
+        "day": "Thu",
+        "date": "Dec 17",
+        "title": "Cradle Mountain → Hobart Airport → Fly to Melbourne",
+        "meta": "190 km to Hobart (2.5 hrs) · Fly HBA–MEL ~1h10m · Arrive Melbourne afternoon",
+        "img": "https://images.unsplash.com/photo-1519681393784-d120267933ba?w=900&q=80",
+        "imgAlt": "Pencil pine forest morning mist — Cradle Mountain final morning",
+        "desc": "A quiet final morning in the Tasmanian highlands, then the long drive south on the Midland Highway back to Hobart Airport — returning the RAV4 where you picked it up. The Pencil Pine Falls walk is perfect for the last hour in the park. Tasmania has been extraordinary. Fly Bass Strait to Melbourne, where the final chapter of the trip begins.",
+        "timeline": [
+          {
+            "time": "06:30",
+            "icon": "🌄",
+            "label": "Pencil Pine Falls walk"
+          },
+          {
+            "time": "08:00",
+            "icon": "🚗",
+            "label": "Drive to Hobart (190km, 2.5 hrs)"
+          },
+          {
+            "time": "10:30",
+            "icon": "🚗",
+            "label": "Return RAV4 at HBA airport"
+          },
+          {
+            "time": "11:00",
+            "icon": "✈️",
+            "label": "Check in — Hobart Airport"
+          },
+          {
+            "time": "~13:00",
+            "icon": "✈️",
+            "label": "Fly HBA → Melbourne"
+          },
+          {
+            "time": "~14:15",
+            "icon": "🏙",
+            "label": "Arrive Melbourne (Tullamarine)"
+          },
+          {
+            "time": "14:30",
+            "icon": "🚗",
+            "label": "Collect RAV4 — Melbourne Airport"
+          },
+          {
+            "time": "16:00",
+            "icon": "🏠",
+            "label": "Check in to Melbourne Airbnb"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "🌄",
+            "name": "Pencil Pine Falls — Final Morning Walk (Easy, 45 min return)",
+            "desc": "A beautiful last walk through ancient pencil pine forest starting from near the visitor centre. Pencil pines (Athrotaxis cupressoides) are endemic to Tasmania and can live over 1,000 years — slow-growing, gnarled, and remarkable. The falls cascade through the forest in morning light. Your last taste of Tasmanian wilderness before the long drive south.",
+            "cost": "Free"
+          },
+          {
+            "icon": "🚗",
+            "name": "Drive to Hobart Airport — 190 km (2.5 hrs)",
+            "desc": "From Cradle Mountain, head east via Claude Road to Deloraine, then join the Midland Highway south — the main arterial route between Launceston and Hobart. It's a straightforward, well-paved drive through Tasmania's broad agricultural heartland: sheep country, heritage towns, and glimpses of the Central Plateau. Fuel up in Deloraine or Campbell Town. Allow 2.5 hours comfortably — you've driven this road before from the other direction on Day 1.",
+            "cost": "~$30 fuel"
+          },
+          {
+            "icon": "✈️",
+            "name": "Return RAV4 & Fly Hobart → Melbourne Tullamarine",
+            "desc": "Hobart Airport (HBA) is 17km east of the CBD, compact and easy. Return your rental RAV4 at the car hire desk — you picked it up here on Day 1, so there is no one-way surcharge. Confirm the full-tank requirement before departure. Airlines on this route: Jetstar, Virgin Australia, and Qantas. Flight time is approximately 1 hour 10 minutes across Bass Strait. In clear weather you'll see both the Tasmanian highlands and Port Phillip Bay.",
+            "cost": "~$120–250 pp (book with Tasmania legs) · No one-way fee — same airport pickup & dropoff"
+          },
+          {
+            "icon": "🚗",
+            "name": "Collect RAV4 — Melbourne Airport (Tullamarine)",
+            "desc": "Head straight to the rental car desks in the arrivals hall — Avis, Europcar, Budget, and Hertz all have counters at Tullamarine. Collect the RAV4 you pre-booked for the Melbourne leg (Dec 17–21, 4 nights). Confirm: excess reduction taken, full-to-full fuel, unlimited km. The drive from the airport to a Fitzroy or Collingwood Airbnb is ~35 minutes via the CityLink tollway (~$5 toll). Keep the CityLink app or purchase a day pass — you'll use the tollway again on departure day.",
+            "cost": "~$90–120/day · 4 nights · ~$360–480 total · ~$90–120 pp · CityLink ~$5 toll"
+          },
+          {
+            "icon": "🏙",
+            "name": "Arrive Melbourne — Check In & Explore",
+            "desc": "Check into your Fitzroy or Collingwood Airbnb and park the car (you won't need it for the city days — parking in Melbourne CBD is expensive, and the free tram zone covers all central attractions). Walk Smith Street for dinner options: Huxtaburger, Tipo 00 for pasta, or Saigon Sally for Vietnamese. Grab a coffee from Brother Baba Budan and take in your first Melbourne evening.",
+            "cost": "Dinner ~$30–45 pp"
+          }
+        ]
+      }
+    ],
+    "melb": [
+      {
+        "id": "d12",
+        "num": "12",
+        "day": "Fri",
+        "date": "Dec 18",
+        "title": "Melbourne City — Laneways, Markets & Culture",
+        "meta": "Base: Melbourne · Leave the car at the Airbnb · Free tram zone covers all CBD attractions",
+        "img": "https://images.unsplash.com/photo-1514395462421-a40e3e51eda2?w=900&q=80",
+        "imgAlt": "Melbourne CBD laneways at golden hour",
+        "desc": "Melbourne is Australia's cultural capital — a city of extraordinary coffee, world-class street art, remarkable food, and a tram network that makes it effortless to explore. Leave the car at the Airbnb (parking is expensive and unnecessary). The free tram zone covers all the main central attractions. Today is all city: morning at the famous open-air market, afternoon in the laneways, and evening at the wild penguin colony on St Kilda Pier.",
+        "timeline": [
+          {
+            "time": "08:30",
+            "icon": "🛒",
+            "label": "Queen Victoria Market"
+          },
+          {
+            "time": "11:00",
+            "icon": "🎨",
+            "label": "Hosier Lane & laneways"
+          },
+          {
+            "time": "13:00",
+            "icon": "☕",
+            "label": "Lune Croissanterie & coffee"
+          },
+          {
+            "time": "15:00",
+            "icon": "🖼",
+            "label": "NGV International gallery"
+          },
+          {
+            "time": "17:30",
+            "icon": "🏙",
+            "label": "Fitzroy / Smith St explore"
+          },
+          {
+            "time": "20:30",
+            "icon": "🐧",
+            "label": "St Kilda pier penguins"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "🛒",
+            "name": "Queen Victoria Market — Morning",
+            "desc": "The Queen Vic has operated since 1878 and is the largest open-air market in the Southern Hemisphere. The deli hall is a sensory overload of artisan cheeses, continental smallgoods, and local specialties. Fresh produce hall for a Tasmania vs Victoria taste comparison. The legendary American Doughnut Kitchen hot jam donuts are non-negotiable — they've been made the same way since 1950. Arrive by 8:30am for atmosphere before the crowds.",
+            "cost": "Free entry · $20–30 spending"
+          },
+          {
+            "icon": "🎨",
+            "name": "Melbourne Laneways — Hosier Lane, Degraves & Centre Place",
+            "desc": "Hosier Lane is Melbourne's most famous laneway — a continuously evolving outdoor gallery where every surface (including the pavement) is covered in ever-changing street art. Two minutes away: Degraves Street (cobblestones, packed espresso bars under covered awnings, the most Melbourne street in Melbourne), Centre Place (European arcade feel), and ACDC Lane (named for the band). Allow 90 minutes to wander freely.",
+            "cost": "Free"
+          },
+          {
+            "icon": "☕",
+            "name": "Melbourne Coffee — Flat White Capital of the World",
+            "desc": "Melbourne arguably invented the flat white and has an obsessive specialty coffee culture. Essentials: Patricia Coffee Brewers (Little Collins St — standing only, just perfect espresso), Proud Mary (Collingwood, a 15-min tram ride), Lune Croissanterie (Fitzroy — croissants so technically perfect they're studied by pastry chefs worldwide; queue opens at 7:30am, sell out by noon, go early or miss out). Lunch at Chin Chin (Flinders Lane) means a walk-in queue but is entirely worth it.",
+            "cost": "$5–7 per coffee · Lunch ~$35–45 pp Chin Chin"
+          },
+          {
+            "icon": "🖼",
+            "name": "NGV International — National Gallery of Victoria",
+            "desc": "The largest art gallery in Australia and one of the finest in the Asia-Pacific. Free permanent collection (fee for major temporary exhibitions). The Great Hall's stained glass ceiling by Leonard French is unmissable. Collection highlights: Rembrandt, Monet, Picasso, and an exceptional collection of Asian art. Located on St Kilda Road, a 15-minute walk or tram from the CBD. Allow 2 hours.",
+            "cost": "Free permanent collection · Major exhibitions ~$28 pp"
+          },
+          {
+            "icon": "🐧",
+            "name": "St Kilda Breakwater — Wild Little Penguin Colony",
+            "desc": "One of the world's most accessible wild penguin experiences, and it's completely free. Little penguins (Eudyptula minor — the world's smallest penguin species at just 33cm tall) nest in the rocks beneath St Kilda Pier's breakwater and return from the sea every evening at dusk. Take tram #96 from Swanston St (free in the city zone). Arrive by 8:30pm in December and wait at the end of the breakwater. No flash, no torches, whisper.",
+            "cost": "Free · Tram from CBD ~$5 outside free zone"
+          }
+        ]
+      },
+      {
+        "id": "d13",
+        "num": "13",
+        "day": "Sat",
+        "date": "Dec 19",
+        "title": "Great Ocean Road — East Section to Apollo Bay",
+        "meta": "~220 km from Melbourne · Drive westward with ocean on left · Allow a full day",
+        "img": "https://images.unsplash.com/photo-1545044846-351ba102b6d5?w=900&q=80",
+        "imgAlt": "Great Ocean Road hugging the clifftop above the Southern Ocean",
+        "desc": "The Great Ocean Road is one of the world's great coastal drives — built between 1919 and 1932 by returned World War I servicemen as a memorial to those who died (it's the world's largest war memorial). Drive westward from Melbourne with the Southern Ocean glittering to your left. The road alternately hugs clifftops above crashing surf and plunges into dense rainforest gullies. Stop constantly — every corner reveals something remarkable. The payoff accumulates gradually until suddenly it's overwhelming.",
+        "timeline": [
+          {
+            "time": "08:00",
+            "icon": "🚗",
+            "label": "Depart Melbourne"
+          },
+          {
+            "time": "09:30",
+            "icon": "🏄",
+            "label": "Torquay — Bells Beach"
+          },
+          {
+            "time": "10:30",
+            "icon": "🦘",
+            "label": "Anglesea golf course"
+          },
+          {
+            "time": "12:30",
+            "icon": "🍔",
+            "label": "Lunch in Lorne"
+          },
+          {
+            "time": "14:30",
+            "icon": "🐨",
+            "label": "Kennett River koalas"
+          },
+          {
+            "time": "16:30",
+            "icon": "🏠",
+            "label": "Arrive Apollo Bay"
+          },
+          {
+            "time": "19:00",
+            "icon": "🍺",
+            "label": "GOR Brewhouse dinner"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "🏄",
+            "name": "Torquay & Bells Beach — GOR Kilometre Zero",
+            "desc": "The Great Ocean Road officially begins at Torquay (90 min from Melbourne via the Princes Freeway). This is Australia's surf capital — home to Quiksilver and Rip Curl HQs, and the legendary Bells Beach, which has hosted the Rip Curl Pro — the world's longest-running professional surfing event — since 1962. Walk the cliff track for ocean views. Excellent breakfast cafes in Torquay town: Common Ground is outstanding.",
+            "cost": "Free · Breakfast cafes ~$20–25 pp"
+          },
+          {
+            "icon": "🦘",
+            "name": "Anglesea — Kangaroos on the Golf Course",
+            "desc": "The Anglesea Golf Club's fairways are home to a large resident mob of eastern grey kangaroos, who graze freely among the golfers every morning. Drive into the club car park and walk respectfully onto the course fringes. Some kangaroos are so habituated they barely look up. An utterly surreal, only-in-Australia experience. The golf club also has a perfectly decent coffee machine.",
+            "cost": "Free to observe"
+          },
+          {
+            "icon": "🍔",
+            "name": "Lorne — Lunch & Erskine Falls",
+            "desc": "Lorne is the GOR's most elegant resort town: a beautiful crescent of beach backed by rolling hills, fine restaurants, and the working Great Ocean Road Brewhouse. The Lorne Hotel right on the foreshore does excellent lunches with ocean views. After lunch, a short 1.3km return walk through lush forest reaches Erskine Falls (30m, impressive in summer). Kafe Lacqua for great fish tacos as an alternative.",
+            "cost": "~$25–40 pp lunch"
+          },
+          {
+            "icon": "🐨",
+            "name": "Kennett River — Best Wild Koala Viewing in Victoria",
+            "desc": "Park on the main road near the Kennett River Holiday Park and walk up Grey River Road on foot. Koalas sit in the fork of manna gum trees just 3–10 metres directly above your head — this is one of the most reliable koala-spotting locations in Australia. You can genuinely guarantee sightings most days. As a bonus: crimson and yellow rosellas will eat seed from your open palm. Allow 45 minutes.",
+            "cost": "Free"
+          },
+          {
+            "icon": "🍺",
+            "name": "Apollo Bay — Settle In & GOR Brewhouse",
+            "desc": "Apollo Bay is a working fishing town and the ideal western GOR base: central to the scenic eastern section and just 1 hour from the Twelve Apostles. The harbour has fresh catch available from the pier most mornings. The Great Ocean Road Brewhouse (Pascoe St) does excellent local craft beers alongside a seafood menu that features the region's rock lobster and barramundi. Walk the long crescent beach at sunset.",
+            "cost": "~$30–45 pp dinner"
+          }
+        ]
+      },
+      {
+        "id": "d14",
+        "num": "14",
+        "day": "Sun",
+        "date": "Dec 20",
+        "title": "Twelve Apostles, Loch Ard Gorge & Cape Otway Lighthouse",
+        "meta": "~90 km west then 60 km return to Apollo Bay · Set alarm for sunrise",
+        "img": "https://images.unsplash.com/photo-1573935448851-e9e02612eddd?w=900&q=80",
+        "imgAlt": "Twelve Apostles limestone stacks glowing at sunrise Southern Ocean",
+        "desc": "The jewel of the Great Ocean Road. Set your alarm — the Twelve Apostles at sunrise (around 5:45am in December), before the tour buses arrive and when the limestone stacks glow orange against a pastel sky, is one of Australia's great travel moments. Spend the morning along the Shipwreck Coast, detour to Cape Otway Lighthouse (koalas are nearly guaranteed on the access road), and return through the lush Otway Ranges hinterland.",
+        "timeline": [
+          {
+            "time": "05:15",
+            "icon": "🌅",
+            "label": "Depart for Twelve Apostles"
+          },
+          {
+            "time": "05:45",
+            "icon": "🪨",
+            "label": "Sunrise at Twelve Apostles"
+          },
+          {
+            "time": "07:30",
+            "icon": "🏖",
+            "label": "Gibson Steps — beach level"
+          },
+          {
+            "time": "09:00",
+            "icon": "💡",
+            "label": "Drive to Cape Otway"
+          },
+          {
+            "time": "10:00",
+            "icon": "💡",
+            "label": "Cape Otway Lighthouse"
+          },
+          {
+            "time": "12:00",
+            "icon": "🚢",
+            "label": "Loch Ard Gorge"
+          },
+          {
+            "time": "13:30",
+            "icon": "🌉",
+            "label": "London Arch & The Grotto"
+          },
+          {
+            "time": "15:00",
+            "icon": "🚗",
+            "label": "Return to Apollo Bay"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "🌅",
+            "name": "Twelve Apostles at Sunrise — Arrive 5:30am",
+            "desc": "This is worth every second of the early alarm. Arrive at the free visitor centre car park before sunrise (~5:45am in December). The pedestrian tunnel leads to two viewing platforms — east and west. With the rising sun illuminating the eight remaining limestone stacks from behind, the formations glow orange and gold against a sky moving from purple through pink to blue. By 8am tour buses fill the car park and the magic is diminished. The Twelve Apostles are free, always open, and have no entry fee. Stay for 45 minutes.",
+            "cost": "Free · Open 24 hours · No entry fee, ever"
+          },
+          {
+            "icon": "🏖",
+            "name": "Gibson Steps — Walk to the Beach Beneath the Stacks",
+            "desc": "A 500m detour west of the Twelve Apostles car park. 86 steps (originally hand-carved into the cliff in the 1880s by a pioneer named Hugh Gibson) lead down to the beach directly beneath the stacks. Stand on the sand and look up at 40-metre limestone pillars looming overhead — a completely different scale than the clifftop views. Do not swim — this beach has extremely dangerous rip currents and dumping surf.",
+            "cost": "Free"
+          },
+          {
+            "icon": "💡",
+            "name": "Cape Otway Lighthouse — Koalas on the Access Road",
+            "desc": "Drive 13km south from the main GOR on Lighthouse Road. Drive slowly and watch the manna gum trees at eye level on both sides of the road — koalas perch in the forks directly over the road and are easily spotted at this height. Often 6–10 sightings on the drive alone. The lighthouse (1848 — Australia's oldest mainland lighthouse) stands 90 metres above the Southern Ocean and offers a guided tour with extraordinary views extending on clear days all the way to Tasmania.",
+            "cost": "$19.50 pp lighthouse entry · Koala viewing free on road"
+          },
+          {
+            "icon": "🚢",
+            "name": "Loch Ard Gorge — Shipwreck & Drama",
+            "desc": "Named after the clipper ship Loch Ard that wrecked here on 1 June 1878 with the loss of 52 lives — only two people survived. The gorge is breathtaking regardless of the history: a near-circular natural amphitheatre of 30m sandstone cliffs, accessible via steep stairs to a sheltered beach. Multiple lookouts with different perspectives, a victims' cemetery, and interpretive boards tell the full story of the wreck. Allow 45–60 minutes.",
+            "cost": "Free"
+          },
+          {
+            "icon": "🌉",
+            "name": "London Arch, The Grotto & Bay of Islands",
+            "desc": "Three easy roadside stops just west of Loch Ard Gorge. London Arch: formerly called London Bridge until a section collapsed suddenly in January 1990, stranding two tourists on the far arch until helicopter rescue (true story — they're still married). The Grotto: look down through a sinkhole in the clifftop to a limestone cave and the surging sea below. Bay of Islands: eight rock stacks viewed from a clifftop lookout. All free, all within 3km of each other.",
+            "cost": "Free"
+          }
+        ]
+      },
+      {
+        "id": "d15",
+        "num": "15",
+        "day": "Mon",
+        "date": "Dec 21",
+        "title": "Apollo Bay → Full Day in Melbourne → Fly Home to Singapore",
+        "meta": "~250 km inland via Princes Hwy · ~3 hrs · Evening flight 22:35 MEL→SIN · Land Singapore 03:20",
+        "img": "https://images.unsplash.com/photo-1582376432754-b63cc6a6e49e?w=900&q=80",
+        "imgAlt": "Melbourne CBD morning light from the Yarra River",
+        "desc": "The last morning on the Southern Ocean coast — then the drive back to Melbourne for a proper final day in the city. With a late-night departure at 22:35, you have the whole day to make the most of Melbourne before heading to Tullamarine. The flight lands in Singapore at 03:20 on Dec 22. No rushing — enjoy it.",
+        "timeline": [
+          {
+            "time": "07:00",
+            "icon": "🌅",
+            "label": "Final coastal sunrise"
+          },
+          {
+            "time": "08:30",
+            "icon": "🚗",
+            "label": "Drive to Melbourne (Princes Hwy)"
+          },
+          {
+            "time": "11:30",
+            "icon": "🏙",
+            "label": "Arrive Melbourne — full day free"
+          },
+          {
+            "time": "12:00",
+            "icon": "🍽",
+            "label": "Final Melbourne lunch"
+          },
+          {
+            "time": "14:00",
+            "icon": "🛍",
+            "label": "Fitzroy / CBD afternoon"
+          },
+          {
+            "time": "19:30",
+            "icon": "🚗",
+            "label": "Head to Tullamarine Airport"
+          },
+          {
+            "time": "20:30",
+            "icon": "🚗",
+            "label": "Return rental car"
+          },
+          {
+            "time": "22:35",
+            "icon": "✈️",
+            "label": "Fly MEL → SIN"
+          },
+          {
+            "time": "03:20+1",
+            "icon": "🛬",
+            "label": "Land Singapore (Dec 22)"
+          }
+        ],
+        "activities": [
+          {
+            "icon": "🌅",
+            "name": "Final Sunrise — Apollo Bay Beach",
+            "desc": "Walk down to the beach before breakfast for one last look at the Southern Ocean. The long crescent of Apollo Bay beach in morning light, with the Otways rising behind — a quiet, perfect final moment. Pick up a pastry from the Apollo Bay Bakery (opens 7am) for the road.",
+            "cost": "Free"
+          },
+          {
+            "icon": "🚗",
+            "name": "Return Drive via Princes Highway (Inland Route)",
+            "desc": "For the return to Melbourne, take the B100 inland through Colac and Geelong rather than retracing the coast — this saves 30–45 minutes. The road passes through volcanic crater lakes (Lake Corangamite is the largest inland permanent saline lake in Australia), dense Otways forest, and pastoral Victoria. Fill the tank before leaving Apollo Bay.",
+            "cost": "~$25 fuel · ~3 hours Colac route"
+          },
+          {
+            "icon": "🍽",
+            "name": "Full Day in Melbourne — Make the Most of It",
+            "desc": "With a 22:35 departure, you have the entire day. Proper lunch in Carlton (Brunetti on Faraday St for legendary Italian pastries — always worth it) or Fitzroy. Afternoon: Smith Street boutiques, a final coffee at a specialty roaster, St Kilda for a beach walk, or Melbourne Central for last-minute shopping. This is a real bonus day — no rushing.",
+            "cost": "~$30–50 pp · Budget for shopping"
+          },
+          {
+            "icon": "🚗",
+            "name": "Return Rental Car at Melbourne Airport (Tullamarine)",
+            "desc": "Head to Tullamarine from the CBD at around 19:30 — 45 minutes in normal evening traffic, allow 75 minutes to be safe. The CityLink tollway costs ~$5 each way. Rental return areas are clearly signed at the terminal. Check fuel requirements (most want a full tank back) and photograph the car before handover. Aim to be through check-in and security by 21:00 for a 22:35 departure.",
+            "cost": "CityLink toll ~$5 · Check fuel requirements"
+          },
+          {
+            "icon": "✈️",
+            "name": "Fly Melbourne (MEL) → Singapore (SIN) — 22:35 departure",
+            "desc": "Depart Melbourne Tullamarine at 22:35. Flight time is approximately 7–8 hours depending on carrier and routing. Landing in Singapore Changi at 03:20 on Dec 22. Confirm your terminal at Changi on check-in — T1, T2, or T3 depending on carrier. Grab some sleep on the plane — you've earned it.",
+            "cost": "Included in pre-booked return ticket"
+          }
+        ]
+      }
+    ]
+  },
+  "stays": [
+    {
+      "id": "hobart",
+      "name": "Hobart",
+      "nights": "Dec 7–10 (4 nights)",
+      "loc": "Hobart, Tasmania",
+      "areas": [
+        "Battery Point",
+        "Sandy Bay",
+        "South Hobart",
+        "North Hobart"
+      ],
+      "minPrice": 220,
+      "maxPrice": 380,
+      "img": "https://images.unsplash.com/photo-1560813962-ff3d8fcf59ba?w=600&q=80",
+      "tip": "Battery Point is the most atmospheric choice — cobblestone streets, 10-minute walk to Salamanca and Constitution Dock. Book a property with off-street parking (essential in Hobart). North Hobart is excellent for restaurants. 4 nights gives you time for MONA, Bruny Island day trip, and Maria Island day trip.",
+      "pills": [
+        "4 nights",
+        "Battery Point ideal",
+        "Kitchen & parking essential"
+      ]
+    },
+    {
+      "id": "portarthur",
+      "name": "Tasman Peninsula — Port Arthur",
+      "nights": "Dec 11 (1 night)",
+      "loc": "Port Arthur area, Tasmania",
+      "areas": [
+        "Port Arthur township",
+        "Nubeena",
+        "Eaglehawk Neck"
+      ],
+      "minPrice": 150,
+      "maxPrice": 240,
+      "img": "https://images.unsplash.com/photo-1548625149-fc4a29cf7092?w=600&q=80",
+      "tip": "Staying nearby enables the highly recommended evening ghost tour and lets you revisit the historic site the next morning (2-day entry included in the $53 ticket). Eaglehawk Neck has some lovely coastal properties with ocean views. Options are limited — book well ahead.",
+      "pills": [
+        "1 night",
+        "Enables ghost tour",
+        "Book early — limited"
+      ]
+    },
+    {
+      "id": "freycinet",
+      "name": "Coles Bay — Freycinet",
+      "nights": "Dec 12–13 (2 nights)",
+      "loc": "Coles Bay, Tasmania",
+      "areas": [
+        "Coles Bay only — very limited supply"
+      ],
+      "minPrice": 280,
+      "maxPrice": 460,
+      "img": "https://images.unsplash.com/photo-1526779259212-939e64788e3c?w=600&q=80",
+      "tip": "This is the most urgent booking of the entire trip. Coles Bay has very few properties and they sell out 4–6 months in advance in peak December. Book the moment you decide to go. A house with a view of the pink Hazards mountains is worth every dollar.",
+      "pills": [
+        "2 nights",
+        "⚠ Book IMMEDIATELY",
+        "Extremely limited supply"
+      ]
+    },
+    {
+      "id": "sthelens",
+      "name": "St Helens — Bay of Fires Base",
+      "nights": "Dec 14 (1 night)",
+      "loc": "St Helens or Binalong Bay, Tasmania",
+      "areas": [
+        "St Helens township",
+        "Binalong Bay"
+      ],
+      "minPrice": 180,
+      "maxPrice": 290,
+      "img": "https://images.unsplash.com/photo-1622396481328-9b1b78cdd9fd?w=600&q=80",
+      "tip": "St Helens has a Coles supermarket, bottle shop, and fuel — this is your last proper resupply point before Launceston. A Binalong Bay property puts you right on the Bay of Fires beach (magical at sunrise) but requires a short drive for supplies. Either works well for one night.",
+      "pills": [
+        "1 night",
+        "Last supermarket stop",
+        "Binalong Bay for sunrise"
+      ]
+    },
+    {
+      "id": "cradle",
+      "name": "Cradle Mountain Area",
+      "nights": "Dec 15–16 (2 nights)",
+      "loc": "Cradle Mountain, Tasmania",
+      "areas": [
+        "Cradle Mountain village",
+        "Wilmot (~35 min south)",
+        "Gowrie Park (~30 min)"
+      ],
+      "minPrice": 210,
+      "maxPrice": 400,
+      "img": "https://images.unsplash.com/photo-1504198266287-1659872e6590?w=600&q=80",
+      "tip": "The in-park Peppers Cradle Mountain Lodge is stunning but $450–700+/night. Nearby Airbnbs in Wilmot or Gowrie Park are far cheaper (~30 min drive to park entrance). Critical: NO fuel station at Cradle Mountain — fill up in Sheffield or Deloraine. NO mobile signal inside the park.",
+      "pills": [
+        "2 nights",
+        "⚠ Book ASAP",
+        "No fuel/signal in park"
+      ]
+    },
+    {
+      "id": "melbourne",
+      "name": "Melbourne",
+      "nights": "Dec 17–18 (2 nights)",
+      "loc": "Melbourne, Victoria",
+      "areas": [
+        "Fitzroy",
+        "Collingwood",
+        "Richmond",
+        "St Kilda"
+      ],
+      "minPrice": 280,
+      "maxPrice": 460,
+      "img": "https://images.unsplash.com/photo-1514395462421-a40e3e51eda2?w=600&q=80",
+      "tip": "Fitzroy or Collingwood are the best picks — vibrant neighbourhood, outstanding restaurants and bars within walking distance, and a quick Uber to the CBD. St Kilda is great for a group wanting beach vibes. Avoid CBD accommodation: more expensive, less character, and city parking is expensive.",
+      "pills": [
+        "2 nights",
+        "Best: Fitzroy/Collingwood",
+        "No car needed in city"
+      ]
+    },
+    {
+      "id": "apollobay",
+      "name": "Apollo Bay — Great Ocean Road",
+      "nights": "Dec 19–20 (2 nights)",
+      "loc": "Apollo Bay, Victoria",
+      "areas": [
+        "Apollo Bay township",
+        "Skenes Creek (6 km east)"
+      ],
+      "minPrice": 220,
+      "maxPrice": 390,
+      "img": "https://images.unsplash.com/photo-1545044846-351ba102b6d5?w=600&q=80",
+      "tip": "Apollo Bay is the ideal GOR base — 1 hour from the Twelve Apostles, 30 minutes from Cape Otway. Book a property with an ocean view: watching the Southern Ocean from a balcony at sunset is a genuine trip highlight. Skenes Creek (6km east) has some dramatic cliff-top properties.",
+      "pills": [
+        "2 nights",
+        "GOR ideal base",
+        "Book ocean-view property"
+      ]
+    }
+  ],
+  "checklist": [
+    {
+      "id": "now",
+      "color": "#ff3b30",
+      "label": "Book This Week",
+      "sub": "Highest demand — prices and availability change fast",
+      "items": [
+        {
+          "id": "airbnb-freycinet",
+          "icon": "🏠",
+          "title": "Freycinet (Coles Bay) Airbnb",
+          "dates": "Dec 12–13 · 2 nights",
+          "detail": "The hardest accommodation to secure on the entire trip — Coles Bay has only a handful of Airbnb properties. Book immediately. Filter: entire home, ≥2 bedrooms, kitchen. A property within walking distance of the Freycinet NP carpark saves time each morning.",
+          "est": "~$300–500/night (whole house)",
+          "where": "Airbnb.com → search \"Coles Bay\" or \"Freycinet\""
+        },
+        {
+          "id": "airbnb-cradle",
+          "icon": "🏠",
+          "title": "Cradle Mountain accommodation",
+          "dates": "Dec 15–16 · 2 nights",
+          "detail": "Very limited lodging near the park. Options: Peppers Cradle Mountain Lodge (premium), Discovery Parks cabins, or Airbnbs in Cradle Mountain Village. All fill up months ahead in December — do not delay this one.",
+          "est": "~$280–500/night (whole house or cabin)",
+          "where": "Airbnb.com → \"Cradle Mountain\" · discoveryparks.com.au"
+        },
+        {
+          "id": "flights-sin",
+          "icon": "✈️",
+          "title": "Singapore → Hobart flights + return Melbourne → Singapore",
+          "dates": "Depart SIN Dec 6 (overnight) · Arrive HBA Dec 7 · Return MEL→SIN Dec 21 at 22:35 · Land SIN 03:20 Dec 22",
+          "detail": "Book as two separate itineraries: ① SIN→SYD or SIN→MEL (Singapore Airlines, Scoot, or Jetstar Intl) then connect to Hobart (HBA) on Qantas, Jetstar, or Virgin. ② Return MEL→SIN on Dec 21 — departure 22:35, landing Singapore Changi 03:20 on Dec 22. December is Australian peak summer — fares are rising now. Total journey ~12–16 hrs each way.",
+          "est": "~$400–700 pp return (SIN↔HBA legs)",
+          "where": "Skyscanner.com.sg → book direct with airline"
+        },
+        {
+          "id": "flight-hba-mel",
+          "icon": "✈️",
+          "title": "Hobart → Melbourne flight",
+          "dates": "Dec 17 · HBA → MEL Tullamarine · ~1 hr 10 min",
+          "detail": "Book this with or just after the main Singapore legs. Jetstar, Virgin Australia, and Qantas all fly this route. Pick a departure that gives you 2+ hrs at Hobart Airport to return the RAV4. Aim for a ~1pm departure — arrive Melbourne by 2:15pm, enough time to check in before evening.",
+          "est": "~$120–250 pp one-way",
+          "where": "jetstar.com · virginaustralia.com · qantas.com"
+        }
+      ]
+    },
+    {
+      "id": "month",
+      "color": "#ff9500",
+      "label": "Book This Month",
+      "sub": "Prices and availability tighten through June–July",
+      "items": [
+        {
+          "id": "car-rental",
+          "icon": "🚗",
+          "title": "RAV4 rental — Hobart Airport (Tasmania leg)",
+          "dates": "Pick up Dec 7 · Drop off Dec 17 · 10 days · Same airport, no one-way fee",
+          "detail": "Book a RAV4 or equivalent medium SUV from Hobart Airport (HBA). Always add the excess reduction (standard excess can be $3,000+). Confirm: unlimited km, full-to-full fuel, gravel road cover (needed for some NP roads). Pick up and drop off at HBA — no one-way surcharge.",
+          "est": "~$110–150/day · ~$1,100–1,500 total · ~$275–375 pp",
+          "where": "Compare: DriveNow.com.au · Avis.com.au · drive.com.au"
+        },
+        {
+          "id": "car-rental-melb",
+          "icon": "🚗",
+          "title": "RAV4 rental — Melbourne Airport (Tullamarine)",
+          "dates": "Pick up Dec 17 · Drop off Dec 21 · 4 nights · Arrive on HBA→MEL flight",
+          "detail": "Book separately from the Tasmania rental — pick up at Tullamarine on arrival from Hobart. You need the car for the Great Ocean Road (Days 13–14) and the return drive to the airport on Dec 21. For city days (Dec 17–18), park it at the Airbnb — CBD parking is expensive and unnecessary with free trams. Return at Tullamarine on Dec 21 before your flight home.",
+          "est": "~$90–120/day · ~$360–480 total · ~$90–120 pp",
+          "where": "Avis.com.au · Budget.com.au · Europcar.com.au — compare at DriveNow.com.au"
+        },
+        {
+          "id": "airbnb-hobart",
+          "icon": "🏠",
+          "title": "Hobart Airbnb",
+          "dates": "Dec 7–10 · 4 nights",
+          "detail": "Base for MONA, Salamanca, Bruny Island day trip, and Maria Island day trip. Priority: Battery Point (10-min walk to Salamanca) or Sandy Bay. Must have: off-street parking for the RAV4, full kitchen, ≥2 bathrooms. 4 bedrooms ideal for 4 people.",
+          "est": "~$220–380/night · 4 nights",
+          "where": "Airbnb.com → search \"Battery Point Hobart\" or \"Sandy Bay Hobart\""
+        },
+        {
+          "id": "airbnb-melbourne",
+          "icon": "🏠",
+          "title": "Melbourne Airbnb",
+          "dates": "Dec 17–21 · 4 nights",
+          "detail": "Best neighbourhoods: Fitzroy (Smith St restaurants, 3km from CBD), Collingwood (edgy, great coffee), or Richmond (quiet, tram access). Must have off-street parking for the RAV4. Use trams for city days — CBD parking is expensive. The car is needed for GOR days (Dec 19–20).",
+          "est": "~$280–460/night · 2 nights",
+          "where": "Airbnb.com → search \"Fitzroy Melbourne\" or \"Collingwood Melbourne\""
+        },
+        {
+          "id": "mona",
+          "icon": "🎨",
+          "title": "MONA entry + MONA ROMA ferry",
+          "dates": "Dec 8 · Depart Brooke Street Pier 8:45am or 10:15am",
+          "detail": "Pre-booking is essential in December — timed museum entry means you cannot just show up. Book museum ($39 pp) and MONA ROMA ferry ($30 pp return) together. Book the 8:45am departure to maximise time inside. Allow 4–5 hrs minimum.",
+          "est": "$69 pp · $276 group",
+          "where": "mona.net.au → \"Visit\" → Book ferry + timed entry"
+        },
+        {
+          "id": "bruny-boat",
+          "icon": "🛥",
+          "title": "Wild Bruny Boat Tour",
+          "dates": "Dec 9 · Departs Adventure Bay, South Bruny · 3 hrs",
+          "detail": "A 3-hour wilderness cruise around the sea caves and cliff faces of South Bruny — one of the genuine highlights of the Tasmania leg. Small group sizes, so December spots fill early. Morning departure recommended.",
+          "est": "~$135 pp · $540 group",
+          "where": "wildbruny.com.au → Book direct"
+        },
+        {
+          "id": "insurance",
+          "icon": "🛡",
+          "title": "Travel insurance",
+          "dates": "Buy immediately after booking flights",
+          "detail": "Comprehensive policy covering: trip cancellation (from purchase date), medical & evacuation, baggage, and rental car excess. Ensure it covers hiking and sea kayaking. Annual multi-trip may be better value if you travel often. Compare: DirectAsia, AIG Travel Guard, Allianz.",
+          "est": "~$80–150 pp comprehensive single-trip",
+          "where": "Finder.com.sg → compare travel insurance"
+        }
+      ]
+    },
+    {
+      "id": "twomonths",
+      "color": "#34c759",
+      "label": "Book 2–3 Months Before",
+      "sub": "September–October 2026",
+      "items": [
+        {
+          "id": "bruny-ferry",
+          "icon": "⛴",
+          "title": "SeaLink Bruny Island car ferry",
+          "dates": "Dec 9 · Kettering terminal · Vehicle + 4 passengers · Return",
+          "detail": "In December, vehicles MUST be pre-booked — cars without reservations are turned away during peak periods. Walk-on passengers can usually board without booking, but you need the RAV4 to get around Bruny. The 20-min crossing runs every 30–60 min.",
+          "est": "~$55–70 vehicle return + ~$12 pp passenger",
+          "where": "sealink.com.au → \"Bruny Island\" → Book vehicle crossing"
+        },
+        {
+          "id": "maria-ferry",
+          "icon": "⛴",
+          "title": "Encounter Maria Island ferry",
+          "dates": "Dec 10 · Triabunna ferry terminal (90 km from Hobart) · Return",
+          "detail": "The only way onto Maria Island (no cars allowed). Book return tickets online. Bring all food and water — no shops on island. Hire bikes on arrival (~$25/day) to reach the Painted Cliffs and far north. Check the tide chart for Painted Cliffs (best at low tide).",
+          "est": "~$50 pp return ferry · $25/day bike hire",
+          "where": "encountermariaferries.com.au → Book return"
+        },
+        {
+          "id": "airbnb-portarthur",
+          "icon": "🏠",
+          "title": "Port Arthur / Tasman Peninsula Airbnb",
+          "dates": "Dec 11 · 1 night",
+          "detail": "Stay near Port Arthur to arrive early before the tour buses and consider the evening Ghost Tour. Look in Port Arthur village, Eaglehawk Neck, or Taranna. A property with a Tasman Sea view adds significantly to this stop.",
+          "est": "~$250–400/night",
+          "where": "Airbnb.com → search \"Port Arthur Tasmania\" or \"Eaglehawk Neck\""
+        },
+        {
+          "id": "airbnb-sthelens",
+          "icon": "🏠",
+          "title": "St Helens / Bay of Fires Airbnb",
+          "dates": "Dec 14 · 1 night",
+          "detail": "St Helens is the Bay of Fires access town. For a premium experience, look for properties in Binalong Bay (10km north) directly on the Bay of Fires beachfront — wake up to orange-lichen granite and turquoise water.",
+          "est": "~$200–350/night",
+          "where": "Airbnb.com → search \"St Helens Tasmania\" or \"Binalong Bay\""
+        },
+        {
+          "id": "airbnb-apollobay",
+          "icon": "🏠",
+          "title": "Apollo Bay Airbnb",
+          "dates": "Dec 19–20 · 2 nights",
+          "detail": "GOR base for Cape Otway and the Twelve Apostles. Apollo Bay township is most convenient; Skenes Creek (6km east) has dramatic cliff-top properties with unobstructed Southern Ocean views — worth the extra cost if available.",
+          "est": "~$220–390/night · 2 nights",
+          "where": "Airbnb.com → search \"Apollo Bay\" or \"Skenes Creek\""
+        },
+        {
+          "id": "portarthur-entry",
+          "icon": "🏛",
+          "title": "Port Arthur Historic Site entry",
+          "dates": "Dec 11 · Includes harbour cruise + guided walking tour",
+          "detail": "Book the 2-day pass online at portarthur.org.au — it includes a harbour cruise (views of Isle of the Dead) and guided walking tour departing from the visitor centre. Site opens 8:30am. Ghost Tour is a separate ticket.",
+          "est": "~$53 pp · $212 group (2-day pass)",
+          "where": "portarthur.org.au → \"Tickets\""
+        }
+      ]
+    },
+    {
+      "id": "predeparture",
+      "color": "#0071e3",
+      "label": "Pre-Departure",
+      "sub": "November–December 2026",
+      "items": [
+        {
+          "id": "parks-pass",
+          "icon": "🌿",
+          "title": "Tasmania National Parks Holiday Pass",
+          "dates": "Buy before Dec 7 · Valid 2 months",
+          "detail": "The single best-value purchase of the trip (~$95.50). One pass covers your RAV4's entry to ALL Tasmanian national parks for 2 months: Freycinet, Cradle Mountain, Mt Field, Tasman NP, and more. Buying daily passes at each park costs far more. Buy online, download the PDF, keep it in the glovebox.",
+          "est": "~$95.50 per vehicle (not per person)",
+          "where": "parks.tas.gov.au → \"Passes\" → Holiday Pass"
+        },
+        {
+          "id": "ghost-tour",
+          "icon": "👻",
+          "title": "Port Arthur Ghost Tour (optional)",
+          "dates": "Dec 11 evening · Departs ~8:30pm · 90 min lantern tour",
+          "detail": "Port Arthur is Australia's most documented paranormal site — thousands of deaths occurred here. The 90-min guided ghost tour visits the most notorious buildings after dark with only a lantern. Limited numbers per tour. Highly recommended for those interested.",
+          "est": "~$35 pp · $140 group",
+          "where": "portarthur.org.au → \"Ghost Tour\""
+        },
+        {
+          "id": "kayaking",
+          "icon": "🚣",
+          "title": "Freycinet Adventures sea kayaking (optional)",
+          "dates": "Dec 12 or 13 · 2pm half-day or full-day departure",
+          "detail": "Half-day ($115 pp) or full-day ($195 pp, includes beach lunch). The 2pm half-day fits perfectly after a morning Wineglass Bay hike. Explore granite sea caves and sheltered bays from water level. Numbers limited — book ahead.",
+          "est": "~$115–195 pp",
+          "where": "freycinetadventures.com.au → Book direct"
+        },
+        {
+          "id": "sim-card",
+          "icon": "📱",
+          "title": "Telstra SIM or Australian roaming pack",
+          "dates": "Arrange before departing Singapore",
+          "detail": "Telstra has the only reliable signal at Cradle Mountain, Mt Field, and remote east coast areas — other carriers have no coverage. Consider a Telstra prepaid SIM (~$30 for 28 days, 40GB) for the group's primary navigation phone. Check if your Singaporean SIM offers competitive Australian roaming as an alternative.",
+          "est": "~$30 Telstra prepaid SIM",
+          "where": "telstra.com.au → \"Prepaid\" → Visitor SIM"
+        },
+        {
+          "id": "offline-maps",
+          "icon": "🗺",
+          "title": "Download offline maps + trail apps",
+          "dates": "Download before departing Singapore",
+          "detail": "Mobile data is unreliable in national parks and remote areas. Download before you go: ① Google Maps offline: Tasmania + Victoria; ② AllTrails: Wineglass Bay circuit, Dove Lake circuit, Mount Amos, Hazards Beach; ③ Organic Maps (free, fully offline OSM). These are essential navigation and safety backups.",
+          "est": "Free apps",
+          "where": "AllTrails · Google Maps offline · Organic Maps"
+        },
+        {
+          "id": "lavender-check",
+          "icon": "💜",
+          "title": "Check Bridestowe lavender bloom status",
+          "dates": "Check in late November 2026",
+          "detail": "Peak bloom at Bridestowe is typically late December through mid-January. Your Dec 15 visit may show partial bloom — some rows in colour. Check the estate's Facebook page or website in late November for real-time bloom progress photos. Still scenic and fragrant even before peak.",
+          "est": "Free estate entry · Shop ~$10–40",
+          "where": "bridestowelavender.com.au · Facebook: Bridestowe Lavender Estate"
+        },
+        {
+          "id": "bom-app",
+          "icon": "🌦",
+          "title": "BOM weather app — check night before Cradle Mountain walks",
+          "dates": "Check evening of Dec 15 and Dec 16",
+          "detail": "Cradle Mountain weather changes rapidly — four seasons in one day is genuinely common. Only attempt the summit or Barn Bluff in clear, stable conditions. Download the BOM app and check \"Cradle Valley\" the evening before. If forecast is cloudy or high winds, pivot to Dove Lake Circuit or drive to Montezuma Falls instead.",
+          "est": "Free app",
+          "where": "BOM App → search \"Cradle Valley\" weather station"
+        }
+      ]
+    }
+  ],
+  "clMeta": {
+    "flights-sin": {
+      "cat": "Flights",
+      "catIcon": "✈️",
+      "catColor": "#0071e3",
+      "tripDate": 6
+    },
+    "flight-hba-mel": {
+      "cat": "Flights",
+      "catIcon": "✈️",
+      "catColor": "#0071e3",
+      "tripDate": 17
+    },
+    "car-rental": {
+      "cat": "Car Rental",
+      "catIcon": "🚗",
+      "catColor": "#ff9500",
+      "tripDate": 7
+    },
+    "car-rental-melb": {
+      "cat": "Car Rental",
+      "catIcon": "🚗",
+      "catColor": "#ff9500",
+      "tripDate": 17
+    },
+    "airbnb-hobart": {
+      "cat": "Accommodation",
+      "catIcon": "🏠",
+      "catColor": "#34c759",
+      "tripDate": 7
+    },
+    "airbnb-portarthur": {
+      "cat": "Accommodation",
+      "catIcon": "🏠",
+      "catColor": "#34c759",
+      "tripDate": 11
+    },
+    "airbnb-freycinet": {
+      "cat": "Accommodation",
+      "catIcon": "🏠",
+      "catColor": "#34c759",
+      "tripDate": 12
+    },
+    "airbnb-sthelens": {
+      "cat": "Accommodation",
+      "catIcon": "🏠",
+      "catColor": "#34c759",
+      "tripDate": 14
+    },
+    "airbnb-cradle": {
+      "cat": "Accommodation",
+      "catIcon": "🏠",
+      "catColor": "#34c759",
+      "tripDate": 15
+    },
+    "airbnb-melbourne": {
+      "cat": "Accommodation",
+      "catIcon": "🏠",
+      "catColor": "#34c759",
+      "tripDate": 17
+    },
+    "airbnb-apollobay": {
+      "cat": "Accommodation",
+      "catIcon": "🏠",
+      "catColor": "#34c759",
+      "tripDate": 19
+    },
+    "mona": {
+      "cat": "Activities",
+      "catIcon": "🎨",
+      "catColor": "#5856d6",
+      "tripDate": 8
+    },
+    "bruny-boat": {
+      "cat": "Activities",
+      "catIcon": "🛥",
+      "catColor": "#5856d6",
+      "tripDate": 9
+    },
+    "portarthur-entry": {
+      "cat": "Activities",
+      "catIcon": "🏛",
+      "catColor": "#5856d6",
+      "tripDate": 11
+    },
+    "ghost-tour": {
+      "cat": "Activities",
+      "catIcon": "👻",
+      "catColor": "#5856d6",
+      "tripDate": 11
+    },
+    "kayaking": {
+      "cat": "Activities",
+      "catIcon": "🚣",
+      "catColor": "#5856d6",
+      "tripDate": 12
+    },
+    "bruny-ferry": {
+      "cat": "Ferries & Transfers",
+      "catIcon": "⛴",
+      "catColor": "#007aff",
+      "tripDate": 9
+    },
+    "maria-ferry": {
+      "cat": "Ferries & Transfers",
+      "catIcon": "⛴",
+      "catColor": "#007aff",
+      "tripDate": 10
+    },
+    "insurance": {
+      "cat": "Insurance",
+      "catIcon": "🛡",
+      "catColor": "#636366",
+      "tripDate": 0
+    },
+    "parks-pass": {
+      "cat": "Essentials",
+      "catIcon": "🌿",
+      "catColor": "#30b94a",
+      "tripDate": 0
+    },
+    "sim-card": {
+      "cat": "Essentials",
+      "catIcon": "📱",
+      "catColor": "#636366",
+      "tripDate": 0
+    },
+    "offline-maps": {
+      "cat": "Essentials",
+      "catIcon": "🗺",
+      "catColor": "#636366",
+      "tripDate": 0
+    },
+    "lavender-check": {
+      "cat": "Essentials",
+      "catIcon": "💜",
+      "catColor": "#636366",
+      "tripDate": 0
+    },
+    "bom-app": {
+      "cat": "Essentials",
+      "catIcon": "🌦",
+      "catColor": "#636366",
+      "tripDate": 0
+    }
+  },
+  "costs": [
+    {
+      "cat": "Flights",
+      "item": "Return flights to Hobart — eg. Singapore↔HBA (via SYD or MEL)",
+      "total": 1600,
+      "pp": 400,
+      "note": "Singapore Airlines, Scoot, or Jetstar International to Sydney/Melbourne, then connect to Hobart. Book 3–4 months ahead. December peak prices rise fast."
+    },
+    {
+      "cat": "Flights",
+      "item": "Hobart → Melbourne one-way (per person)",
+      "total": 500,
+      "pp": 125,
+      "note": "~1hr 10min flight. Jetstar, Virgin, or Qantas. Book with your Singapore↔Hobart legs for convenience."
+    },
+    {
+      "cat": "Accommodation",
+      "item": "14 nights (whole house, avg $295/night, split 4)",
+      "total": 4130,
+      "pp": 1033,
+      "note": "See Stays page for full location breakdown. Peak Dec pricing applies."
+    },
+    {
+      "cat": "Transport",
+      "item": "RAV4 rental — Hobart Airport, Tasmania (~10 days @ $130/day)",
+      "total": 1300,
+      "pp": 325,
+      "note": "Picked up and returned at Hobart Airport — no one-way fee. Compare Avis, Europcar, Drive Car Hire (local Tas)."
+    },
+    {
+      "cat": "Transport",
+      "item": "RAV4 rental — Melbourne Airport (Tullamarine), ~4 days @ $110/day",
+      "total": 440,
+      "pp": 110,
+      "note": "Pick up on arrival from Hobart Dec 17. Use for GOR days. Return at Tullamarine Dec 21 before flight home."
+    },
+    {
+      "cat": "Transport",
+      "item": "Fuel — Tasmania (~1,200 km @ $2.40/L, 8L/100km)",
+      "total": 230,
+      "pp": 58,
+      "note": "Fill up in major towns: Hobart, St Helens, Sheffield, Deloraine"
+    },
+    {
+      "cat": "Transport",
+      "item": "Fuel — Melbourne/GOR (~600 km @ $2.00/L)",
+      "total": 96,
+      "pp": 24,
+      "note": "Melbourne fuel ~$1.90–2.20/L, cheaper than Tasmania"
+    },
+    {
+      "cat": "Transport",
+      "item": "Melbourne city transport — CityLink tolls & trams",
+      "total": 60,
+      "pp": 15,
+      "note": "CityLink ~$5 each way airport↔city, free tram zone for CBD sightseeing, misc Ubers"
+    },
+    {
+      "cat": "Parks & Entry",
+      "item": "Tasmania Holiday Parks Pass (per vehicle)",
+      "total": 96,
+      "pp": 24,
+      "note": "Covers ALL Tas national parks for 2 months — far cheaper than daily fees at each park"
+    },
+    {
+      "cat": "Parks & Entry",
+      "item": "Port Arthur Historic Site (2-day entry)",
+      "total": 212,
+      "pp": 53,
+      "note": "Includes harbour cruise, guided walking tour, and audio guide"
+    },
+    {
+      "cat": "Parks & Entry",
+      "item": "Cradle Mountain shuttle bus pass (72hr)",
+      "total": 60,
+      "pp": 15,
+      "note": "Required — no private cars beyond visitor centre in the park"
+    },
+    {
+      "cat": "Activities",
+      "item": "MONA museum + MONA ROMA catamaran ferry",
+      "total": 276,
+      "pp": 69,
+      "note": "Pre-book timed museum entry at mona.net.au. Allow 4–5 hours minimum."
+    },
+    {
+      "cat": "Activities",
+      "item": "Bruny Island Wild boat tour (sea caves & wildlife)",
+      "total": 540,
+      "pp": 135,
+      "note": "3-hr cruise around southern coastline. One of Tasmania's finest experiences."
+    },
+    {
+      "cat": "Activities",
+      "item": "Bruny Island SeaLink ferry (vehicle + passengers)",
+      "total": 256,
+      "pp": 64,
+      "note": "Return vehicle crossing + 4 passengers. Pre-book for December."
+    },
+    {
+      "cat": "Activities",
+      "item": "Cape Otway Lighthouse entry",
+      "total": 78,
+      "pp": 20,
+      "note": "Includes guided lighthouse tour. Koalas almost guaranteed on the access road."
+    },
+    {
+      "cat": "Activities",
+      "item": "Other activities (wildlife parks, kayaking, ghost tour, etc)",
+      "total": 480,
+      "pp": 120,
+      "note": "Natureworld Bicheno ~$35pp, Port Arthur ghost tour ~$35pp, optional sea kayaking"
+    },
+    {
+      "cat": "Food & Drink",
+      "item": "Food — 15 days @ $90/day per person average",
+      "total": 5400,
+      "pp": 1350,
+      "note": "Mix of self-catering (Airbnb kitchen) and dining out. Tasmanian seafood is world-class."
+    },
+    {
+      "cat": "Misc",
+      "item": "Incidentals (souvenirs, pharmacy, laundry, tips)",
+      "total": 800,
+      "pp": 200,
+      "note": ""
+    }
+  ],
+  "tips": [
+    {
+      "icon": "🦘",
+      "title": "Wildlife Safety",
+      "items": [
+        "Never drive after dark in Tasmania — wombats and wallabies cause hundreds of accidents per year",
+        "At Cradle Mountain, wombats are very tame — stay calm and don't touch",
+        "Tasmanian devils are rarely seen in the wild; Natureworld Bicheno is your best bet",
+        "Check for echidnas crossing roads especially in highlands and around Mt Field",
+        "Carry a good torch (red light) for evening wildlife spotting without disturbing animals"
+      ]
+    },
+    {
+      "icon": "⛅",
+      "title": "December Weather",
+      "items": [
+        "Coast: 20–24°C, long sunny days until 9pm. Summer UV is extreme — SPF 50+ essential",
+        "Cradle Mountain: 14–18°C, can drop to 5°C, brings sudden rain and wind — always carry waterproofs",
+        "Mt Wellington: 10°C colder than Hobart at the summit — always pack a layer",
+        "Bay of Fires: warm and sheltered, ideal swimming. No shade — bring a beach tent",
+        "Check the Bureau of Meteorology app (BOM) daily — Tasmanian mountain weather is unpredictable"
+      ]
+    },
+    {
+      "icon": "📱",
+      "title": "Connectivity & Navigation",
+      "items": [
+        "Telstra has the best coverage in regional Tasmania — consider a Telstra SIM or roaming pack",
+        "Cradle Mountain approaches, Mt Field, and parts of Bruny Island have zero signal",
+        "Download offline Google Maps for all areas before leaving signal range",
+        "Tasmania has some excellent signal dead zones — communicate plans before heading remote",
+        "Emergency: 000 (Australia). If lost hiking, activate an emergency beacon (PLB)"
+      ]
+    },
+    {
+      "icon": "⛽",
+      "title": "Driving & Fuel",
+      "items": [
+        "Tasmanian roads outside main highways are narrow, winding, and often shared with logging trucks",
+        "Add 20% to all drive-time estimates for Tasmania compared to mainland driving",
+        "Fill up whenever you see a servo in smaller towns — remote areas can have 100+ km gaps",
+        "Current Tasmania fuel average: ~$2.40/L (varies). Check fuelcheck.tas.gov.au",
+        "The A10 (Lake Highway) and B12 (Lyell Highway) offer stunning alternative routes"
+      ]
+    },
+    {
+      "icon": "🎒",
+      "title": "What to Pack",
+      "items": [
+        "Waterproof jacket — essential for Cradle Mountain and coastal hikes",
+        "Warm layer (fleece or down) for evenings and mountain weather",
+        "Sturdy walking shoes / trail runners — most hikes don't require boots",
+        "High-SPF sunscreen, sun hat, sunglasses — UV is extreme in December",
+        "Reusable water bottles — fill at national park water points (filtered)",
+        "Insect repellent — March flies and mozzies in some coastal areas",
+        "First aid kit, including blister plasters for hiking days"
+      ]
+    },
+    {
+      "icon": "🥩",
+      "title": "Food & Coffee",
+      "items": [
+        "Hobart has excellent cafes and restaurants — Franklin, Peppina, Institut Polaire",
+        "Salamanca Market (Saturdays 8am–3pm) and Farm Gate Market (Sundays) are unmissable",
+        "Fresh Tasmanian seafood: oysters, scallops, Atlantic salmon, abalone — all exceptional",
+        "Melbourne: Lune Croissanterie (queue early), Chin Chin, Cumulus Inc.",
+        "Self-cater 3–4 dinners per week to save ~$50–70 pp/day — Woolworths and Coles in major towns"
+      ]
+    },
+    {
+      "icon": "🏥",
+      "title": "Health & Safety",
+      "items": [
+        "Australia Medicare does not cover visitors — travel insurance is essential",
+        "Snake season in December — watch where you step on warm rocks and in long grass. Freeze if you see one.",
+        "Sun protection is critical — burns happen within 10 mins without sunscreen in Australian summer",
+        "Hypothermia risk at Cradle Mountain — weather can change to wet and cold within an hour",
+        "Nearest hospitals: Hobart (Royal Hobart), Launceston (LGH), St Helens (district hospital)"
+      ]
+    },
+    {
+      "icon": "📋",
+      "title": "Book Before You Go",
+      "items": [
+        "✅ Flights from Singapore — book 3–4 months ahead, December sells out",
+        "✅ RAV4 rental — Avis, Europcar, Sixt or local Hobart operators",
+        "✅ Freycinet (Coles Bay) Airbnb — very limited, book 4–6 months ahead",
+        "✅ Cradle Mountain accommodation — limited, book ASAP",
+        "✅ MONA timed entry — book online before trip",
+        "✅ Tasmania Holiday Parks Pass — buy online before arriving",
+        "✅ Port Arthur Ghost Tour — book online (sells out in December)"
+      ]
+    }
+  ]
+}

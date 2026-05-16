@@ -1,0 +1,116 @@
+/* __PDF_PAGE__ */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Arial,sans-serif; font-size: 10.5pt; line-height: 1.65; color: #1a1a1a; background: #fff; letter-spacing: 0.01em; }
+
+/* ── COVER ── */
+.cover { min-height: 94vh; display: flex; flex-direction: column; justify-content: space-between; page-break-after: always; }
+.cover-label { font-size: 9pt; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #0071e3; margin-bottom: 14pt; padding-top: 8pt; }
+.cover-title { font-size: 38pt; font-weight: 800; letter-spacing: -2px; line-height: 1.02; margin-bottom: 10pt; }
+.cover-sub { font-size: 12pt; color: #555; line-height: 1.65; margin-bottom: 22pt; max-width: 360pt; }
+.stats { display: flex; gap: 10pt; margin-bottom: 18pt; }
+.stat-box { flex: 1; background: #f5f5f7; border-radius: 7pt; padding: 10pt 11pt; }
+.stat-val { font-size: 17pt; font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; }
+.stat-lbl { font-size: 7.5pt; color: #666; margin-top: 2pt; line-height: 1.3; }
+.route-box { background: #f5f5f7; border-radius: 7pt; padding: 9pt 11pt; margin-bottom: 9pt; }
+.route-lbl { font-size: 7.5pt; font-weight: 700; letter-spacing: 1pt; text-transform: uppercase; color: #888; margin-bottom: 5pt; }
+.route-stops { display: flex; flex-wrap: wrap; align-items: center; gap: 3.5pt; }
+.rs { background: #fff; border: 1pt solid #ddd; border-radius: 20pt; font-size: 8pt; font-weight: 600; padding: 2pt 7pt; white-space: nowrap; }
+.ra { color: #bbb; font-size: 9pt; }
+.cover-foot { font-size: 8pt; color: #aaa; border-top: 1pt solid #eee; padding-top: 7pt; }
+
+/* ── SECTION HEADER ── */
+.sec { page-break-before: always; padding-bottom: 9pt; border-bottom: 2pt solid #1a1a1a; margin-bottom: 15pt; }
+.sec .tag { font-size: 8pt; font-weight: 700; letter-spacing: 1.5pt; text-transform: uppercase; color: #0071e3; margin-bottom: 3pt; }
+.sec h2 { font-size: 20pt; font-weight: 800; letter-spacing: -0.5pt; }
+
+/* ── DAY CARDS ── */
+.day { margin-bottom: 16pt; page-break-inside: avoid; border-radius: 7pt; border: 1pt solid #e5e5e5; overflow: hidden; }
+.day-hdr { display: flex; align-items: stretch; background: #1a1a1a; color: #fff; }
+.day-num { width: 58pt; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8pt 6pt; text-align: center; flex-shrink: 0; }
+.day-num span { font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5pt; opacity: 0.65; display: block; }
+.day-num strong { font-size: 14pt; font-weight: 800; line-height: 1; display: block; letter-spacing: -0.5pt; white-space: nowrap; }
+.day-info { flex: 1; padding: 9pt 11pt; display: flex; flex-direction: column; justify-content: center; }
+.day-ttl { font-size: 12pt; font-weight: 700; line-height: 1.3; margin-bottom: 3pt; }
+.day-meta { font-size: 7.5pt; opacity: 0.72; line-height: 1.45; }
+.day-body { padding: 10pt 12pt; }
+
+/* ── TIMELINE ── */
+.tl { display: flex; background: #f5f5f7; border-radius: 5pt; overflow: hidden; margin-bottom: 9pt; }
+.tl-item { flex: 1; min-width: 52pt; padding: 5pt 3pt; text-align: center; border-right: 1pt solid #e8e8e8; }
+.tl-item:last-child { border-right: none; }
+.tl-time { font-size: 6.5pt; font-weight: 700; color: #0071e3; margin-bottom: 2pt; white-space: nowrap; }
+.tl-icon { font-size: 11pt; line-height: 1.2; margin-bottom: 1pt; }
+.tl-lbl { font-size: 6.5pt; font-weight: 600; color: #444; line-height: 1.3; }
+
+.day-desc { font-size: 9.5pt; color: #555; line-height: 1.65; margin-bottom: 9pt; }
+
+/* ── ACTIVITIES ── */
+.acts { display: flex; flex-direction: column; gap: 8pt; }
+.act { display: flex; gap: 7pt; align-items: flex-start; }
+.act-ico { font-size: 13pt; flex-shrink: 0; margin-top: 1pt; line-height: 1; }
+.act-name { font-size: 10pt; font-weight: 700; line-height: 1.3; margin-bottom: 1.5pt; }
+.act-desc { font-size: 9pt; color: #555; line-height: 1.6; }
+.act-cost { font-size: 8pt; color: #0071e3; font-weight: 700; margin-top: 2pt; }
+
+/* ── ACCOMMODATION ── */
+.stay { margin-bottom: 13pt; border: 1pt solid #e5e5e5; border-radius: 7pt; padding: 10pt 12pt; page-break-inside: avoid; }
+.stay-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 3pt; gap: 8pt; }
+.stay-name { font-size: 12.5pt; font-weight: 700; }
+.stay-nights { font-size: 8pt; font-weight: 700; color: #0071e3; white-space: nowrap; flex-shrink: 0; }
+.stay-loc { font-size: 8.5pt; color: #777; margin-bottom: 4pt; }
+.stay-price { font-size: 14pt; font-weight: 800; margin-bottom: 3pt; }
+.stay-price-sub { font-size: 8.5pt; font-weight: 400; color: #666; }
+.stay-areas { font-size: 8.5pt; color: #444; margin-bottom: 4pt; }
+.stay-tip { font-size: 8.5pt; color: #555; line-height: 1.6; font-style: italic; border-top: 1pt solid #f0f0f0; padding-top: 5pt; }
+
+/* ── BUDGET ── */
+.b-totals { display: flex; gap: 10pt; margin-bottom: 16pt; }
+.b-total { flex: 1; text-align: center; background: #f5f5f7; border-radius: 7pt; padding: 11pt; }
+.b-val { font-size: 20pt; font-weight: 800; letter-spacing: -1pt; }
+.b-lbl { font-size: 8pt; color: #666; margin-top: 3pt; }
+.ctable { width: 100%; border-collapse: collapse; font-size: 8.5pt; }
+.ctable th { text-align: left; font-size: 7pt; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5pt; color: #888; padding: 6pt 7pt; border-bottom: 1.5pt solid #ddd; }
+.ctable td { padding: 5.5pt 7pt; border-bottom: 1pt solid #f0f0f0; vertical-align: top; line-height: 1.4; }
+.ctable tr:last-child td { border-bottom: none; }
+.cost-cat { font-weight: 700; font-size: 8.5pt; color: #1a1a1a; background: #fafafa; }
+.cost-amt { font-weight: 800; font-size: 9pt; white-space: nowrap; }
+.cost-pp { font-weight: 800; font-size: 9pt; color: #0071e3; white-space: nowrap; }
+.cost-note { color: #777; font-size: 8pt; }
+
+/* ── CHECKLIST ── */
+.cl-group-pdf { margin-bottom: 16pt; page-break-inside: avoid; }
+.cl-group-pdf-hdr { padding: 7pt 10pt; border-radius: 5pt 5pt 0 0; display: flex; justify-content: space-between; align-items: center; }
+.cl-group-pdf-title { font-size: 10pt; font-weight: 800; color: #fff; letter-spacing: -0.2pt; }
+.cl-group-pdf-sub { font-size: 7pt; color: rgba(255,255,255,.8); margin-top: 1pt; }
+.cl-group-pdf-badge { font-size: 7.5pt; font-weight: 700; color: #fff; background: rgba(255,255,255,.25); padding: 2pt 7pt; border-radius: 10pt; white-space: nowrap; }
+.cl-items-pdf { border: 1pt solid #e5e5e5; border-top: none; border-radius: 0 0 5pt 5pt; }
+.cl-item-pdf { display: flex; gap: 7pt; padding: 7pt 10pt; border-bottom: 1pt solid #f5f5f5; align-items: flex-start; }
+.cl-item-pdf:last-child { border-bottom: none; }
+.cl-box { width: 11pt; height: 11pt; border: 1.5pt solid #bbb; border-radius: 2pt; flex-shrink: 0; margin-top: 1pt; }
+.cl-ico-pdf { font-size: 12pt; flex-shrink: 0; line-height: 1.2; }
+.cl-body-pdf { flex: 1; }
+.cl-title-pdf { font-size: 9.5pt; font-weight: 700; line-height: 1.3; margin-bottom: 1pt; }
+.cl-dates-pdf { font-size: 8pt; font-weight: 600; color: #0071e3; margin-bottom: 2pt; }
+.cl-detail-pdf { font-size: 8pt; color: #555; line-height: 1.5; margin-bottom: 2pt; }
+.cl-meta-pdf { font-size: 7.5pt; color: #888; }
+.cl-meta-pdf strong { color: #34c759; }
+
+/* ── MAPS ── */
+.map-section-pdf { margin-bottom: 18pt; page-break-inside: avoid; }
+.map-label { font-size: 8pt; font-weight: 700; letter-spacing: 1.2pt; text-transform: uppercase; margin-bottom: 6pt; }
+.map-label.tas { color: #0071e3; }
+.map-label.melb { color: #ff9500; }
+.map-img { width: 100%; border-radius: 7pt; display: block; border: 1pt solid #e5e5e5; }
+.map-caption { font-size: 7.5pt; color: #888; margin-top: 4pt; line-height: 1.4; }
+.maps-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14pt; }
+
+/* ── TIPS ── */
+.tips { display: grid; grid-template-columns: 1fr 1fr; gap: 11pt; }
+.tip-card { border: 1pt solid #e5e5e5; border-radius: 7pt; padding: 10pt; page-break-inside: avoid; }
+.tip-ico { font-size: 16pt; margin-bottom: 5pt; line-height: 1; }
+.tip-ttl { font-size: 10pt; font-weight: 700; margin-bottom: 5pt; }
+.tip-list { list-style: none; }
+.tip-list li { font-size: 8.5pt; color: #555; line-height: 1.55; padding: 3.5pt 0 3.5pt 11pt; border-bottom: 1pt solid #f5f5f5; position: relative; }
+.tip-list li::before { content: '→'; position: absolute; left: 0; color: #0071e3; font-weight: 700; }
+.tip-list li:last-child { border-bottom: none; }
+
