@@ -849,44 +849,10 @@ function flightCardRouteMapHtml(m) {
   return `<div class="flight-card-map-host" aria-hidden="true"><div class="flight-card-map" data-route="${enc}"></div></div>`;
 }
 
-function tripMaplibreSupported() {
-  return typeof maplibregl !== 'undefined' && maplibregl.supported();
-}
 
-function createEsriGlobeStyle() {
-  return {
-    version: 8,
-    name: 'triple-esri-satellite',
-    sources: {
-      esri: {
-        type: 'raster',
-        tiles: ['https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
-        tileSize: 256,
-        attribution: '© Esri',
-        maxzoom: 19,
-      },
-    },
-    layers: [
-      {
-        id: 'background',
-        type: 'background',
-        paint: { 'background-color': '#0a1628' },
-      },
-      {
-        id: 'esri',
-        type: 'raster',
-        source: 'esri',
-        paint: {
-          'raster-opacity': 1,
-          'raster-fade-duration': 0,
-          /* Avoid aggressive brightness filters — on some GPUs they can flatten imagery to black */
-          'raster-saturation': -0.22,
-          'raster-contrast': 0.08,
-        },
-      },
-    ],
-  };
-}
+/** Esri World Imagery (XYZ). Leaflet raster tiles work without WebGL (reliable on iOS PWA). */
+const TRIP_SATELLITE_TILE_URL =
+  'https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
 
 function tripToRad(d) {
   return (d * Math.PI) / 180;
@@ -935,81 +901,9 @@ function tripGreatCircleLine(coords, stepsPerLeg) {
   return out;
 }
 
-function tripLngLatBounds(coords) {
-  const b = new maplibregl.LngLatBounds(coords[0], coords[0]);
-  coords.forEach(c => b.extend(c));
-  return b;
-}
-
-function tripMaplibreAddRouteGlow(map, sourceId, coordsLngLat, colors, widths) {
-  const w = widths || { core: 3, glow: 11 };
-  const c = colors || { core: '#7dd3fc', glow: '#38bdf8' };
-  const line = tripGreatCircleLine(coordsLngLat, 36);
-  map.addSource(sourceId, {
-    type: 'geojson',
-    data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: line } },
-  });
-  map.addLayer({
-    id: `${sourceId}-glow`,
-    type: 'line',
-    source: sourceId,
-    paint: {
-      'line-color': c.glow,
-      'line-width': w.glow,
-      'line-blur': 3.5,
-      'line-opacity': 0.42,
-    },
-  });
-  map.addLayer({
-    id: `${sourceId}-core`,
-    type: 'line',
-    source: sourceId,
-    layout: { 'line-cap': 'round', 'line-join': 'round' },
-    paint: {
-      'line-color': c.core,
-      'line-width': w.core,
-      'line-opacity': 0.95,
-    },
-  });
-}
-
-function tripMaplibreAddDashedLeg(map, sourceId, p0, p1, color) {
-  const line = tripGreatCircleLine(
-    [
-      [p0[0], p0[1]],
-      [p1[0], p1[1]],
-    ],
-    18
-  );
-  map.addSource(sourceId, {
-    type: 'geojson',
-    data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: line } },
-  });
-  map.addLayer({
-    id: `${sourceId}-line`,
-    type: 'line',
-    source: sourceId,
-    layout: { 'line-cap': 'round', 'line-join': 'round' },
-    paint: {
-      'line-color': color,
-      'line-width': 2.2,
-      'line-opacity': 0.72,
-      'line-dasharray': [2, 2.5],
-    },
-  });
-}
-
-function tripMaplibreWaitIdle(map, msCap) {
-  const cap = msCap || 1600;
-  return new Promise(resolve => {
-    const t = setTimeout(resolve, cap);
-    const done = () => {
-      clearTimeout(t);
-      resolve();
-    };
-    if (map.loaded && map.loaded()) map.once('idle', done);
-    else map.once('load', () => map.once('idle', done));
-  });
+/** [lng,lat][] → [lat,lng][] for Leaflet */
+function tripLineLngLatToLeaflet(lngLatRing) {
+  return lngLatRing.map(c => [c[1], c[0]]);
 }
 
 const _flightCardMiniMaps = [];
@@ -1029,7 +923,7 @@ function refreshFlightCardMiniMapSizes() {
   requestAnimationFrame(() => {
     for (const map of _flightCardMiniMaps) {
       try {
-        map.resize();
+        map.invalidateSize();
       } catch (_) {
         /* ignore */
       }
@@ -1039,8 +933,9 @@ function refreshFlightCardMiniMapSizes() {
 
 function initFlightCardMiniMaps() {
   teardownFlightCardMiniMaps();
-  if (!tripMaplibreSupported()) return;
-  const style = createEsriGlobeStyle();
+  if (typeof L === 'undefined') return;
+
+  const tileOpts = { maxZoom: 19, attribution: '© Esri', crossOrigin: true };
 
   document.querySelectorAll('.flight-card-map[data-route]').forEach(el => {
     let pts;
@@ -1051,91 +946,37 @@ function initFlightCardMiniMaps() {
     }
     if (!Array.isArray(pts) || pts.length < 2) return;
 
-    const coords = pts.map(p => [p.lng, p.lat]);
-    const map = new maplibregl.Map({
-      container: el,
-      style,
-      center: coords[0],
-      zoom: 1.35,
-      pitch: 52,
-      bearing: 24,
-      maxPitch: 85,
+    const coordsLngLat = pts.map(p => [p.lng, p.lat]);
+    const latlngs = tripLineLngLatToLeaflet(tripGreatCircleLine(coordsLngLat, 32));
+
+    const map = L.map(el, {
+      zoomControl: false,
       attributionControl: false,
-      scrollZoom: false,
-      boxZoom: false,
-      dragPan: true,
-      dragRotate: true,
-      touchZoomRotate: true,
-      touchPitch: true,
+      dragging: true,
+      scrollWheelZoom: false,
       doubleClickZoom: true,
+      boxZoom: false,
       keyboard: false,
-      renderWorldCopies: false,
+      tap: true,
     });
-    map.once('load', () => {
-      const line = tripGreatCircleLine(coords, 32);
-      map.addSource('fc-route', {
-        type: 'geojson',
-        data: {
-          type: 'Feature',
-          properties: {},
-          geometry: { type: 'LineString', coordinates: line },
-        },
-      });
-      map.addLayer({
-        id: 'fc-route-glow',
-        type: 'line',
-        source: 'fc-route',
-        paint: {
-          'line-color': '#22d3ee',
-          'line-width': 10,
-          'line-blur': 2.5,
-          'line-opacity': 0.38,
-        },
-      });
-      map.addLayer({
-        id: 'fc-route-core',
-        type: 'line',
-        source: 'fc-route',
-        layout: { 'line-cap': 'round', 'line-join': 'round' },
-        paint: {
-          'line-color': '#bae6fd',
-          'line-width': 3,
-          'line-opacity': 0.96,
-        },
-      });
-
-      map.addSource('fc-stops', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: pts.map(p => ({
-            type: 'Feature',
-            properties: {},
-            geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
-          })),
-        },
-      });
-      map.addLayer({
-        id: 'fc-stop-halo',
-        type: 'circle',
-        source: 'fc-stops',
-        paint: {
-          'circle-radius': 6,
-          'circle-color': '#ffffff',
-          'circle-opacity': 0.95,
-          'circle-stroke-width': 2,
-          'circle-stroke-color': '#0284c7',
-        },
-      });
-
-      try {
-        const b = tripLngLatBounds(coords);
-        map.fitBounds(b, { padding: 28, duration: 0, maxZoom: 6.2, pitch: 50, bearing: map.getBearing() });
-      } catch (_) {
-        map.setCenter(coords[0]);
-      }
+    L.tileLayer(TRIP_SATELLITE_TILE_URL, tileOpts).addTo(map);
+    L.polyline(latlngs, { color: '#22d3ee', weight: 10, opacity: 0.34, lineJoin: 'round' }).addTo(map);
+    L.polyline(latlngs, { color: '#bae6fd', weight: 3, opacity: 0.96, lineJoin: 'round' }).addTo(map);
+    pts.forEach((p, i) => {
+      const isEnd = i === 0 || i === pts.length - 1;
+      L.circleMarker([p.lat, p.lng], {
+        radius: isEnd ? 5 : 4,
+        color: '#ffffff',
+        weight: 2,
+        fillColor: isEnd ? '#0284c7' : '#38bdf8',
+        fillOpacity: 1,
+      }).addTo(map);
     });
-
+    try {
+      map.fitBounds(L.latLngBounds(latlngs), { padding: [12, 12], maxZoom: 7 });
+    } catch (_) {
+      map.setView(latlngs[0], 4);
+    }
     _flightCardMiniMaps.push(map);
   });
 
@@ -2334,27 +2175,17 @@ async function doExportPDF(isLandscape) {
     const prev = pageEl.style.display;
     pageEl.style.display = 'block';
     try {
-      let dataUrl = null;
-      if (liveMap && typeof liveMap.getCanvas === 'function') {
-        liveMap.resize();
-        await tripMaplibreWaitIdle(liveMap, 2200);
-        try {
-          dataUrl = liveMap.getCanvas().toDataURL('image/jpeg', 0.88);
-        } catch (_) {
-          /* WebGL readback can fail on some GPUs */
-        }
+      if (liveMap && typeof liveMap.invalidateSize === 'function') {
+        liveMap.invalidateSize();
+        await new Promise(r => setTimeout(r, 450));
       }
-      if (!dataUrl) {
-        if (liveMap && typeof liveMap.resize === 'function') liveMap.resize();
-        await new Promise(r => setTimeout(r, 400));
-        const canvas = await html2canvas(mapEl, {
-          useCORS: true,
-          allowTaint: true,
-          scale: 1.5,
-          backgroundColor: '#020617',
-        });
-        dataUrl = canvas.toDataURL('image/jpeg', 0.88);
-      }
+      const canvas = await html2canvas(mapEl, {
+        useCORS: true,
+        allowTaint: true,
+        scale: 1.5,
+        backgroundColor: '#0a1628',
+      });
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.88);
       pageEl.style.display = prev;
       return dataUrl;
     } catch (e) {
@@ -2887,42 +2718,15 @@ function init() {
 // ═══════════════════════════════════════
 function initMaps() {
   try {
-    if (!tripMaplibreSupported()) {
-      console.warn('MapLibre GL not available; maps disabled');
+    if (typeof L === 'undefined') {
+      console.warn('Leaflet not loaded; maps disabled');
       return;
     }
-    const style = createEsriGlobeStyle();
+    const tileOpts = { maxZoom: 19, attribution: '© Esri', crossOrigin: true };
 
-    const mapTas = new maplibregl.Map({
-      container: 'map-tas',
-      style,
-      center: [146.8, -42.2],
-      zoom: 5.45,
-      pitch: 50,
-      bearing: -22,
-      maxPitch: 85,
-      scrollZoom: true,
-      boxZoom: true,
-      dragRotate: true,
-      touchPitch: true,
-      doubleClickZoom: true,
-      attributionControl: true,
-      renderWorldCopies: false,
-    });
-    try {
-      mapTas.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right');
-    } catch (_) {
-      try {
-        mapTas.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
-      } catch (_2) {
-        /* ignore */
-      }
-    }
-    try {
-      mapTas.addControl(new maplibregl.GlobeControl(), 'top-right');
-    } catch (_) {
-      /* older MapLibre */
-    }
+    // ── Tasmania Map ──────────────────────────────────────────
+    const mapTas = L.map('map-tas', { zoomControl: true, scrollWheelZoom: false }).setView([-42.2, 146.8], 7);
+    L.tileLayer(TRIP_SATELLITE_TILE_URL, tileOpts).addTo(mapTas);
     window._mapTas = mapTas;
 
     const tasStops = [
@@ -2940,62 +2744,37 @@ function initMaps() {
     ];
 
     const mainLngLat = tasStops.filter(s => !s.daytrip).map(s => [s.lng, s.lat]);
+    const mainPath = tripLineLngLatToLeaflet(tripGreatCircleLine(mainLngLat, 36));
+    L.polyline(mainPath, { color: '#0ea5e9', weight: 11, opacity: 0.38, lineJoin: 'round' }).addTo(mapTas);
+    L.polyline(mainPath, { color: '#7dd3fc', weight: 3.5, opacity: 0.95, lineJoin: 'round' }).addTo(mapTas);
 
-    mapTas.once('load', () => {
-      tripMaplibreAddRouteGlow(mapTas, 'tas-main', mainLngLat, { core: '#7dd3fc', glow: '#0ea5e9' }, { core: 3.5, glow: 13 });
+    function addTasDash(a, b) {
+      const latlngs = tripLineLngLatToLeaflet(tripGreatCircleLine([[a.lng, a.lat], [b.lng, b.lat]], 18));
+      L.polyline(latlngs, { color: '#4ade80', weight: 2.5, opacity: 0.72, dashArray: '6 8', lineJoin: 'round' }).addTo(mapTas);
+    }
+    addTasDash(tasStops[0], tasStops[1]);
+    addTasDash(tasStops[0], tasStops[2]);
+    addTasDash(tasStops[5], tasStops[7]);
 
-      tripMaplibreAddDashedLeg(mapTas, 'tas-dt-bruny', [tasStops[0].lng, tasStops[0].lat], [tasStops[1].lng, tasStops[1].lat], '#4ade80');
-      tripMaplibreAddDashedLeg(mapTas, 'tas-dt-maria', [tasStops[0].lng, tasStops[0].lat], [tasStops[2].lng, tasStops[2].lat], '#4ade80');
-      tripMaplibreAddDashedLeg(mapTas, 'tas-dt-bride', [tasStops[5].lng, tasStops[5].lat], [tasStops[7].lng, tasStops[7].lat], '#4ade80');
-
-      tasStops.forEach(s => {
-        const size = s.daytrip ? 24 : 28;
-        const el = document.createElement('div');
-        el.innerHTML = `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${s.color};border:2.5px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-size:${s.daytrip ? 10 : 11}px;font-weight:700;color:#fff;font-family:var(--font),system-ui,sans-serif">${s.num}</div>`;
-        new maplibregl.Marker({ element: el })
-          .setLngLat([s.lng, s.lat])
-          .setPopup(new maplibregl.Popup({ offset: Math.round(size / 2) }).setHTML(`<strong>${s.label}</strong><br/>${s.note}`))
-          .addTo(mapTas);
+    tasStops.forEach(s => {
+      const size = s.daytrip ? 24 : 28;
+      const icon = L.divIcon({
+        className: '',
+        html:`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${s.color};border:2.5px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-size:${s.daytrip ? 10 : 11}px;font-weight:700;color:#fff;font-family:var(--font),system-ui,sans-serif">${s.num}</div>`,
+        iconSize:[size, size], iconAnchor:[size / 2, size / 2], popupAnchor:[0, -size / 2],
       });
-
-      const tasPts = tasStops.map(s => [s.lng, s.lat]);
-      try {
-        mapTas.fitBounds(tripLngLatBounds(tasPts), { padding: 56, duration: 0, maxZoom: 8.6, pitch: 52, bearing: mapTas.getBearing() });
-      } catch (_) {
-        mapTas.setCenter(tasPts[0]);
-      }
+      L.marker([s.lat, s.lng], { icon }).addTo(mapTas).bindPopup(`<strong>${s.label}</strong><br/>${s.note}`);
     });
 
-    const mapMelb = new maplibregl.Map({
-      container: 'map-melb',
-      style,
-      center: [144.2, -38.4],
-      zoom: 6.25,
-      pitch: 48,
-      bearing: 12,
-      maxPitch: 85,
-      scrollZoom: true,
-      boxZoom: true,
-      dragRotate: true,
-      touchPitch: true,
-      doubleClickZoom: true,
-      attributionControl: true,
-      renderWorldCopies: false,
-    });
     try {
-      mapMelb.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right');
+      mapTas.fitBounds(L.latLngBounds(tasStops.map(s => [s.lat, s.lng])), { padding: [52, 52], maxZoom: 8 });
     } catch (_) {
-      try {
-        mapMelb.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
-      } catch (_2) {
-        /* ignore */
-      }
+      mapTas.setView([tasStops[0].lat, tasStops[0].lng], 7);
     }
-    try {
-      mapMelb.addControl(new maplibregl.GlobeControl(), 'top-right');
-    } catch (_) {
-      /* older MapLibre */
-    }
+
+    // ── Melbourne / GOR Map ───────────────────────────────────
+    const mapMelb = L.map('map-melb', { zoomControl: true, scrollWheelZoom: false }).setView([-38.4, 144.2], 8);
+    L.tileLayer(TRIP_SATELLITE_TILE_URL, tileOpts).addTo(mapMelb);
     window._mapMelb = mapMelb;
 
     const melbStops = [
@@ -3011,31 +2790,30 @@ function initMaps() {
     ];
 
     const gorLngLat = melbStops.map(s => [s.lng, s.lat]);
+    const gorPath = tripLineLngLatToLeaflet(tripGreatCircleLine(gorLngLat, 36));
+    L.polyline(gorPath, { color: '#fb923c', weight: 11, opacity: 0.42, lineJoin: 'round' }).addTo(mapMelb);
+    L.polyline(gorPath, { color: '#fdba74', weight: 3.5, opacity: 0.95, lineJoin: 'round' }).addTo(mapMelb);
 
-    mapMelb.once('load', () => {
-      tripMaplibreAddRouteGlow(mapMelb, 'melb-gor', gorLngLat, { core: '#fdba74', glow: '#fb923c' }, { core: 3.5, glow: 13 });
-
-      melbStops.forEach((s, i) => {
-        const isEnd = i === melbStops.length - 1;
-        const color = isEnd ? '#86868b' : '#ff9500';
-        const el = document.createElement('div');
-        el.innerHTML = `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;font-family:var(--font),system-ui,sans-serif">${s.num}</div>`;
-        new maplibregl.Marker({ element: el })
-          .setLngLat([s.lng, s.lat])
-          .setPopup(new maplibregl.Popup({ offset: 14 }).setHTML(`<strong>${s.label}</strong><br/>${s.note}`))
-          .addTo(mapMelb);
+    melbStops.forEach((s, i) => {
+      const isEnd = i === melbStops.length - 1;
+      const color = isEnd ? '#86868b' : '#ff9500';
+      const icon = L.divIcon({
+        className: '',
+        html:`<div style="width:28px;height:28px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;font-family:var(--font),system-ui,sans-serif">${s.num}</div>`,
+        iconSize:[28, 28], iconAnchor:[14, 14], popupAnchor:[0, -14],
       });
-
-      try {
-        mapMelb.fitBounds(tripLngLatBounds(gorLngLat), { padding: 50, duration: 0, maxZoom: 9.2, pitch: 48, bearing: mapMelb.getBearing() });
-      } catch (_) {
-        mapMelb.setCenter(gorLngLat[0]);
-      }
+      L.marker([s.lat, s.lng], { icon }).addTo(mapMelb).bindPopup(`<strong>${s.label}</strong><br/>${s.note}`);
     });
 
+    try {
+      mapMelb.fitBounds(L.latLngBounds(melbStops.map(s => [s.lat, s.lng])), { padding: [50, 50], maxZoom: 9 });
+    } catch (_) {
+      mapMelb.setView([melbStops[0].lat, melbStops[0].lng], 8);
+    }
+
     requestAnimationFrame(() => {
-      mapTas.resize();
-      mapMelb.resize();
+      mapTas.invalidateSize();
+      mapMelb.invalidateSize();
     });
   } catch (e) {
     console.error('initMaps', e);
