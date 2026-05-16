@@ -246,7 +246,7 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
   -webkit-overflow-scrolling:touch;scrollbar-width:thin}
 .flight-cards-scroller::-webkit-scrollbar{height:5px}
 .flight-cards-scroller .flight-card{
-  flex:0 0 min(298px,calc(100vw - 56px));scroll-snap-align:start;max-width:100%}
+  flex:0 0 min(308px,calc(100vw - 56px));scroll-snap-align:start;max-width:100%}
 .flight-cards-scroller--empty{
   flex-direction:column;overflow-x:visible;scroll-snap-type:none}
 .flight-cards-scroller--empty .flight-empty--solo{
@@ -256,15 +256,18 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 /* Calmer elevation on flight cards (avoid “double” glass halo) */
 .flight-card.glass-card{box-shadow:0 6px 28px rgba(0,0,0,.07), var(--glass-inner)}
 .flight-card-hd{
-  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px 10px;
+  display:grid;grid-template-columns:auto minmax(7.5rem,1fr) auto;align-items:center;gap:8px 10px;
   margin-bottom:6px;padding-right:min(108px,30vw)}
 .flight-card-star{color:#ff9500;font-size:14px;line-height:1;flex-shrink:0}
-.flight-card-hd-mid{min-width:0;overflow:hidden}
+.flight-card-hd-mid{min-width:0;overflow:visible;justify-self:start;max-width:100%}
 .flight-card--simple .flight-card-hd-mid .flight-pill{
   margin:0;display:inline-flex;vertical-align:middle;max-width:100%;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-  font-size:13px;font-weight:600;letter-spacing:.02em;text-transform:none;
+  overflow:visible;text-overflow:clip;white-space:nowrap;
+  font-size:12px;font-weight:700;letter-spacing:.02em;text-transform:none;
+  padding:4px 11px;min-width:7.25ch;
   color:var(--text-sec);background:rgba(0,0,0,.06);border:1px solid rgba(0,0,0,.1)}
+.flight-card--simple .flight-card-hd-mid .flight-pill.flight-pill--long{
+  font-size:11px;font-weight:700;padding:3px 9px;letter-spacing:.01em}
 .flight-card-when{
   font-size:13px;font-weight:500;color:var(--text-sec);line-height:1.25;
   text-align:right;white-space:nowrap;justify-self:end}
@@ -273,6 +276,11 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
   font-size:clamp(17px,4.8vw,20px);font-weight:700;letter-spacing:-.4px;color:var(--text);
   line-height:1.2;margin:0 0 14px;padding-right:min(108px,26vw)}
 .flight-card-times{display:flex;flex-direction:column;gap:10px}
+.flight-card-conn-gap{
+  font-size:11px;font-weight:600;color:var(--text-sec);line-height:1.35;
+  margin:4px 0 2px;padding:2px 0 2px 32px}
+.flight-card-conn-pill{margin:0 0 2px;padding-left:32px}
+.flight-card-conn-pill .flight-pill{font-size:11px;font-weight:700;padding:3px 9px;margin:0}
 .flight-card-leg{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
 .flight-card-leg-meta{
   margin-left:auto;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-end;
@@ -287,10 +295,6 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 .flight-card-ap{font-size:14px;font-weight:500;color:var(--text-sec);min-width:2.75rem;letter-spacing:.03em}
 .flight-card-tm{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.02em}
 .flight-card-plus{font-size:10px;font-weight:700;color:var(--text-sec);vertical-align:super;margin-left:1px}
-.flight-card-divider{height:1px;background:rgba(0,0,0,.09);margin:14px 0 11px}
-.flight-card-layover{display:flex;align-items:center;justify-content:space-between;gap:12px}
-.flight-card-layover-text{font-size:14px;font-weight:700;color:var(--text);line-height:1.35;flex:1;min-width:0}
-.flight-card-layover-chev{color:var(--text-ter);font-size:20px;line-height:1;font-weight:300;flex-shrink:0}
 .flight-card-no-fallback{font-size:13px;font-weight:600;color:var(--text-sec);display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .flight-pill{
   display:inline-flex;align-items:center;justify-content:center;
