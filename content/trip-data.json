@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.14",
+  "appVersion": "1.0.15",
   "versions": [
     {
       "v": "1.0",
@@ -173,9 +173,23 @@
       "v": "1.0.14",
       "date": "2026-05-16",
       "title": "Scroll lock on all modals",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Background scroll is frozen whenever any dialog is open (including auth, version history, conflicts, and the rest), not only the flight form"
+      ]
+    },
+    {
+      "v": "1.0.15",
+      "date": "2026-05-16",
+      "title": "Flight board polish — airlines, connections, native chrome",
+      "latest": true,
+      "changes": [
+        "Status bar / PWA theme aligned with the frosted header (light theme-color, translucent status bar, safe-area padding)",
+        "Countdown follows the first scheduled flight and refreshes every minute",
+        "Flight timeline scrolls inside each card; non-direct itineraries show a connection column",
+        "Add/edit flight uses airline picklists plus flight digits (e.g. JQ8); connection airline, route, and landing time; notes removed from the form and cards",
+        "Navigation clears stuck scroll-lock so the bottom edit bar stays fixed to the viewport",
+        "Tighter departure/arrival pickers and slimmer cards/countdown; controls use iOS-style blue, corner radius, and tap feedback"
       ]
     }
   ],

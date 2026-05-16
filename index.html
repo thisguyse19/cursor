@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, viewport-fit=cover, user-scalable=no">
 <title>Triple · Tasmania & Melbourne</title>
 <meta name="description" content="Triple trip planner — Tasmania & Melbourne, December 2026">
-<meta name="theme-color" content="#0071e3">
+<meta name="theme-color" content="#f5f5f7">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Triple">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
@@ -536,9 +536,10 @@
     <label class="flight-modal-label" for="flight-f-label">Label</label>
     <input id="flight-f-label" class="flight-modal-input" type="text" placeholder="e.g. Return to Singapore" autocomplete="off">
     <label class="flight-modal-label" for="flight-f-airline">Airline</label>
-    <input id="flight-f-airline" class="flight-modal-input" type="text" placeholder="e.g. Singapore Airlines" autocomplete="off">
-    <label class="flight-modal-label" for="flight-f-no">Flight number</label>
-    <input id="flight-f-no" class="flight-modal-input" type="text" placeholder="e.g. SQ218" autocomplete="off">
+    <select id="flight-f-airline" class="flight-modal-input flight-modal-select" aria-label="Airline"></select>
+    <input id="flight-f-airline-custom" class="flight-modal-input" type="text" placeholder="IATA airline code (2–3 letters)" maxlength="3" autocomplete="off" style="display:none;margin-top:-6px">
+    <label class="flight-modal-label" for="flight-f-flight-digits">Flight number (digits)</label>
+    <input id="flight-f-flight-digits" class="flight-modal-input" type="text" inputmode="numeric" placeholder="e.g. 218" autocomplete="off">
     <div class="flight-form-row">
       <div>
         <label class="flight-modal-label" for="flight-f-dep-ap">From (IATA)</label>
@@ -547,24 +548,6 @@
       <div>
         <label class="flight-modal-label" for="flight-f-arr-ap">To (IATA)</label>
         <input id="flight-f-arr-ap" class="flight-modal-input" type="text" placeholder="SIN" maxlength="4" autocomplete="off">
-      </div>
-    </div>
-    <label class="flight-modal-label" for="flight-f-connection">Connection</label>
-    <select id="flight-f-connection" class="flight-modal-input flight-modal-select">
-      <option value="direct">Direct (single leg)</option>
-      <option value="same_pnr">Same booking / protected connection</option>
-      <option value="self_transfer">Self-transfer (separate tickets)</option>
-      <option value="overnight">Overnight or long layover</option>
-      <option value="open_jaw">Open jaw / multi-city</option>
-    </select>
-    <div class="flight-form-row">
-      <div>
-        <label class="flight-modal-label" for="flight-f-via">Connect via (IATA, optional)</label>
-        <input id="flight-f-via" class="flight-modal-input" type="text" placeholder="e.g. SIN" maxlength="4" autocomplete="off">
-      </div>
-      <div>
-        <label class="flight-modal-label" for="flight-f-connection-notes">Connection notes</label>
-        <input id="flight-f-connection-notes" class="flight-modal-input" type="text" placeholder="Layover time, terminal change…" autocomplete="off">
       </div>
     </div>
     <div class="flight-datetime-row">
@@ -577,8 +560,34 @@
         <input id="flight-f-arr" class="flight-modal-input flight-modal-datetime" type="datetime-local">
       </div>
     </div>
-    <label class="flight-modal-label" for="flight-f-notes">Notes</label>
-    <input id="flight-f-notes" class="flight-modal-input" type="text" placeholder="Seat, booking ref, …" autocomplete="off">
+    <label class="flight-modal-label" for="flight-f-connection">Connection</label>
+    <select id="flight-f-connection" class="flight-modal-input flight-modal-select">
+      <option value="direct">Direct (single leg)</option>
+      <option value="same_pnr">Same booking / protected connection</option>
+      <option value="self_transfer">Self-transfer (separate tickets)</option>
+      <option value="overnight">Overnight or long layover</option>
+      <option value="open_jaw">Open jaw / multi-city</option>
+    </select>
+    <div id="flight-conn-block" class="flight-conn-fields" hidden>
+      <div class="flight-conn-block-title">Connection flight</div>
+      <label class="flight-modal-label" for="flight-f-conn-airline">Connection airline</label>
+      <select id="flight-f-conn-airline" class="flight-modal-input flight-modal-select" aria-label="Connection airline"></select>
+      <input id="flight-f-conn-airline-custom" class="flight-modal-input" type="text" placeholder="IATA code (2–3 letters)" maxlength="3" autocomplete="off" style="display:none;margin-top:-6px">
+      <label class="flight-modal-label" for="flight-f-conn-flight-digits">Connection flight number</label>
+      <input id="flight-f-conn-flight-digits" class="flight-modal-input" type="text" inputmode="numeric" placeholder="digits only" autocomplete="off">
+      <div class="flight-form-row">
+        <div>
+          <label class="flight-modal-label" for="flight-f-conn-dep-ap">From (IATA)</label>
+          <input id="flight-f-conn-dep-ap" class="flight-modal-input" type="text" placeholder="prior leg" maxlength="4" autocomplete="off">
+        </div>
+        <div>
+          <label class="flight-modal-label" for="flight-f-conn-arr-ap">Connect at (IATA)</label>
+          <input id="flight-f-conn-arr-ap" class="flight-modal-input" type="text" placeholder="hub" maxlength="4" autocomplete="off">
+        </div>
+      </div>
+      <label class="flight-modal-label" for="flight-f-conn-arrival">Landing time (local)</label>
+      <input id="flight-f-conn-arrival" class="flight-modal-input flight-modal-datetime" type="datetime-local">
+    </div>
     <div class="modal-actions" style="margin-top:18px">
       <button type="button" class="btn btn-outline" onclick="closeFlightAddModal()">Cancel</button>
       <button type="button" class="btn btn-blue" id="flight-modal-submit" onclick="submitFlightAdd()">Save flight</button>
@@ -691,6 +700,7 @@
   </div>
 </div>
 
+<script src="js/airlines.js" defer></script>
 <script src="js/app.js" defer></script>
 </body>
 </html>
