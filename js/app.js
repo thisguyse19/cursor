@@ -1001,14 +1001,20 @@ function initFlightBoardSectionToggle() {
   const btn = document.getElementById('flight-board-toggle');
   const stack = document.getElementById('flight-board-stack');
   const wrap = document.getElementById('flight-board-section');
+  const addBtn = document.getElementById('flight-add-btn');
   if (!btn || !stack || !wrap) return;
   const apply = () => {
     const collapsed = localStorage.getItem(FLIGHT_BOARD_COLLAPSED_KEY) === '1';
     wrap.classList.toggle('flight-board-wrap--collapsed', collapsed);
     btn.textContent = collapsed ? 'Show' : 'Hide';
     btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
-    if (collapsed) stack.setAttribute('inert', '');
-    else stack.removeAttribute('inert');
+    if (collapsed) {
+      stack.setAttribute('inert', '');
+      if (addBtn) addBtn.setAttribute('inert', '');
+    } else {
+      stack.removeAttribute('inert');
+      if (addBtn) addBtn.removeAttribute('inert');
+    }
   };
   apply();
   btn.addEventListener('click', () => {
@@ -2420,6 +2426,7 @@ async function _hashInput(val) {
 async function checkAuth() {
   const stored = localStorage.getItem(_AK);
   if (stored === _AH) {
+    document.documentElement.classList.add('auth-cached');
     document.getElementById('auth-overlay').classList.add('hidden');
     maybeShowOnboarding();
     return;
@@ -2448,6 +2455,7 @@ async function submitAuth() {
     if (hash === _AH) {
       if (document.getElementById('auth-remember').checked) {
         localStorage.setItem(_AK, _AH);
+        document.documentElement.classList.add('auth-cached');
       }
       document.getElementById('auth-overlay').classList.add('hidden');
       maybeShowOnboarding();
