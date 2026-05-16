@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.13",
+  "appVersion": "1.0.14",
   "versions": [
     {
       "v": "1.0",
@@ -160,13 +160,22 @@
       "v": "1.0.13",
       "date": "2026-05-16",
       "title": "Flights timeline strip, connections, calmer buttons, pinned toolbar",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Flight cards scroll horizontally with snap and a day-style timeline (depart / arrive, carrier & number between)",
         "Add/edit flight: connection type menu, optional via airport and connection notes; shown compactly on the card",
         "Softer button styling; edit toolbar is a frosted bar fixed to the bottom safe area (iOS-style), content padded above it",
         "Flight modal locks page scroll while open; viewport disallows pinch-zoom; reduced glass on controls overall",
         "Removed the old gate-merge blurb under Your flights"
+      ]
+    },
+    {
+      "v": "1.0.14",
+      "date": "2026-05-16",
+      "title": "Scroll lock on all modals",
+      "latest": true,
+      "changes": [
+        "Background scroll is frozen whenever any dialog is open (including auth, version history, conflicts, and the rest), not only the flight form"
       ]
     }
   ],

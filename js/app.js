@@ -32,27 +32,44 @@ const FLIGHT_CONNECTION_LABELS = {
   open_jaw: 'Multi-city',
 };
 
-let modalScrollLockCount = 0;
+/** Lock page scroll while any modal (or the auth gate) is visible. */
+let modalScrollLockActive = false;
 let modalScrollLockY = 0;
-function lockModalScroll() {
-  if (modalScrollLockCount === 0) {
-    modalScrollLockY = window.scrollY || window.pageYOffset || 0;
-    document.documentElement.classList.add('modal-scroll-lock');
-    document.body.classList.add('modal-scroll-lock');
-    document.body.style.top = `-${modalScrollLockY}px`;
-  }
-  modalScrollLockCount++;
+
+function modalBlockingOverlayCount() {
+  let n = document.querySelectorAll('.modal-overlay.open').length;
+  const auth = document.getElementById('auth-overlay');
+  if (auth && !auth.classList.contains('hidden')) n += 1;
+  return n;
 }
-function unlockModalScroll() {
-  if (modalScrollLockCount <= 1) {
-    modalScrollLockCount = 0;
+
+function syncModalScrollLock() {
+  const n = modalBlockingOverlayCount();
+  if (n > 0) {
+    if (!modalScrollLockActive) {
+      modalScrollLockY = window.scrollY || window.pageYOffset || 0;
+      modalScrollLockActive = true;
+      document.documentElement.classList.add('modal-scroll-lock');
+      document.body.classList.add('modal-scroll-lock');
+      document.body.style.top = `-${modalScrollLockY}px`;
+    }
+  } else if (modalScrollLockActive) {
+    modalScrollLockActive = false;
     document.documentElement.classList.remove('modal-scroll-lock');
     document.body.classList.remove('modal-scroll-lock');
     document.body.style.removeProperty('top');
     window.scrollTo(0, modalScrollLockY);
-  } else {
-    modalScrollLockCount--;
   }
+}
+
+function initModalScrollLockObservers() {
+  const mo = new MutationObserver(() => syncModalScrollLock());
+  document.querySelectorAll('.modal-overlay').forEach(el =>
+    mo.observe(el, { attributes: true, attributeFilter: ['class'] })
+  );
+  const auth = document.getElementById('auth-overlay');
+  if (auth) mo.observe(auth, { attributes: true, attributeFilter: ['class'] });
+  syncModalScrollLock();
 }
 let _tripCountdownTick = null;
 let TRIP_COUNTDOWN_META = null;
@@ -419,7 +436,6 @@ function openFlightAddModal() {
   const conn = document.getElementById('flight-f-connection');
   if (conn) conn.value = 'direct';
   modal.classList.add('open');
-  lockModalScroll();
   setTimeout(() => document.getElementById('flight-f-label')?.focus(), 50);
 }
 
@@ -459,14 +475,12 @@ function openFlightEditModal(id) {
   document.getElementById('flight-f-via').value = src.viaAirport || '';
   document.getElementById('flight-f-connection-notes').value = src.connectionDetail || '';
   modal.classList.add('open');
-  lockModalScroll();
   setTimeout(() => document.getElementById('flight-f-label')?.focus(), 50);
 }
 
 function closeFlightAddModal() {
   flightModalEditingId = null;
   document.getElementById('flightAddModal')?.classList.remove('open');
-  unlockModalScroll();
   const titleEl = document.getElementById('flight-modal-title');
   if (titleEl) titleEl.textContent = 'Add flight';
   const submitEl = document.getElementById('flight-modal-submit');
@@ -1841,6 +1855,7 @@ function setupServiceWorkerUpdates() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  initModalScrollLockObservers();
   setupServiceWorkerUpdates();
 
   const flightAddBtnEarly = document.getElementById('flight-add-btn');
