@@ -31,6 +31,8 @@
 html{
   font-size:16px;
   height:100%;
+  min-height:100%;
+  min-height:-webkit-fill-available;
   overflow:hidden;
   overscroll-behavior:none;
 }
@@ -243,6 +245,7 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:0;height:
 #sw-update-bar{
   position:fixed;bottom:0;left:0;right:0;z-index:10001;
   display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
+  padding:12px 16px calc(12px + constant(safe-area-inset-bottom));
   padding:12px 16px calc(12px + env(safe-area-inset-bottom, 0px));
   background:var(--glass-fill-strong);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
   border-top:var(--glass-border);box-shadow:0 -10px 40px rgba(0,0,0,.08), var(--glass-inner);
@@ -513,20 +516,32 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:0;height:
 /* WHITE BOX */
 .wb{background:var(--glass-fill);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-radius:var(--r-lg);padding:22px;border:var(--glass-border);box-shadow: var(--glass-outer), var(--glass-inner)}
 
-/* EDIT TOOLBAR — iOS-style frosted bar, flush to bottom / safe area */
+/* EDIT TOOLBAR — iOS-style frosted bar, flush to bottom / safe area
+   WebKit often leaves a visible strip above the home indicator when backdrop-filter
+   meets env(safe-area-inset-bottom); ::after paints an opaque slab in that zone. */
 .edit-toolbar{
   position:fixed;left:0;right:0;bottom:0;z-index:1000;
+  --tb-pad-base:10px;
+  --tb-pad-inline:16px;
   display:flex;justify-content:center;align-items:stretch;
-  padding:10px 16px calc(10px + env(safe-area-inset-bottom, 0px));
+  padding:var(--tb-pad-base) var(--tb-pad-inline) calc(var(--tb-pad-base) + constant(safe-area-inset-bottom));
+  padding:var(--tb-pad-base) var(--tb-pad-inline) calc(var(--tb-pad-base) + env(safe-area-inset-bottom, 0px));
   margin:0;
-  transform:translateZ(0);
-  -webkit-transform:translateZ(0);
   background:rgba(250,250,252,.82);
   backdrop-filter:saturate(180%) blur(24px);
   -webkit-backdrop-filter:saturate(180%) blur(24px);
   border-top:0.5px solid rgba(0,0,0,.07);
   box-shadow:0 -4px 24px rgba(0,0,0,.06), inset 0 1px 0 rgba(255,255,255,.75)}
+.edit-toolbar::after{
+  content:'';
+  position:absolute;left:0;right:0;bottom:0;
+  height:calc(var(--tb-pad-base) + constant(safe-area-inset-bottom));
+  height:calc(var(--tb-pad-base) + env(safe-area-inset-bottom, 0px));
+  background:rgb(250,250,252);
+  pointer-events:none;
+  z-index:0}
 .edit-toolbar-inner{
+  position:relative;z-index:1;
   display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:8px;
   max-width:720px;width:100%}
 .tb-btn{border:none;border-radius:12px;padding:9px 16px;font-size:13px;font-weight:600;font-family:var(--font);cursor:pointer;
@@ -721,7 +736,7 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
   .tips-grid{grid-template-columns:1fr}
 
   /* Edit toolbar full-bleed on mobile */
-  .edit-toolbar{padding:8px 12px calc(8px + env(safe-area-inset-bottom, 0px))}
+  .edit-toolbar{--tb-pad-base:8px;--tb-pad-inline:12px}
   .tb-btn{padding:7px 12px;font-size:12px}
 
   /* Section header spacing */
