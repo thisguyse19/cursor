@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.20",
+  "appVersion": "1.0.21",
   "versions": [
     {
       "v": "1.0",
@@ -247,10 +247,21 @@
       "v": "1.0.20",
       "date": "2026-05-16",
       "title": "Mini route map on every flight card",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Each flight card includes a small map with the path between stops (and via hubs for connections), using the same OpenStreetMap tiles as the trip maps",
         "Airport lookup file now stores coordinates so routes draw worldwide for any IATA code"
+      ]
+    },
+    {
+      "v": "1.0.21",
+      "date": "2026-05-16",
+      "title": "iOS PWA bottom toolbar",
+      "latest": true,
+      "changes": [
+        "Edit toolbar sits flush with the home indicator on iPhone — opaque fill under the safe-area inset fixes the frosted bar gap WebKit sometimes shows in standalone mode",
+        "Older iOS safe-area values use the constant() fallback alongside env()",
+        "Viewport min-height uses -webkit-fill-available so the layout matches the visible screen edge"
       ]
     }
   ],
