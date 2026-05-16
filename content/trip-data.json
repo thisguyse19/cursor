@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.34",
+  "appVersion": "1.0.35",
   "versions": [
     {
       "v": "1.0",
@@ -387,11 +387,20 @@
       "v": "1.0.34",
       "date": "2026-05-16",
       "title": "Trip tools cog menu",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Removed the bottom floating edit pill that overlapped Safari UI (drawer nav, modal close, etc.)",
         "PDF export lives beside a compact cog on the mobile top bar and in the sidebar; History, Revert, Edit, and Backup open from the cog dropdown",
         "Main scroll padding and SW update pill spacing no longer depend on a bottom toolbar"
+      ]
+    },
+    {
+      "v": "1.0.35",
+      "date": "2026-05-16",
+      "title": "Add to Home Screen tip",
+      "latest": true,
+      "changes": [
+        "One-time modal after sign-in explains how to add the trip planner to your Home Screen for a full-screen app-like experience; dismissed permanently on this device"
       ]
     }
   ],

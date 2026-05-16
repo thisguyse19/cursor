@@ -16,6 +16,7 @@ const FLIGHT_BOARD_COLLAPSED_KEY = 'tripleFlightBoardCollapsed';
 const CL_SORT_KEY = 'tripleClSort';
 const BACKUP_FORMAT = 'triple-backup';
 const BACKUP_VERSION = 1;
+const ADD_TO_HOME_DISMISSED_KEY = 'tripAddToHomeDismissed';
 /** All localStorage keys owned by the app that should round-trip in backup / restore. */
 const TRIPLE_BACKUP_KEYS = [
   FLIGHT_OVERLAY_KEY,
@@ -27,6 +28,7 @@ const TRIPLE_BACKUP_KEYS = [
   'tripAuthToken',
   'tripWelcomeSeen',
   'tripLastSeenVersion',
+  ADD_TO_HOME_DISMISSED_KEY,
   CL_SORT_KEY,
 ];
 const FLIGHT_PATCH_KEYS = [
@@ -3244,7 +3246,51 @@ function maybeShowOnboarding() {
     localStorage.setItem('tripLastSeenVersion', APP_VERSION);
     setTimeout(() => openWhatsNewModal(), 600);
   }
+  scheduleAddToHomeHintAfterOnboarding();
 }
+
+function isAlreadyInstalledWebApp() {
+  try {
+    if (window.navigator.standalone === true) return true;
+    if (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) return true;
+    if (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches) return true;
+  } catch (e) {}
+  return false;
+}
+
+function otherOnboardingModalOpen() {
+  return (
+    document.getElementById('welcomeModal')?.classList.contains('open') ||
+    document.getElementById('whatsNewModal')?.classList.contains('open') ||
+    document.getElementById('conflictModal')?.classList.contains('open')
+  );
+}
+
+function scheduleAddToHomeHintAfterOnboarding() {
+  const tryOpen = () => {
+    try {
+      if (localStorage.getItem(ADD_TO_HOME_DISMISSED_KEY)) return;
+      if (isAlreadyInstalledWebApp()) return;
+      if (otherOnboardingModalOpen()) {
+        setTimeout(tryOpen, 340);
+        return;
+      }
+      const el = document.getElementById('addToHomeModal');
+      if (!el || el.classList.contains('open')) return;
+      el.classList.add('open');
+    } catch (e) {}
+  };
+  setTimeout(tryOpen, 720);
+}
+
+function dismissAddToHomeHint() {
+  try {
+    localStorage.setItem(ADD_TO_HOME_DISMISSED_KEY, '1');
+  } catch (e) {}
+  document.getElementById('addToHomeModal')?.classList.remove('open');
+}
+
+window.dismissAddToHomeHint = dismissAddToHomeHint;
 
 function openWhatsNewModal() {
   if (!VERSIONS || !Array.isArray(VERSIONS)) return;

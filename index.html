@@ -744,6 +744,44 @@
   </div>
 </div>
 
+<!-- ═══ MODAL: ADD TO HOME SCREEN ═══ -->
+<div class="modal-overlay" id="addToHomeModal" onclick="if(event.target===this)dismissAddToHomeHint()">
+  <div class="modal" style="max-width:500px">
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:42px;margin-bottom:10px">📲</div>
+      <div class="modal-title">Add to your Home Screen</div>
+      <p class="modal-sub" style="margin-bottom:0">Put this trip planner on your Home Screen so it opens full&nbsp;screen like other apps — quick to launch and easy to find.</p>
+    </div>
+    <div class="welcome-items">
+      <div class="welcome-item">
+        <div class="welcome-icon">📱</div>
+        <div>
+          <div class="welcome-item-title">iPhone or iPad</div>
+          <div class="welcome-item-desc">In Safari, tap the <strong>Share</strong> button <span style="opacity:.85">(square with an arrow)</span>, scroll down, tap <strong>Add to Home Screen</strong>, then <strong>Add</strong>.</div>
+        </div>
+      </div>
+      <div class="welcome-item">
+        <div class="welcome-icon">🤖</div>
+        <div>
+          <div class="welcome-item-title">Android</div>
+          <div class="welcome-item-desc">In Chrome, tap <strong>⋮</strong> in the corner, then choose <strong>Add to Home screen</strong> or <strong>Install app</strong>, and confirm.</div>
+        </div>
+      </div>
+      <div class="welcome-item">
+        <div class="welcome-icon">💻</div>
+        <div>
+          <div class="welcome-item-title">Computer</div>
+          <div class="welcome-item-desc">Look for an <strong>Install</strong> or <strong>plus</strong> icon in or near the address bar and follow the prompts.</div>
+        </div>
+      </div>
+    </div>
+    <p class="modal-sub" style="margin-top:18px;margin-bottom:0;font-size:13px">This tip won’t show again after you close it.</p>
+    <div class="modal-actions" style="justify-content:center;margin-top:22px">
+      <button type="button" class="btn btn-blue" onclick="dismissAddToHomeHint()" style="padding:12px 36px;font-size:15px">Got it</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ MODAL: WHAT'S NEW ═══ -->
 <div class="modal-overlay" id="whatsNewModal" onclick="if(event.target===this)this.classList.remove('open')">
   <div class="modal" style="max-width:500px">
