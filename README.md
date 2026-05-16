@@ -317,7 +317,15 @@ Exports **`window.AIRLINE_OPTIONS`**: an array of `{ n: name, c: iata }`. `popul
 
 ## Change history
 
-The canonical changelog is **`content/trip-data.json` → `versions`**. Summaries below mirror shipped releases (newest last in this list is current).
+The canonical changelog is **`content/trip-data.json` → `versions`**. The **sidebar version pill** and **Version history** modal read from this array. Summaries below mirror shipped releases.
+
+### Release checklist (do this on every push that ships user-visible changes)
+
+1. **`content/trip-data.json`**
+   - Increment **`appVersion`** (semver, e.g. `1.0.17`).
+   - Append one object to **`versions`** with `v`, `date` (ISO `YYYY-MM-DD`), `title`, and `changes` (string array). Set **`"latest": true`** only on the new entry; set **`"latest": false`** on every older entry.
+2. **`sw.js`** — bump the **`CACHE`** constant whenever you change precached shell assets (`index.html`, `styles/app.css`, `js/app.js`, etc.) so installed PWAs pick up the new bundle.
+3. Optionally mirror the same title and bullets in this README **Change history** section so the doc stays skimmable.
 
 ### 1.0 — Initial Release (2026-05-11)
 
@@ -379,7 +387,7 @@ The canonical changelog is **`content/trip-data.json` → `versions`**. Summarie
 
 - Background scroll frozen for all dialogs including auth.
 
-### 1.0.15 — Flight board polish (2026-05-16) — **current**
+### 1.0.15 — Flight board polish (2026-05-16)
 
 - Light `theme-color` + translucent status bar + safe-area header alignment.
 - Countdown from first flight, **1-minute** refresh.
@@ -388,13 +396,19 @@ The canonical changelog is **`content/trip-data.json` → `versions`**. Summarie
 - `normalizeBodyScroll` on nav/drawer close for **fixed bottom toolbar**.
 - Slimmer cards/countdown; iOS-style primary buttons.
 
+### 1.0.16 — Flights layout, connections, countdown & PWA (2026-05-16) — **current**
+
+- Version history workflow documented; keep **`versions[]`** in sync with every release (see checklist above).
+- Thin blue **next-flight** countdown (days / hours / “Enjoy your trip!”); dotted placeholder when there are no flights; bundled **`flights`** defaults to empty.
+- Flight board stack width; legs show **dates**; **connection** layover duration + second-leg rows; **conn dep/arr** times in the form; pills and digits widened for real flight codes.
+- Sidebar **safe-area** so the badge clears the notch; optional live-merge caption under the board.
+
 ---
 
 ## Contributing / forking
 
-1. Bump **`appVersion`** and append a **`versions`** entry when shipping user-visible changes.
-2. Bump the **service worker `CACHE`** name in `sw.js` when changing precached assets.
-3. Run a local HTTP server to verify `fetch` of JSON.
+1. Follow the **Release checklist** in **Change history** (bump `appVersion`, append `versions`, set `latest` flags, bump `sw.js` `CACHE` when needed).
+2. Run a local HTTP server to verify `fetch` of JSON.
 
 ## License / usage
 

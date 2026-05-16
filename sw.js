@@ -1,5 +1,5 @@
 /* Minimal service worker for installability and offline shell (GitHub Pages–friendly). */
-const CACHE = 'triple-v20';
+const CACHE = 'triple-v23';
 
 function isContentJsonUrl(url) {
   try {

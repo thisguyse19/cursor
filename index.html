@@ -537,23 +537,27 @@
   <div class="modal flight-modal">
     <div class="modal-title" id="flight-modal-title">Add flight</div>
     <p class="modal-sub" id="flight-modal-sub">Saved only on this device. Enter departure and optional arrival in your local timezone; times are stored in UTC.</p>
-    <label class="flight-modal-label" for="flight-f-label">Label</label>
-    <input id="flight-f-label" class="flight-modal-input" type="text" placeholder="e.g. Return to Singapore" autocomplete="off">
+    <div class="flight-form-row">
+      <div>
+        <label class="flight-modal-label" for="flight-f-dep-ap">From</label>
+        <div class="airport-ac-wrap">
+          <input id="flight-f-dep-ap" class="flight-modal-input airport-ac-input" type="text" placeholder="City, name, or code" maxlength="48" autocomplete="off" spellcheck="false">
+          <ul class="airport-ac-list" hidden role="listbox" aria-label="Airport suggestions"></ul>
+        </div>
+      </div>
+      <div>
+        <label class="flight-modal-label" for="flight-f-arr-ap">To</label>
+        <div class="airport-ac-wrap">
+          <input id="flight-f-arr-ap" class="flight-modal-input airport-ac-input" type="text" placeholder="Final airport" maxlength="48" autocomplete="off" spellcheck="false">
+          <ul class="airport-ac-list" hidden role="listbox" aria-label="Airport suggestions"></ul>
+        </div>
+      </div>
+    </div>
     <label class="flight-modal-label" for="flight-f-airline">Airline</label>
     <select id="flight-f-airline" class="flight-modal-input flight-modal-select" aria-label="Airline"></select>
     <input id="flight-f-airline-custom" class="flight-modal-input" type="text" placeholder="IATA airline code (2–3 letters)" maxlength="3" autocomplete="off" style="display:none;margin-top:-6px">
     <label class="flight-modal-label" for="flight-f-flight-digits">Flight number (digits)</label>
     <input id="flight-f-flight-digits" class="flight-modal-input" type="text" inputmode="numeric" placeholder="1–4 digits" maxlength="4" pattern="[0-9]{1,4}" autocomplete="off">
-    <div class="flight-form-row">
-      <div>
-        <label class="flight-modal-label" for="flight-f-dep-ap">From (IATA)</label>
-        <input id="flight-f-dep-ap" class="flight-modal-input" type="text" placeholder="MEL" maxlength="4" autocomplete="off">
-      </div>
-      <div>
-        <label class="flight-modal-label" for="flight-f-arr-ap">To (IATA)</label>
-        <input id="flight-f-arr-ap" class="flight-modal-input" type="text" placeholder="SIN" maxlength="4" autocomplete="off">
-      </div>
-    </div>
     <div class="flight-datetime-row">
       <div class="flight-datetime-field">
         <label class="flight-modal-label" for="flight-f-dep">Departure (local)</label>
@@ -574,21 +578,27 @@
     </select>
     <div id="flight-conn-block" class="flight-conn-fields" hidden>
       <div class="flight-conn-block-title">Connection flight</div>
+      <div class="flight-form-row">
+        <div>
+          <label class="flight-modal-label" for="flight-f-conn-dep-ap">From</label>
+          <div class="airport-ac-wrap">
+            <input id="flight-f-conn-dep-ap" class="flight-modal-input airport-ac-input" type="text" placeholder="Prior leg arrival" maxlength="48" autocomplete="off" spellcheck="false">
+            <ul class="airport-ac-list" hidden role="listbox" aria-label="Airport suggestions"></ul>
+          </div>
+        </div>
+        <div>
+          <label class="flight-modal-label" for="flight-f-conn-arr-ap">Connect at</label>
+          <div class="airport-ac-wrap">
+            <input id="flight-f-conn-arr-ap" class="flight-modal-input airport-ac-input" type="text" placeholder="Hub airport" maxlength="48" autocomplete="off" spellcheck="false">
+            <ul class="airport-ac-list" hidden role="listbox" aria-label="Airport suggestions"></ul>
+          </div>
+        </div>
+      </div>
       <label class="flight-modal-label" for="flight-f-conn-airline">Connection airline</label>
       <select id="flight-f-conn-airline" class="flight-modal-input flight-modal-select" aria-label="Connection airline"></select>
       <input id="flight-f-conn-airline-custom" class="flight-modal-input" type="text" placeholder="IATA code (2–3 letters)" maxlength="3" autocomplete="off" style="display:none;margin-top:-6px">
       <label class="flight-modal-label" for="flight-f-conn-flight-digits">Connection flight number</label>
       <input id="flight-f-conn-flight-digits" class="flight-modal-input" type="text" inputmode="numeric" placeholder="1–4 digits" maxlength="4" pattern="[0-9]{1,4}" autocomplete="off">
-      <div class="flight-form-row">
-        <div>
-          <label class="flight-modal-label" for="flight-f-conn-dep-ap">From (IATA)</label>
-          <input id="flight-f-conn-dep-ap" class="flight-modal-input" type="text" placeholder="prior leg" maxlength="4" autocomplete="off">
-        </div>
-        <div>
-          <label class="flight-modal-label" for="flight-f-conn-arr-ap">Connect at (IATA)</label>
-          <input id="flight-f-conn-arr-ap" class="flight-modal-input" type="text" placeholder="hub" maxlength="4" autocomplete="off">
-        </div>
-      </div>
       <div class="flight-datetime-row">
         <div class="flight-datetime-field">
           <label class="flight-modal-label" for="flight-f-conn-departure">Connection departs (local)</label>
