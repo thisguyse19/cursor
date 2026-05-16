@@ -13,6 +13,22 @@ let flightModalEditingId = null;
 let _flightCardDotsObserver = null;
 const FLIGHT_OVERLAY_KEY = 'tripleFlightOverlay';
 const FLIGHT_BOARD_COLLAPSED_KEY = 'tripleFlightBoardCollapsed';
+const CL_SORT_KEY = 'tripleClSort';
+const BACKUP_FORMAT = 'triple-backup';
+const BACKUP_VERSION = 1;
+/** All localStorage keys owned by the app that should round-trip in backup / restore. */
+const TRIPLE_BACKUP_KEYS = [
+  FLIGHT_OVERLAY_KEY,
+  FLIGHT_BOARD_COLLAPSED_KEY,
+  'checklistState',
+  'tripHistory',
+  'tripFreshSnapshot',
+  'tripAppVersion',
+  'tripAuthToken',
+  'tripWelcomeSeen',
+  'tripLastSeenVersion',
+  CL_SORT_KEY,
+];
 const FLIGHT_PATCH_KEYS = [
   'airline',
   'airlineCode',
@@ -1256,9 +1272,25 @@ function saveHistory(h) {
 // ═══════════════════════════════════════
 let clSort = 'urgency';
 
+const CL_SORT_MODES = ['urgency', 'category', 'date', 'status'];
+
+function loadClSortPreference() {
+  try {
+    const s = localStorage.getItem(CL_SORT_KEY);
+    if (s && CL_SORT_MODES.includes(s)) clSort = s;
+  } catch (_) { /* ignore */ }
+}
+
+function syncClSortButtons() {
+  document.querySelectorAll('.cl-sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === clSort));
+}
+
 function setClSort(s) {
   clSort = s;
-  document.querySelectorAll('.cl-sort-btn').forEach(b => b.classList.toggle('active', b.dataset.sort === s));
+  try {
+    localStorage.setItem(CL_SORT_KEY, s);
+  } catch (_) { /* ignore */ }
+  syncClSortButtons();
   renderChecklist();
 }
 
@@ -1612,6 +1644,20 @@ function applySnapshot(s) {
   updateCharts();
 }
 
+function syncEditToolbarButton() {
+  const b = document.getElementById('editBtn');
+  if (!b) return;
+  if (isEditing) {
+    b.textContent = '✓';
+    b.setAttribute('aria-label', 'Finish editing');
+    b.title = 'Done';
+  } else {
+    b.textContent = '✏️';
+    b.setAttribute('aria-label', 'Edit page content');
+    b.title = 'Edit';
+  }
+}
+
 function toggleEdit() {
   if(!isEditing) {
     isEditing = true;
@@ -1619,9 +1665,9 @@ function toggleEdit() {
     document.querySelectorAll('[data-key]').forEach(el => {
       el.contentEditable = 'true';
     });
-    document.getElementById('editBtn').textContent = '✓ Done';
     document.getElementById('editBtn').classList.remove('tb-primary');
     document.getElementById('editBtn').classList.add('tb-export');
+    syncEditToolbarButton();
     showToast('✏️ Edit mode enabled — changes are saved locally for you only.');
   } else {
     isEditing = false;
@@ -1629,9 +1675,9 @@ function toggleEdit() {
     document.querySelectorAll('[data-key]').forEach(el => {
       el.contentEditable = 'false';
     });
-    document.getElementById('editBtn').textContent = '✏️ Edit';
     document.getElementById('editBtn').classList.add('tb-primary');
     document.getElementById('editBtn').classList.remove('tb-export');
+    syncEditToolbarButton();
 
     const snap = captureSnapshot();
     const history = loadHistory();
@@ -1779,6 +1825,101 @@ function doRevertAll() {
 // ═══════════════════════════════════════
 function exportPDF() {
   document.getElementById('pdfModal').classList.add('open');
+}
+
+// ═══════════════════════════════════════
+// BACKUP / RESTORE
+// ═══════════════════════════════════════
+function buildTripleBackupObject() {
+  const entries = {};
+  for (const key of TRIPLE_BACKUP_KEYS) {
+    const v = localStorage.getItem(key);
+    if (v !== null) entries[key] = v;
+  }
+  return {
+    format: BACKUP_FORMAT,
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    tripContentVersion: APP_VERSION != null ? String(APP_VERSION) : null,
+    entries,
+  };
+}
+
+function parseTripleBackupJSON(text) {
+  let data;
+  try {
+    data = JSON.parse(text);
+  } catch {
+    throw new Error('This file is not valid JSON. Choose a Triple backup exported from this app.');
+  }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new Error('This file is not a Triple backup.');
+  }
+  if (data.format !== BACKUP_FORMAT) {
+    throw new Error('This file is not a Triple backup.');
+  }
+  const ver = Number(data.version);
+  if (!Number.isFinite(ver) || ver < 1 || ver > BACKUP_VERSION) {
+    throw new Error(
+      ver > BACKUP_VERSION
+        ? 'This backup was made with a newer version of the app. Update the app and try again.'
+        : 'This backup file is not supported.'
+    );
+  }
+  if (!data.entries || typeof data.entries !== 'object' || Array.isArray(data.entries)) {
+    throw new Error('The backup file is missing data or is damaged.');
+  }
+  for (const k of Object.keys(data.entries)) {
+    if (!TRIPLE_BACKUP_KEYS.includes(k)) {
+      throw new Error('This file is not a valid Triple backup (unexpected fields).');
+    }
+    const v = data.entries[k];
+    if (typeof v !== 'string') {
+      throw new Error('The backup file is damaged (invalid field types).');
+    }
+  }
+  return data;
+}
+
+function applyTripleBackup(data) {
+  for (const key of TRIPLE_BACKUP_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(data.entries, key)) {
+      localStorage.setItem(key, data.entries[key]);
+    } else {
+      localStorage.removeItem(key);
+    }
+  }
+}
+
+function openBackupModal() {
+  document.getElementById('backupModal').classList.add('open');
+}
+
+function closeBackupModal() {
+  document.getElementById('backupModal')?.classList.remove('open');
+}
+
+function doBackupDownload() {
+  closeBackupModal();
+  const payload = buildTripleBackupObject();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const d = new Date();
+  const pad = n => String(n).padStart(2, '0');
+  const fname = `triple-trip-backup-${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}.json`;
+  a.href = url;
+  a.download = fname;
+  a.rel = 'noopener';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function startBackupRestore() {
+  closeBackupModal();
+  document.getElementById('backupFileInput')?.click();
 }
 
 async function doExportPDF(isLandscape) {
@@ -2309,6 +2450,8 @@ function init() {
   renderStays();
   renderCostTable();
   renderTips();
+  loadClSortPreference();
+  syncClSortButtons();
   renderChecklist();
 
   loadFlightOverlay();
@@ -2480,6 +2623,10 @@ window.submitAuth = submitAuth;
 window.doExportPDF = doExportPDF;
 window.setClSort = setClSort;
 window.doRevertAll = doRevertAll;
+window.openBackupModal = openBackupModal;
+window.closeBackupModal = closeBackupModal;
+window.doBackupDownload = doBackupDownload;
+window.startBackupRestore = startBackupRestore;
 
 /** In-app PWA update: new worker waits until the user taps Update, then reloads once (localStorage is kept). */
 function setupServiceWorkerUpdates() {
@@ -2561,6 +2708,34 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('flight-f-connection')?.addEventListener('change', updateConnectionFormVisibility);
 
   initFlightBoardSectionToggle();
+
+  const backupInput = document.getElementById('backupFileInput');
+  if (backupInput) {
+    backupInput.addEventListener('change', () => {
+      const f = backupInput.files && backupInput.files[0];
+      backupInput.value = '';
+      if (!f) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const text = typeof reader.result === 'string' ? reader.result : '';
+          const data = parseTripleBackupJSON(text);
+          applyTripleBackup(data);
+          window.location.reload();
+        } catch (e) {
+          console.error(e);
+          showAlert(
+            e.message || 'This file could not be restored. Export a new backup from the app and try again.',
+            'Backup & restore'
+          );
+        }
+      };
+      reader.onerror = () => {
+        showAlert('Could not read the chosen file.', 'Backup & restore');
+      };
+      reader.readAsText(f, 'utf-8');
+    });
+  }
 
   (function setupTouchTips() {
     const tip = document.createElement('div');

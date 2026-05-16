@@ -476,13 +476,15 @@
 <!-- ═══ EDIT TOOLBAR ═══ -->
 <div class="edit-toolbar">
   <div class="edit-toolbar-inner">
-    <button class="tb-btn tb-ghost" id="historyBtn" onclick="openHistory()">⏱ History</button>
+    <button type="button" class="tb-btn tb-ghost tb-icon" id="historyBtn" onclick="openHistory()" aria-label="Edit history" title="History">⏱</button>
     <div class="tb-sep"></div>
-    <button class="tb-btn tb-danger" id="revertBtn" onclick="confirmRevert()">↺ Revert All</button>
+    <button type="button" class="tb-btn tb-danger tb-icon" id="revertBtn" onclick="confirmRevert()" aria-label="Revert all changes" title="Revert all">↺</button>
     <div class="tb-sep"></div>
-    <button class="tb-btn tb-primary" id="editBtn" onclick="toggleEdit()">✏️ Edit</button>
+    <button type="button" class="tb-btn tb-primary tb-icon" id="editBtn" onclick="toggleEdit()" aria-label="Edit page content" title="Edit">✏️</button>
     <div class="tb-sep"></div>
-    <button class="tb-btn tb-export" onclick="exportPDF()">↓ PDF</button>
+    <button type="button" class="tb-btn tb-ghost tb-icon" onclick="openBackupModal()" aria-label="Backup or restore data" title="Backup & restore">💾</button>
+    <div class="tb-sep"></div>
+    <button type="button" class="tb-btn tb-export tb-pdf-btn" onclick="exportPDF()"><span class="tb-pdf-glyph" aria-hidden="true">↓</span> PDF</button>
   </div>
 </div>
 
@@ -539,7 +541,30 @@
       </button>
     </div>
     <div class="modal-actions">
-      <button class="btn btn-outline" onclick="document.getElementById('pdfModal').classList.remove('open')">Cancel</button>
+      <button type="button" class="btn btn-outline" onclick="document.getElementById('pdfModal').classList.remove('open')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL: BACKUP / RESTORE ═══ -->
+<div class="modal-overlay" id="backupModal" onclick="if(event.target===this)closeBackupModal()">
+  <div class="modal">
+    <div class="modal-title">Backup & restore</div>
+    <p class="modal-sub">Download everything saved on this device — flight board changes, checklist progress, page edits, and history — or load a file you saved earlier.</p>
+    <div class="pdf-options">
+      <button type="button" class="pdf-opt" onclick="doBackupDownload()">
+        <div class="pdf-opt-icon">⬇️</div>
+        <div class="pdf-opt-name">Back up</div>
+        <div class="pdf-opt-desc">Download a JSON file you can store in Files, iCloud Drive, or email. Use it to move your data to another device or keep a snapshot.</div>
+      </button>
+      <button type="button" class="pdf-opt" onclick="startBackupRestore()">
+        <div class="pdf-opt-icon">⬆️</div>
+        <div class="pdf-opt-name">Restore</div>
+        <div class="pdf-opt-desc">Choose a backup file exported from this app. Current data on this device will be replaced, then the page reloads.</div>
+      </button>
+    </div>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-outline" onclick="closeBackupModal()">Cancel</button>
     </div>
   </div>
 </div>
@@ -739,6 +764,8 @@
     </div>
   </div>
 </div>
+
+<input type="file" id="backupFileInput" accept="application/json,.json" hidden autocomplete="off" aria-hidden="true">
 
 <script src="js/airlines.js" defer></script>
 <script src="js/app.js" defer></script>
