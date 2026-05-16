@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.22",
+  "appVersion": "1.0.23",
   "versions": [
     {
       "v": "1.0",
@@ -268,11 +268,22 @@
       "v": "1.0.22",
       "date": "2026-05-16",
       "title": "Globe satellite maps",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Trip maps and flight-card routes use MapLibre GL with a 3D globe, darkened Esri World Imagery satellite, and atmosphere sky — pan, zoom, rotate, and tilt like a flight-tracker app",
         "Great-circle paths with a soft cyan glow on flight cards; main trip maps keep numbered stops, dashed day-trip legs, and orange GOR routing",
         "PDF map snapshots read from the WebGL canvas for sharper exports"
+      ]
+    },
+    {
+      "v": "1.0.23",
+      "date": "2026-05-16",
+      "title": "Map imagery fix",
+      "latest": true,
+      "changes": [
+        "Satellite maps default to Mercator so Esri tiles paint reliably; use the globe control on trip maps for 3D globe when you want it",
+        "Upgraded MapLibre, switched Esri endpoint, removed sky layer and heavy raster brightness filters that could show a blank black canvas on some devices",
+        "Flight card mini maps use the same Mercator satellite base"
       ]
     }
   ],
