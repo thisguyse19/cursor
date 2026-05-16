@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.23",
+  "appVersion": "1.0.24",
   "versions": [
     {
       "v": "1.0",
@@ -279,11 +279,21 @@
       "v": "1.0.23",
       "date": "2026-05-16",
       "title": "Map imagery fix",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Satellite maps default to Mercator so Esri tiles paint reliably; use the globe control on trip maps for 3D globe when you want it",
         "Upgraded MapLibre, switched Esri endpoint, removed sky layer and heavy raster brightness filters that could show a blank black canvas on some devices",
         "Flight card mini maps use the same Mercator satellite base"
+      ]
+    },
+    {
+      "v": "1.0.24",
+      "date": "2026-05-16",
+      "title": "Maps: Leaflet + satellite",
+      "latest": true,
+      "changes": [
+        "Replaced MapLibre with Leaflet and Esri World Imagery — raster tiles do not depend on WebGL, fixing blank black maps when maplibregl.supported() was false (common on iOS PWA)",
+        "Trip maps and flight cards keep great-circle routes, glow polylines, and numbered markers; tile layers use crossOrigin for cleaner PDF captures"
       ]
     }
   ],
