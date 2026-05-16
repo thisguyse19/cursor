@@ -1,4 +1,4 @@
-// Trip planner — load /content/trip-data.json via HTTP (use a static server, not file://).
+// Trip planner — load content/trip-data.json over HTTP (GitHub Pages or a local static server).
 
 let APP_VERSION;
 let VERSIONS;
@@ -24,6 +24,19 @@ async function loadTripData() {
   CL_META = d.clMeta;
   COSTS = d.costs;
   TIPS = d.tips;
+}
+
+/** Newest-first semver sort for the version history modal. */
+function compareVersionDesc(a, b) {
+  const pa = String(a.v).split('.').map(part => parseInt(part, 10) || 0);
+  const pb = String(b.v).split('.').map(part => parseInt(part, 10) || 0);
+  const n = Math.max(pa.length, pb.length);
+  for (let i = 0; i < n; i++) {
+    const da = pa[i] ?? 0;
+    const db = pb[i] ?? 0;
+    if (da !== db) return db - da;
+  }
+  return 0;
 }
 
 // ═══════════════════════════════════════
@@ -1161,6 +1174,40 @@ async function submitAuth() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  (function setupTouchTips() {
+    const tip = document.createElement('div');
+    tip.id = 'touch-tip';
+    document.body.appendChild(tip);
+    let hideTimer, _startX = 0, _startY = 0;
+
+    document.addEventListener('touchstart', function(e) {
+      _startX = e.touches[0].clientX;
+      _startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    document.addEventListener('touchend', function(e) {
+      const dx = Math.abs(e.changedTouches[0].clientX - _startX);
+      const dy = Math.abs(e.changedTouches[0].clientY - _startY);
+      if (dx > 8 || dy > 8) return;
+
+      const target = e.target.closest('[data-tip]');
+      if (!target) { tip.classList.remove('tt-show'); return; }
+
+      clearTimeout(hideTimer);
+      tip.textContent = target.getAttribute('data-tip');
+
+      const rect = target.getBoundingClientRect();
+      const vw = window.innerWidth;
+      let left = rect.left + rect.width / 2;
+      left = Math.max(112, Math.min(vw - 112, left));
+      tip.style.left = left + 'px';
+      tip.style.top = Math.max(rect.top, 60) + 'px';
+      tip.classList.add('tt-show');
+
+      hideTimer = setTimeout(() => tip.classList.remove('tt-show'), 3000);
+    }, { passive: true });
+  })();
+
   (async () => {
     let dataLoaded = false;
     try {
@@ -1215,68 +1262,3 @@ function openWhatsNewModal() {
     `<ul class="wn-changes">${latest.changes.map(c => `<li>${c}</li>`).join('')}</ul>`;
   document.getElementById('whatsNewModal').classList.add('open');
 }
-
-Object.assign(window, {
-  submitAuth,
-  toggleMobileMenu,
-  closeMobileMenu,
-  openVersionModal,
-  showPage,
-  setClSort,
-  resetChecklist,
-  toggleChecklistItem,
-  openHistory,
-  confirmRevert,
-  toggleEdit,
-  exportPDF,
-  doExportPDF,
-  closeHistory,
-  closeDiff,
-  doRollback,
-  doRevertAll,
-  doResetChecklist,
-  resolveAllConflicts,
-  saveConflictChoices,
-  deleteCard,
-  toggleDay,
-  chooseConflict,
-  openDiff,
-});
-
-// ═══════════════════════════════════════
-// TOUCH TOOLTIPS
-// ═══════════════════════════════════════
-(function() {
-  const tip = document.createElement('div');
-  tip.id = 'touch-tip';
-  document.body.appendChild(tip);
-  let hideTimer, _startX = 0, _startY = 0;
-
-  document.addEventListener('touchstart', function(e) {
-    _startX = e.touches[0].clientX;
-    _startY = e.touches[0].clientY;
-  }, { passive: true });
-
-  document.addEventListener('touchend', function(e) {
-    const dx = Math.abs(e.changedTouches[0].clientX - _startX);
-    const dy = Math.abs(e.changedTouches[0].clientY - _startY);
-    if (dx > 8 || dy > 8) return; // user was scrolling, not tapping
-
-    const target = e.target.closest('[data-tip]');
-    if (!target) { tip.classList.remove('tt-show'); return; }
-
-    clearTimeout(hideTimer);
-    tip.textContent = target.getAttribute('data-tip');
-
-    // Position above the tapped element, clamped within viewport
-    const rect = target.getBoundingClientRect();
-    const vw = window.innerWidth;
-    let left = rect.left + rect.width / 2;
-    left = Math.max(112, Math.min(vw - 112, left));
-    tip.style.left = left + 'px';
-    tip.style.top = Math.max(rect.top, 60) + 'px';
-    tip.classList.add('tt-show');
-
-    hideTimer = setTimeout(() => tip.classList.remove('tt-show'), 3000);
-  }, { passive: true });
-})();
