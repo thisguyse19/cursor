@@ -2963,6 +2963,9 @@ function setupEditToolbarViewportAnchor() {
 
     bar.style.setProperty('top', `${topPx}px`, 'important');
     bar.style.setProperty('bottom', 'auto', 'important');
+
+    const clearance = Math.ceil(h + gap + safe + 20);
+    document.documentElement.style.setProperty('--edit-toolbar-clearance', `${clearance}px`);
   }
 
   schedule();

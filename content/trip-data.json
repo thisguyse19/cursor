@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.30",
+  "appVersion": "1.0.31",
   "versions": [
     {
       "v": "1.0",
@@ -348,10 +348,20 @@
       "v": "1.0.30",
       "date": "2026-05-16",
       "title": "PWA edit bar layout viewport",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Edit toolbar: anchor from window.innerHeight first — visualViewport alone was still placing the bar at the top (Safari over the sticky header) or in the notch band (standalone PWA); blend vv only when it agrees with a bottom placement",
         "Safe-bottom fallback via env() probe if --safe-bottom does not resolve; extra schedule on load/orientationchange; toolbar z-index above the SW update strip"
+      ]
+    },
+    {
+      "v": "1.0.31",
+      "date": "2026-05-16",
+      "title": "Scroll above edit bar",
+      "latest": true,
+      "changes": [
+        "Main column bottom padding matches the live edit toolbar height via --edit-toolbar-clearance so scrolled page ends sit above the bar, including when buttons wrap on narrow widths",
+        "scroll-padding-bottom follows the same value for in-page jumps"
       ]
     }
   ],
