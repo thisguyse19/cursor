@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.25",
+  "appVersion": "1.0.26",
   "versions": [
     {
       "v": "1.0",
@@ -300,10 +300,20 @@
       "v": "1.0.25",
       "date": "2026-05-16",
       "title": "PWA bottom toolbar safe area",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Edit toolbar uses a minimum bottom inset in standalone/fullscreen mode so the frosted bar stays flush with the home indicator when env(safe-area-inset-bottom) incorrectly reads 0",
         "Main scroll padding on narrow installed PWAs matches the same inset so content does not sit under a taller toolbar"
+      ]
+    },
+    {
+      "v": "1.0.26",
+      "date": "2026-05-16",
+      "title": "PWA floating edit bar",
+      "latest": true,
+      "changes": [
+        "Edit controls sit in a centered frosted pill above the home-indicator zone instead of a full-width bar that fought WebKit’s safe-area painting",
+        "Installed standalone/fullscreen: page gradient is clipped above the bottom inset so the system home strip can render over a transparent layer; shared --safe-bottom drives toolbar position and scroll padding"
       ]
     }
   ],
