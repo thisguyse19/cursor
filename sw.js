@@ -1,5 +1,5 @@
 /* Minimal service worker for installability and offline shell (GitHub Pages–friendly). */
-const CACHE = 'triple-v7';
+const CACHE = 'triple-v8';
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

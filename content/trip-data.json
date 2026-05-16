@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.9",
+  "appVersion": "1.0.10",
   "versions": [
     {
       "v": "1.0",
@@ -114,12 +114,23 @@
       "v": "1.0.9",
       "date": "2026-05-16",
       "title": "Flight Board & Live File",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Trip overview now includes flight cards with route, times, and live-style status merged from a flights file fetched on each launch",
         "Countdown (or “in flight” / “arrived”) for every departure and arrival using your device clock",
         "Add your own flights with + Add flight — saved only on this device alongside checklist progress",
         "Hide cards you do not need with the remove control on each card"
+      ]
+    },
+    {
+      "v": "1.0.10",
+      "date": "2026-05-16",
+      "title": "Flight Board — UX & Add Fix",
+      "latest": true,
+      "changes": [
+        "Add flight opens reliably — button is wired as soon as the page loads (not only after data init)",
+        "Flight section layout: more space above the add control; liquid-glass styling on the add button",
+        "Safer modal open when fields are missing in edge cases"
       ]
     }
   ],

@@ -220,19 +220,22 @@ function renderFlights() {
 }
 
 function openFlightAddModal() {
-  document.getElementById('flight-f-label').value = '';
-  document.getElementById('flight-f-airline').value = '';
-  document.getElementById('flight-f-no').value = '';
-  document.getElementById('flight-f-dep-ap').value = '';
-  document.getElementById('flight-f-arr-ap').value = '';
-  document.getElementById('flight-f-dep').value = '';
-  document.getElementById('flight-f-arr').value = '';
-  document.getElementById('flight-f-notes').value = '';
-  document.getElementById('flightAddModal').classList.add('open');
+  const modal = document.getElementById('flightAddModal');
+  if (!modal) {
+    console.warn('[Triple] flightAddModal missing');
+    return;
+  }
+  const ids = ['flight-f-label', 'flight-f-airline', 'flight-f-no', 'flight-f-dep-ap', 'flight-f-arr-ap', 'flight-f-dep', 'flight-f-arr', 'flight-f-notes'];
+  for (const id of ids) {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  }
+  modal.classList.add('open');
+  setTimeout(() => document.getElementById('flight-f-label')?.focus(), 50);
 }
 
 function closeFlightAddModal() {
-  document.getElementById('flightAddModal').classList.remove('open');
+  document.getElementById('flightAddModal')?.classList.remove('open');
 }
 
 function submitFlightAdd() {
@@ -1356,9 +1359,6 @@ function init() {
   loadFlightOverlay();
   renderFlights();
 
-  const flightBtn = document.getElementById('flight-add-btn');
-  if (flightBtn) flightBtn.addEventListener('click', openFlightAddModal);
-
   checkVersionMerge(); // applies history + handles version-change merge
   setTimeout(initMaps, 200);
 }
@@ -1585,6 +1585,15 @@ function setupServiceWorkerUpdates() {
 
 window.addEventListener('DOMContentLoaded', () => {
   setupServiceWorkerUpdates();
+
+  const flightAddBtnEarly = document.getElementById('flight-add-btn');
+  if (flightAddBtnEarly) {
+    flightAddBtnEarly.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openFlightAddModal();
+    });
+  }
 
   (function setupTouchTips() {
     const tip = document.createElement('div');

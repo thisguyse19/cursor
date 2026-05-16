@@ -219,9 +219,17 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 #sw-update-bar .sw-update-btn{flex-shrink:0;padding:8px 18px;font-size:13px;margin:0}
 
 .flight-board-wrap{padding-bottom:8px}
-.flight-board-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:4px}
-.flight-board-header .sec-title{margin-bottom:6px}
-.flight-add-btn{flex-shrink:0}
+.flight-board-intro{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+.flight-board-intro .sec-header{margin-bottom:0;width:100%}
+.flight-board-intro .sec-sub{margin-bottom:0}
+.flight-add-btn-glass{
+  flex-shrink:0;margin-top:22px;margin-bottom:4px;padding:11px 22px;font-size:14px;font-weight:700;font-family:var(--font);
+  cursor:pointer;touch-action:manipulation;-webkit-tap-highlight-color:transparent;color:var(--blue);
+  background:var(--glass-fill);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);
+  border:var(--glass-border);border-radius:50px;box-shadow:var(--glass-outer),var(--glass-inner);transition:box-shadow .2s, transform .15s}
+.flight-add-btn-glass:hover{
+  box-shadow:var(--glass-hover),var(--glass-inner);transform:translateY(-1px);color:var(--blue-h)}
+.flight-add-btn-glass:active{transform:translateY(0)}
 .flight-cards-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(272px,1fr));gap:16px;margin-top:12px}
 .flight-card{position:relative;padding:20px 18px 18px;min-height:120px}
 .flight-card-top{margin-bottom:10px}
