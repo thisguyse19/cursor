@@ -1200,6 +1200,33 @@ function openWhatsNewModal() {
   document.getElementById('whatsNewModal').classList.add('open');
 }
 
+Object.assign(window, {
+  submitAuth,
+  toggleMobileMenu,
+  closeMobileMenu,
+  openVersionModal,
+  showPage,
+  setClSort,
+  resetChecklist,
+  toggleChecklistItem,
+  openHistory,
+  confirmRevert,
+  toggleEdit,
+  exportPDF,
+  doExportPDF,
+  closeHistory,
+  closeDiff,
+  doRollback,
+  doRevertAll,
+  doResetChecklist,
+  resolveAllConflicts,
+  saveConflictChoices,
+  deleteCard,
+  toggleDay,
+  chooseConflict,
+  openDiff,
+});
+
 // ═══════════════════════════════════════
 // TOUCH TOOLTIPS
 // ═══════════════════════════════════════
@@ -1237,29 +1264,3 @@ function openWhatsNewModal() {
     hideTimer = setTimeout(() => tip.classList.remove('tt-show'), 3000);
   }, { passive: true });
 })();
-
-Object.assign(window, {
-  submitAuth,
-  toggleMobileMenu,
-  closeMobileMenu,
-  openVersionModal,
-  showPage,
-  setClSort,
-  resetChecklist,
-  openHistory,
-  confirmRevert,
-  toggleEdit,
-  exportPDF,
-  doExportPDF,
-  closeHistory,
-  closeDiff,
-  doRollback,
-  doRevertAll,
-  doResetChecklist,
-  resolveAllConflicts,
-  saveConflictChoices,
-  deleteCard,
-  toggleDay,
-  chooseConflict,
-  openDiff,
-});
