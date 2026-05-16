@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.33",
+  "appVersion": "1.0.34",
   "versions": [
     {
       "v": "1.0",
@@ -378,9 +378,20 @@
       "v": "1.0.33",
       "date": "2026-05-16",
       "title": "Restore backup from login",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Password screen includes Restore from backup — same JSON restore as in the app; page reloads and unlocks automatically if the backup contains a saved tripAuthToken (Remember me)"
+      ]
+    },
+    {
+      "v": "1.0.34",
+      "date": "2026-05-16",
+      "title": "Trip tools cog menu",
+      "latest": true,
+      "changes": [
+        "Removed the bottom floating edit pill that overlapped Safari UI (drawer nav, modal close, etc.)",
+        "PDF export lives beside a compact cog on the mobile top bar and in the sidebar; History, Revert, Edit, and Backup open from the cog dropdown",
+        "Main scroll padding and SW update pill spacing no longer depend on a bottom toolbar"
       ]
     }
   ],

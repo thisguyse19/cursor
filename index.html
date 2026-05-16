@@ -67,9 +67,20 @@
     <span></span><span></span><span></span>
   </button>
   <div class="mobile-header-title">Tasmania &amp; Melbourne</div>
-  <div class="mobile-header-right"></div>
+  <div class="mobile-header-actions">
+    <button type="button" class="mobile-header-pdf" onclick="exportPDF()" aria-label="Export PDF">↓ PDF</button>
+    <button type="button" class="mobile-header-cog" id="mobileTopCog" onclick="toggleTopToolsMenu(event)" aria-label="Trip tools" aria-expanded="false" aria-haspopup="true" aria-controls="topToolsMenu">⚙</button>
+  </div>
 </div>
 <div class="mobile-overlay" id="mobile-overlay" onclick="closeMobileMenu()"></div>
+
+<!-- ═══ TOP TOOLS (cog dropdown — shared mobile + desktop triggers) ═══ -->
+<div class="top-tools-dropdown" id="topToolsMenu" role="menu" aria-hidden="true">
+  <button type="button" class="top-tools-item tb-btn tb-ghost" id="historyBtn" role="menuitem" onclick="openHistory()">⏱ History</button>
+  <button type="button" class="top-tools-item tb-btn tb-danger" id="revertBtn" role="menuitem" onclick="confirmRevert()">↺ Revert all</button>
+  <button type="button" class="top-tools-item tb-btn tb-primary" id="editBtn" role="menuitem" onclick="toggleEdit()">✏️ Edit</button>
+  <button type="button" class="top-tools-item tb-btn tb-ghost" role="menuitem" onclick="openBackupModal()">💾 Backup &amp; restore</button>
+</div>
 
 <!-- ═══ SIDEBAR ═══ -->
 <nav class="sidebar" id="sidebar">
@@ -80,6 +91,10 @@
     <button class="ver-pill" id="ver-pill-btn" onclick="openVersionModal()">
       <span class="ver-pill-dot"></span><span id="ver-pill-label">v1.0</span>
     </button>
+    <div class="sb-actions">
+      <button type="button" class="sb-pdf-btn" onclick="exportPDF()" aria-label="Export PDF">↓ PDF</button>
+      <button type="button" class="sb-cog-btn" id="desktopTopCog" onclick="toggleTopToolsMenu(event)" aria-label="Trip tools" aria-expanded="false" aria-haspopup="true" aria-controls="topToolsMenu">⚙</button>
+    </div>
   </div>
   <div class="sidebar-nav-scroll">
   <div class="nav-group">
@@ -477,21 +492,6 @@
 </section>
 
 </main>
-
-<!-- ═══ EDIT TOOLBAR ═══ -->
-<div class="edit-toolbar">
-  <div class="edit-toolbar-inner">
-    <button type="button" class="tb-btn tb-ghost tb-icon" id="historyBtn" onclick="openHistory()" aria-label="Edit history" title="History">⏱</button>
-    <div class="tb-sep"></div>
-    <button type="button" class="tb-btn tb-danger tb-icon" id="revertBtn" onclick="confirmRevert()" aria-label="Revert all changes" title="Revert all">↺</button>
-    <div class="tb-sep"></div>
-    <button type="button" class="tb-btn tb-primary tb-icon" id="editBtn" onclick="toggleEdit()" aria-label="Edit page content" title="Edit">✏️</button>
-    <div class="tb-sep"></div>
-    <button type="button" class="tb-btn tb-ghost tb-icon" onclick="openBackupModal()" aria-label="Backup or restore data" title="Backup & restore">💾</button>
-    <div class="tb-sep"></div>
-    <button type="button" class="tb-btn tb-export tb-pdf-btn" onclick="exportPDF()"><span class="tb-pdf-glyph" aria-hidden="true">↓</span> PDF</button>
-  </div>
-</div>
 
 <!-- ═══ MODAL: HISTORY ═══ -->
 <div class="modal-overlay" id="historyModal" onclick="if(event.target===this)this.classList.remove('open')">
