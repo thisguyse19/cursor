@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """
-Generate PWA / iOS app icons: three plane silhouettes (varying opacity) on a
-dark blue gradient — glass-friendly, no wordmark. Renders master at 1024px.
+Generate PWA / iOS app icons (procedural fallback): three plane silhouettes on a
+dark blue gradient. For real 3D artwork, use icons/icon-source-1024.png and run:
+  python3 scripts/build-icons-from-source.py
 """
 from __future__ import annotations
 
