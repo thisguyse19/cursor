@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.38",
+  "appVersion": "1.0.39",
   "versions": [
     {
       "v": "1.0",
@@ -426,11 +426,20 @@
       "v": "1.0.38",
       "date": "2026-05-16",
       "title": "Mobile bottom band + flight map gestures",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Narrow layouts use small viewport height (svh) for html/body in the browser, with lvh when installed, plus body/mesh background tweaks so a grey strip is less likely under iOS UI",
         "Main column uses a local (scrolled) mesh on phones — fixed backgrounds inside overflow scroll are brittle on WebKit",
         "Flight card satellite maps no longer pan, pinch-zoom, or double-tap zoom; touch drags pass vertically to the page"
+      ]
+    },
+    {
+      "v": "1.0.39",
+      "date": "2026-05-16",
+      "title": "Flight board show / hide timing",
+      "latest": true,
+      "changes": [
+        "Hide / Show on the flight board runs in two steps: content (cards, countdown, Add flight) fades out or in together, then the section height opens or closes — no staggered piecemeal hiding"
       ]
     }
   ],
