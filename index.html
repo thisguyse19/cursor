@@ -1254,13 +1254,14 @@ const VERSIONS = [
     ]
   },
   {
-    v: '1.0.7',
-    date: '2026-05-16',
-    title: 'Softer Glass — Hero & Sidebar',
-    latest: true,
+    v: '1.0.5',
+    date: '2026-05-15',
+    title: 'Itinerary Update — Return Flight Details',
+    latest: false,
     changes: [
-      'Hero titles no longer sit in a frosted panel — text uses the photo gradient plus shadow for readability, so nothing “cuts into” the top of the image or the mobile header area',
-      'Sidebar links are flat again with simple hover/active tints and spacing between rows — no stacked glass tiles on each button',
+      'Day 15 updated: evening departure 22:35 MEL→SIN, landing Singapore 03:20 — full last day in Melbourne now available',
+      'Jordan noted as arriving Dec 5 (2 days early, free & easy) before group lands Dec 7',
+      'Checklist return flight updated with specific departure time and landing details',
     ]
   },
   {
@@ -1275,17 +1276,29 @@ const VERSIONS = [
     ]
   },
   {
-    v: '1.0.5',
-    date: '2026-05-15',
-    title: 'Itinerary Update — Return Flight Details',
-    latest: false,
+    v: '1.0.7',
+    date: '2026-05-16',
+    title: 'Softer Glass — Hero & Sidebar',
+    latest: true,
     changes: [
-      'Day 15 updated: evening departure 22:35 MEL→SIN, landing Singapore 03:20 — full last day in Melbourne now available',
-      'Jordan noted as arriving Dec 5 (2 days early, free & easy) before group lands Dec 7',
-      'Checklist return flight updated with specific departure time and landing details',
+      'Hero titles no longer sit in a frosted panel — text uses the photo gradient plus shadow for readability, so nothing “cuts into” the top of the image or the mobile header area',
+      'Sidebar links are flat again with simple hover/active tints and spacing between rows — no stacked glass tiles on each button',
     ]
   }
 ];
+
+/** Newest-first order for the version history modal (not raw array index). */
+function compareVersionDesc(a, b) {
+  const pa = String(a.v).split('.').map(part => parseInt(part, 10) || 0);
+  const pb = String(b.v).split('.').map(part => parseInt(part, 10) || 0);
+  const n = Math.max(pa.length, pb.length);
+  for (let i = 0; i < n; i++) {
+    const da = pa[i] ?? 0;
+    const db = pb[i] ?? 0;
+    if (da !== db) return db - da;
+  }
+  return 0;
+}
 
 // ═══════════════════════════════════════
 // DATA
@@ -2969,7 +2982,7 @@ ${checklistHtml}
 // ═══════════════════════════════════════
 function openVersionModal() {
   const list = document.getElementById('versionList');
-  list.innerHTML = VERSIONS.slice().reverse().map(v => `
+  list.innerHTML = VERSIONS.slice().sort(compareVersionDesc).map(v => `
     <div class="ver-entry">
       <div class="ver-entry-hdr">
         <span class="ver-badge${v.latest?' latest':''}">v${v.v}</span>
