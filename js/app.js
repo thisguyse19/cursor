@@ -415,34 +415,6 @@ function flightCardMainHtml(m) {
     ${layover}`;
 }
 
-function updateFlightScrollerFades(el) {
-  if (!el || !el.classList.contains('flight-cards-scroller')) return;
-  if (el.classList.contains('flight-cards-scroller--empty')) {
-    el.classList.remove('flight-scroller--fade-left', 'flight-scroller--fade-right');
-    return;
-  }
-  const max = el.scrollWidth - el.clientWidth;
-  const tol = 3;
-  if (max <= tol) {
-    el.classList.remove('flight-scroller--fade-left', 'flight-scroller--fade-right');
-    return;
-  }
-  el.classList.toggle('flight-scroller--fade-left', el.scrollLeft > tol);
-  el.classList.toggle('flight-scroller--fade-right', el.scrollLeft < max - tol);
-}
-
-function ensureFlightScrollerFadeBinding(el) {
-  if (!el || el.dataset.flightFadeBound) return;
-  el.dataset.flightFadeBound = '1';
-  const run = () => updateFlightScrollerFades(el);
-  el.addEventListener('scroll', run, { passive: true });
-  window.addEventListener('resize', run);
-  if (typeof ResizeObserver !== 'undefined') {
-    const ro = new ResizeObserver(run);
-    ro.observe(el);
-  }
-}
-
 function normalizeBodyScroll() {
   if (modalBlockingOverlayCount() > 0) return;
   document.documentElement.classList.remove('modal-scroll-lock');
@@ -651,10 +623,6 @@ function renderFlights() {
   }
 
   renderTripCountdownBanner();
-
-  ensureFlightScrollerFadeBinding(grid);
-  updateFlightScrollerFades(grid);
-  requestAnimationFrame(() => updateFlightScrollerFades(grid));
 }
 
 function openFlightAddModal() {
