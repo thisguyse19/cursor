@@ -1148,30 +1148,44 @@ async function submitAuth() {
   const input = document.getElementById('auth-input');
   const btn   = document.getElementById('auth-btn');
   const err   = document.getElementById('auth-error');
-  const val   = input.value;
+  const val   = input.value.trim();
   if (!val) return;
 
   btn.disabled = true;
   btn.textContent = 'Checking…';
   err.textContent = '';
 
-  const hash = await _hashInput(val);
-  if (hash === _AH) {
-    if (document.getElementById('auth-remember').checked) {
-      localStorage.setItem(_AK, _AH);
+  try {
+    if (!globalThis.crypto?.subtle) {
+      err.textContent = 'This page needs a secure connection (https) to verify the password. Use the site’s GitHub Pages URL, not http or file.';
+      return;
     }
-    document.getElementById('auth-overlay').classList.add('hidden');
-    maybeShowOnboarding();
-  } else {
-    input.value = '';
-    input.classList.add('error');
-    err.textContent = 'Incorrect password. Try again.';
-    setTimeout(() => input.classList.remove('error'), 400);
-    input.focus();
+    const hash = await _hashInput(val);
+    if (hash === _AH) {
+      if (document.getElementById('auth-remember').checked) {
+        localStorage.setItem(_AK, _AH);
+      }
+      document.getElementById('auth-overlay').classList.add('hidden');
+      maybeShowOnboarding();
+    } else {
+      input.value = '';
+      input.classList.add('error');
+      err.textContent = 'Incorrect password. Try again.';
+      setTimeout(() => input.classList.remove('error'), 400);
+      input.focus();
+    }
+  } catch (e) {
+    console.error(e);
+    err.textContent = 'Could not verify password (try again, or use the https site link).';
+  } finally {
     btn.disabled = false;
     btn.textContent = 'Unlock';
   }
 }
+
+/* Top-level `async function` is not always on `window` in classic scripts; inline handlers need this. */
+window.submitAuth = submitAuth;
+window.doExportPDF = doExportPDF;
 
 window.addEventListener('DOMContentLoaded', () => {
   (function setupTouchTips() {
