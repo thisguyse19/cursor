@@ -1,5 +1,5 @@
 /* Minimal service worker for installability and offline shell (GitHub Pages–friendly). */
-const CACHE = 'triple-v26';
+const CACHE = 'triple-v27';
 
 function isContentJsonUrl(url) {
   try {
@@ -22,6 +22,7 @@ self.addEventListener('install', (event) => {
           new URL('js/airlines.js', scope).href,
           new URL('js/app.js', scope).href,
           new URL('manifest.webmanifest', scope).href,
+          new URL('icons/icon-1024.png', scope).href,
           new URL('icons/apple-touch-icon.png', scope).href,
           new URL('icons/icon-192.png', scope).href,
           new URL('icons/icon-512.png', scope).href,
