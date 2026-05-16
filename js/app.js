@@ -2911,16 +2911,15 @@ window.startBackupRestore = startBackupRestore;
 window.startBackupRestoreFromLogin = startBackupRestoreFromLogin;
 
 function _safeBottomPx() {
-  const raw = getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom').trim();
-  let n = parseFloat(raw);
-  if (Number.isFinite(n) && n >= 0) return n;
+  let n = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom').trim());
+  if (!Number.isFinite(n) || n < 0) n = 0;
   const probe = document.createElement('div');
   probe.style.cssText =
     'position:fixed;left:-9999px;bottom:0;height:0;padding-bottom:env(safe-area-inset-bottom,0px);pointer-events:none;opacity:0;visibility:hidden';
   document.body.appendChild(probe);
-  n = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
+  const probed = parseFloat(getComputedStyle(probe).paddingBottom) || 0;
   probe.remove();
-  return n;
+  return Math.max(n, probed);
 }
 
 /**
