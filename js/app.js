@@ -1272,6 +1272,12 @@ window.setClSort = setClSort;
 window.doRevertAll = doRevertAll;
 
 window.addEventListener('DOMContentLoaded', () => {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker
+      .register(contentUrl('sw.js'))
+      .catch((err) => console.warn('[Triple] service worker registration failed', err));
+  }
+
   (function setupTouchTips() {
     const tip = document.createElement('div');
     tip.id = 'touch-tip';
