@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.32",
+  "appVersion": "1.0.33",
   "versions": [
     {
       "v": "1.0",
@@ -368,10 +368,19 @@
       "v": "1.0.32",
       "date": "2026-05-16",
       "title": "Update pill above edit bar",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Service-worker “new version” UI is a floating frosted pill centered above the edit toolbar with higher z-index so Update is tappable; --sw-update-bottom tracks the edit stack from the same anchor pass",
         "When the update pill is visible, main bottom padding grows so scrolled content can clear it; print hides the update UI"
+      ]
+    },
+    {
+      "v": "1.0.33",
+      "date": "2026-05-16",
+      "title": "Restore backup from login",
+      "latest": true,
+      "changes": [
+        "Password screen includes Restore from backup — same JSON restore as in the app; page reloads and unlocks automatically if the backup contains a saved tripAuthToken (Remember me)"
       ]
     }
   ],

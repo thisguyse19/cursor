@@ -54,6 +54,10 @@
     </label>
     <button class="auth-btn" id="auth-btn" onclick="submitAuth()">Unlock</button>
     <div class="auth-error" id="auth-error"></div>
+    <div class="auth-restore-wrap">
+      <button type="button" class="auth-restore-btn" onclick="startBackupRestoreFromLogin()">Restore from backup…</button>
+      <p class="auth-restore-hint">Choose a Triple JSON export. This device’s saved data is replaced, then the page reloads.</p>
+    </div>
   </div>
 </div>
 

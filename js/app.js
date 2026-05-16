@@ -2165,6 +2165,11 @@ function startBackupRestore() {
   document.getElementById('backupFileInput')?.click();
 }
 
+/** Auth gate: same file picker + apply flow as in-app backup restore; after reload, checkAuth runs (backup may include tripAuthToken). */
+function startBackupRestoreFromLogin() {
+  document.getElementById('backupFileInput')?.click();
+}
+
 async function doExportPDF(isLandscape) {
 
   // ── Capture maps as images ────────────────────────────────
@@ -2893,6 +2898,7 @@ window.openBackupModal = openBackupModal;
 window.closeBackupModal = closeBackupModal;
 window.doBackupDownload = doBackupDownload;
 window.startBackupRestore = startBackupRestore;
+window.startBackupRestoreFromLogin = startBackupRestoreFromLogin;
 
 /**
  * Pin the edit toolbar to the bottom of the **layout viewport** (window.innerHeight).
