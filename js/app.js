@@ -849,6 +849,200 @@ function flightCardRouteMapHtml(m) {
   return `<div class="flight-card-map-host" aria-hidden="true"><div class="flight-card-map" data-route="${enc}"></div></div>`;
 }
 
+function tripMaplibreSupported() {
+  return typeof maplibregl !== 'undefined' && maplibregl.supported();
+}
+
+function createEsriGlobeStyle() {
+  return {
+    version: 8,
+    name: 'triple-esri-satellite',
+    glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
+    sources: {
+      esri: {
+        type: 'raster',
+        tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+        tileSize: 256,
+        attribution: '© Esri',
+        maxzoom: 19,
+      },
+    },
+    layers: [
+      {
+        id: 'background',
+        type: 'background',
+        paint: { 'background-color': '#020617' },
+      },
+      {
+        id: 'esri',
+        type: 'raster',
+        source: 'esri',
+        paint: {
+          'raster-opacity': 0.9,
+          'raster-fade-duration': 0,
+          'raster-brightness-min': 0.08,
+          'raster-brightness-max': 0.46,
+          'raster-contrast': 0.12,
+          'raster-saturation': -0.55,
+        },
+      },
+    ],
+  };
+}
+
+function maplibreBindGlobeProjection(map) {
+  const apply = () => {
+    try {
+      map.setProjection({ type: 'globe' });
+    } catch (_) {
+      /* older MapLibre builds */
+    }
+  };
+  if (map.isStyleLoaded && map.isStyleLoaded()) apply();
+  else map.once('style.load', apply);
+}
+
+function tripToRad(d) {
+  return (d * Math.PI) / 180;
+}
+function tripToDeg(r) {
+  return (r * 180) / Math.PI;
+}
+
+/** Great-circle interpolation between [lng,lat] points, t ∈ [0,1] */
+function tripGreatCircleInterpolate(a, b, t) {
+  const [lng1, lat1] = [tripToRad(a[0]), tripToRad(a[1])];
+  const [lng2, lat2] = [tripToRad(b[0]), tripToRad(b[1])];
+  const sinLat1 = Math.sin(lat1);
+  const cosLat1 = Math.cos(lat1);
+  const sinLat2 = Math.sin(lat2);
+  const cosLat2 = Math.cos(lat2);
+  const dLng = lng2 - lng1;
+  const c = Math.acos(Math.min(1, Math.max(-1, sinLat1 * sinLat2 + cosLat1 * cosLat2 * Math.cos(dLng))));
+  if (c < 1e-10) return [a[0], a[1]];
+  const sinC = Math.sin(c);
+  const A = Math.sin((1 - t) * c) / sinC;
+  const B = Math.sin(t * c) / sinC;
+  const x = A * cosLat1 * Math.cos(lng1) + B * cosLat2 * Math.cos(lng2);
+  const y = A * cosLat1 * Math.sin(lng1) + B * cosLat2 * Math.sin(lng2);
+  const z = A * sinLat1 + B * sinLat2;
+  const lat = Math.asin(Math.min(1, Math.max(-1, z)));
+  const lng = Math.atan2(y, x);
+  return [tripToDeg(lng), tripToDeg(lat)];
+}
+
+/** Dense [lng,lat] vertices along great-circle legs */
+function tripGreatCircleLine(coords, stepsPerLeg) {
+  const n = stepsPerLeg || 28;
+  if (!coords || coords.length < 2) return coords || [];
+  const out = [];
+  for (let i = 0; i < coords.length - 1; i++) {
+    const a = coords[i];
+    const b = coords[i + 1];
+    for (let s = 0; s < n; s++) {
+      if (i > 0 && s === 0) continue;
+      const t = s / n;
+      out.push(tripGreatCircleInterpolate(a, b, t));
+    }
+  }
+  out.push(coords[coords.length - 1]);
+  return out;
+}
+
+function tripLngLatBounds(coords) {
+  const b = new maplibregl.LngLatBounds(coords[0], coords[0]);
+  coords.forEach(c => b.extend(c));
+  return b;
+}
+
+function tripMaplibreAddSky(map) {
+  if (map.getLayer('sky')) return;
+  try {
+    map.addLayer({
+      id: 'sky',
+      type: 'sky',
+      paint: {
+        'sky-type': 'atmosphere',
+        'sky-atmosphere-sun-intensity': 10,
+        'sky-atmosphere-color': 'rgb(6, 10, 24)',
+      },
+    });
+  } catch (_) {
+    /* sky unsupported */
+  }
+}
+
+function tripMaplibreAddRouteGlow(map, sourceId, coordsLngLat, colors, widths) {
+  const w = widths || { core: 3, glow: 11 };
+  const c = colors || { core: '#7dd3fc', glow: '#38bdf8' };
+  const line = tripGreatCircleLine(coordsLngLat, 36);
+  map.addSource(sourceId, {
+    type: 'geojson',
+    data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: line } },
+  });
+  map.addLayer({
+    id: `${sourceId}-glow`,
+    type: 'line',
+    source: sourceId,
+    paint: {
+      'line-color': c.glow,
+      'line-width': w.glow,
+      'line-blur': 3.5,
+      'line-opacity': 0.42,
+    },
+  });
+  map.addLayer({
+    id: `${sourceId}-core`,
+    type: 'line',
+    source: sourceId,
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: {
+      'line-color': c.core,
+      'line-width': w.core,
+      'line-opacity': 0.95,
+    },
+  });
+}
+
+function tripMaplibreAddDashedLeg(map, sourceId, p0, p1, color) {
+  const line = tripGreatCircleLine(
+    [
+      [p0[0], p0[1]],
+      [p1[0], p1[1]],
+    ],
+    18
+  );
+  map.addSource(sourceId, {
+    type: 'geojson',
+    data: { type: 'Feature', properties: {}, geometry: { type: 'LineString', coordinates: line } },
+  });
+  map.addLayer({
+    id: `${sourceId}-line`,
+    type: 'line',
+    source: sourceId,
+    layout: { 'line-cap': 'round', 'line-join': 'round' },
+    paint: {
+      'line-color': color,
+      'line-width': 2.2,
+      'line-opacity': 0.72,
+      'line-dasharray': [2, 2.5],
+    },
+  });
+}
+
+function tripMaplibreWaitIdle(map, msCap) {
+  const cap = msCap || 1600;
+  return new Promise(resolve => {
+    const t = setTimeout(resolve, cap);
+    const done = () => {
+      clearTimeout(t);
+      resolve();
+    };
+    if (map.loaded && map.loaded()) map.once('idle', done);
+    else map.once('load', () => map.once('idle', done));
+  });
+}
+
 const _flightCardMiniMaps = [];
 
 function teardownFlightCardMiniMaps() {
@@ -866,7 +1060,7 @@ function refreshFlightCardMiniMapSizes() {
   requestAnimationFrame(() => {
     for (const map of _flightCardMiniMaps) {
       try {
-        map.invalidateSize();
+        map.resize();
       } catch (_) {
         /* ignore */
       }
@@ -876,9 +1070,8 @@ function refreshFlightCardMiniMapSizes() {
 
 function initFlightCardMiniMaps() {
   teardownFlightCardMiniMaps();
-  if (typeof L === 'undefined') return;
-  const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  const tileOpts = { attribution: '', maxZoom: 11 };
+  if (!tripMaplibreSupported()) return;
+  const style = createEsriGlobeStyle();
 
   document.querySelectorAll('.flight-card-map[data-route]').forEach(el => {
     let pts;
@@ -889,35 +1082,99 @@ function initFlightCardMiniMaps() {
     }
     if (!Array.isArray(pts) || pts.length < 2) return;
 
-    const map = L.map(el, {
-      zoomControl: false,
+    const coords = pts.map(p => [p.lng, p.lat]);
+    const map = new maplibregl.Map({
+      container: el,
+      style,
+      center: coords[0],
+      zoom: 1.35,
+      pitch: 52,
+      bearing: 24,
+      maxPitch: 85,
       attributionControl: false,
-      dragging: false,
-      scrollWheelZoom: false,
-      doubleClickZoom: false,
+      scrollZoom: false,
       boxZoom: false,
+      dragPan: true,
+      dragRotate: true,
+      touchZoomRotate: true,
+      touchPitch: true,
+      doubleClickZoom: true,
       keyboard: false,
-      tap: false,
+      renderWorldCopies: false,
     });
-    L.tileLayer(tileUrl, tileOpts).addTo(map);
-    const latlngs = pts.map(p => [p.lat, p.lng]);
-    const line = L.polyline(latlngs, { color: '#0071e3', weight: 3, opacity: 0.88, lineJoin: 'round' });
-    line.addTo(map);
-    pts.forEach((p, i) => {
-      const isEnd = i === 0 || i === pts.length - 1;
-      L.circleMarker([p.lat, p.lng], {
-        radius: isEnd ? 5 : 4,
-        color: '#ffffff',
-        weight: 2,
-        fillColor: isEnd ? '#0071e3' : '#34c759',
-        fillOpacity: 1,
-      }).addTo(map);
+    maplibreBindGlobeProjection(map);
+
+    map.once('load', () => {
+      try {
+        tripMaplibreAddSky(map);
+      } catch (_) {
+        /* ignore */
+      }
+
+      const line = tripGreatCircleLine(coords, 32);
+      map.addSource('fc-route', {
+        type: 'geojson',
+        data: {
+          type: 'Feature',
+          properties: {},
+          geometry: { type: 'LineString', coordinates: line },
+        },
+      });
+      map.addLayer({
+        id: 'fc-route-glow',
+        type: 'line',
+        source: 'fc-route',
+        paint: {
+          'line-color': '#22d3ee',
+          'line-width': 10,
+          'line-blur': 2.5,
+          'line-opacity': 0.38,
+        },
+      });
+      map.addLayer({
+        id: 'fc-route-core',
+        type: 'line',
+        source: 'fc-route',
+        layout: { 'line-cap': 'round', 'line-join': 'round' },
+        paint: {
+          'line-color': '#bae6fd',
+          'line-width': 3,
+          'line-opacity': 0.96,
+        },
+      });
+
+      map.addSource('fc-stops', {
+        type: 'geojson',
+        data: {
+          type: 'FeatureCollection',
+          features: pts.map(p => ({
+            type: 'Feature',
+            properties: {},
+            geometry: { type: 'Point', coordinates: [p.lng, p.lat] },
+          })),
+        },
+      });
+      map.addLayer({
+        id: 'fc-stop-halo',
+        type: 'circle',
+        source: 'fc-stops',
+        paint: {
+          'circle-radius': 6,
+          'circle-color': '#ffffff',
+          'circle-opacity': 0.95,
+          'circle-stroke-width': 2,
+          'circle-stroke-color': '#0284c7',
+        },
+      });
+
+      try {
+        const b = tripLngLatBounds(coords);
+        map.fitBounds(b, { padding: 28, duration: 0, maxZoom: 6.2, pitch: 50, bearing: map.getBearing() });
+      } catch (_) {
+        map.setCenter(coords[0]);
+      }
     });
-    try {
-      map.fitBounds(line.getBounds(), { padding: [12, 12], maxZoom: 7 });
-    } catch {
-      map.setView(latlngs[0], 3);
-    }
+
     _flightCardMiniMaps.push(map);
   });
 
@@ -2109,18 +2366,37 @@ function startBackupRestore() {
 async function doExportPDF(isLandscape) {
 
   // ── Capture maps as images ────────────────────────────────
-  async function captureMap(mapId, pageId, leafletMap) {
+  async function captureMap(mapId, pageId, liveMap) {
     const pageEl = document.getElementById(pageId);
-    const mapEl  = document.getElementById(mapId);
+    const mapEl = document.getElementById(mapId);
     if (!mapEl || !pageEl) return null;
     const prev = pageEl.style.display;
     pageEl.style.display = 'block';
-    if (leafletMap) { leafletMap.invalidateSize(); await new Promise(r => setTimeout(r, 350)); }
     try {
-      const canvas = await html2canvas(mapEl, { useCORS: true, allowTaint: true, scale: 1.5, backgroundColor: '#f5f5f7' });
+      let dataUrl = null;
+      if (liveMap && typeof liveMap.getCanvas === 'function') {
+        liveMap.resize();
+        await tripMaplibreWaitIdle(liveMap, 2200);
+        try {
+          dataUrl = liveMap.getCanvas().toDataURL('image/jpeg', 0.88);
+        } catch (_) {
+          /* WebGL readback can fail on some GPUs */
+        }
+      }
+      if (!dataUrl) {
+        if (liveMap && typeof liveMap.resize === 'function') liveMap.resize();
+        await new Promise(r => setTimeout(r, 400));
+        const canvas = await html2canvas(mapEl, {
+          useCORS: true,
+          allowTaint: true,
+          scale: 1.5,
+          backgroundColor: '#020617',
+        });
+        dataUrl = canvas.toDataURL('image/jpeg', 0.88);
+      }
       pageEl.style.display = prev;
-      return canvas.toDataURL('image/jpeg', 0.88);
-    } catch(e) {
+      return dataUrl;
+    } catch (e) {
       pageEl.style.display = prev;
       return null;
     }
@@ -2650,89 +2926,168 @@ function init() {
 // ═══════════════════════════════════════
 function initMaps() {
   try {
-    if (typeof L === 'undefined') {
-      console.warn('Leaflet not loaded; maps disabled');
+    if (!tripMaplibreSupported()) {
+      console.warn('MapLibre GL not available; maps disabled');
       return;
     }
-  const tileUrl = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
-  const tileOpts = { attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>', maxZoom: 13 };
+    const style = createEsriGlobeStyle();
 
-  // ── Tasmania Map ──────────────────────────────────────────
-  const mapTas = L.map('map-tas', { zoomControl: true, scrollWheelZoom: false }).setView([-42.2, 146.8], 7);
-  L.tileLayer(tileUrl, tileOpts).addTo(mapTas);
-  window._mapTas = mapTas;
-
-  const tasStops = [
-    { lat:-42.8821, lng:147.3272, num:1,  label:'Hobart', note:'Dec 7–10 · 4 nights · Base for Bruny & Maria day trips', color:'#0071e3', daytrip:false },
-    { lat:-43.38,   lng:147.28,   num:'A', label:'Bruny Island', note:'Dec 9 · Day trip · Wilderness cruise, oysters, bread fridge', color:'#34c759', daytrip:true },
-    { lat:-42.62,   lng:148.07,   num:'B', label:'Maria Island', note:'Dec 10 · Day trip · Painted Cliffs, wombats, convict ruins', color:'#34c759', daytrip:true },
-    { lat:-42.6750, lng:146.5528, num:2,  label:'Mt Field NP', note:'Dec 11 · Morning stop en route Port Arthur', color:'#0071e3', daytrip:false },
-    { lat:-43.1397, lng:147.8572, num:3,  label:'Port Arthur', note:'Dec 11 · 1 night · Historic penal colony, Isle of the Dead', color:'#0071e3', daytrip:false },
-    { lat:-42.1167, lng:148.2833, num:4,  label:'Freycinet (Coles Bay)', note:'Dec 12–13 · 2 nights · Wineglass Bay, Mount Amos', color:'#0071e3', daytrip:false },
-    { lat:-41.3197, lng:148.2467, num:5,  label:'Bay of Fires / St Helens', note:'Dec 14 · 1 night · Pyengana dairy, Swimcart Beach', color:'#0071e3', daytrip:false },
-    { lat:-41.25,   lng:147.58,   num:'C', label:'Bridestowe Lavender', note:'Dec 15 · Morning stop · World\'s largest lavender estate', color:'#34c759', daytrip:true },
-    { lat:-41.4419, lng:147.145,  num:6,  label:'Launceston', note:'Dec 15 · Brief stop · Cataract Gorge', color:'#0071e3', daytrip:false },
-    { lat:-41.6417, lng:145.95,   num:7,  label:'Cradle Mountain', note:'Dec 15–16 · 2 nights · Dove Lake, Barn Bluff', color:'#0071e3', daytrip:false },
-    { lat:-42.8821, lng:147.3272, num:8,  label:'Hobart Airport', note:'Dec 17 · Fly to Melbourne · Return RAV4 · No one-way fee', color:'#ff3b30', daytrip:false },
-  ];
-
-  const mainRoute = tasStops.filter(s => !s.daytrip).map(s => [s.lat, s.lng]);
-  L.polyline(mainRoute, { color:'#0071e3', weight:3, opacity:0.7, dashArray:'6 4' }).addTo(mapTas);
-
-  // Day trip lines from Hobart
-  [[tasStops[0], tasStops[1]], [tasStops[0], tasStops[2]]].forEach(([a,b]) => {
-    L.polyline([[a.lat,a.lng],[b.lat,b.lng]], { color:'#34c759', weight:2, opacity:0.6, dashArray:'4 6' }).addTo(mapTas);
-  });
-  // Bridestowe line
-  L.polyline([[tasStops[5].lat,tasStops[5].lng],[tasStops[7].lat,tasStops[7].lng]], { color:'#34c759', weight:2, opacity:0.6, dashArray:'4 6' }).addTo(mapTas);
-
-  tasStops.forEach((s, i) => {
-    const size = s.daytrip ? 24 : 28;
-    const icon = L.divIcon({
-      className:'',
-      html:`<div style="width:${size}px;height:${size}px;border-radius:50%;background:${s.color};border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:${s.daytrip?10:11}px;font-weight:700;color:#fff;font-family:var(--font)">${s.num}</div>`,
-      iconSize:[size,size], iconAnchor:[size/2,size/2], popupAnchor:[0,-size/2]
+    const mapTas = new maplibregl.Map({
+      container: 'map-tas',
+      style,
+      center: [146.8, -42.2],
+      zoom: 5.45,
+      pitch: 50,
+      bearing: -22,
+      maxPitch: 85,
+      scrollZoom: true,
+      boxZoom: true,
+      dragRotate: true,
+      touchPitch: true,
+      doubleClickZoom: true,
+      attributionControl: true,
+      renderWorldCopies: false,
     });
-    L.marker([s.lat,s.lng], {icon}).addTo(mapTas)
-     .bindPopup(`<strong>${s.label}</strong>${s.note}`);
-  });
+    maplibreBindGlobeProjection(mapTas);
+    try {
+      mapTas.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right');
+    } catch (_) {
+      try {
+        mapTas.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+      } catch (_2) {
+        /* ignore */
+      }
+    }
+    try {
+      mapTas.addControl(new maplibregl.GlobeControl(), 'top-right');
+    } catch (_) {
+      /* older MapLibre */
+    }
+    window._mapTas = mapTas;
 
-  // ── Melbourne / GOR Map ───────────────────────────────────
-  const mapMelb = L.map('map-melb', { zoomControl: true, scrollWheelZoom: false }).setView([-38.4, 144.2], 8);
-  L.tileLayer(tileUrl, tileOpts).addTo(mapMelb);
-  window._mapMelb = mapMelb;
+    const tasStops = [
+      { lat:-42.8821, lng:147.3272, num:1,  label:'Hobart', note:'Dec 7–10 · 4 nights · Base for Bruny & Maria day trips', color:'#0071e3', daytrip:false },
+      { lat:-43.38,   lng:147.28,   num:'A', label:'Bruny Island', note:'Dec 9 · Day trip · Wilderness cruise, oysters, bread fridge', color:'#34c759', daytrip:true },
+      { lat:-42.62,   lng:148.07,   num:'B', label:'Maria Island', note:'Dec 10 · Day trip · Painted Cliffs, wombats, convict ruins', color:'#34c759', daytrip:true },
+      { lat:-42.6750, lng:146.5528, num:2,  label:'Mt Field NP', note:'Dec 11 · Morning stop en route Port Arthur', color:'#0071e3', daytrip:false },
+      { lat:-43.1397, lng:147.8572, num:3,  label:'Port Arthur', note:'Dec 11 · 1 night · Historic penal colony, Isle of the Dead', color:'#0071e3', daytrip:false },
+      { lat:-42.1167, lng:148.2833, num:4,  label:'Freycinet (Coles Bay)', note:'Dec 12–13 · 2 nights · Wineglass Bay, Mount Amos', color:'#0071e3', daytrip:false },
+      { lat:-41.3197, lng:148.2467, num:5,  label:'Bay of Fires / St Helens', note:'Dec 14 · 1 night · Pyengana dairy, Swimcart Beach', color:'#0071e3', daytrip:false },
+      { lat:-41.25,   lng:147.58,   num:'C', label:'Bridestowe Lavender', note:'Dec 15 · Morning stop · World\'s largest lavender estate', color:'#34c759', daytrip:true },
+      { lat:-41.4419, lng:147.145,  num:6,  label:'Launceston', note:'Dec 15 · Brief stop · Cataract Gorge', color:'#0071e3', daytrip:false },
+      { lat:-41.6417, lng:145.95,   num:7,  label:'Cradle Mountain', note:'Dec 15–16 · 2 nights · Dove Lake, Barn Bluff', color:'#0071e3', daytrip:false },
+      { lat:-42.8821, lng:147.3272, num:8,  label:'Hobart Airport', note:'Dec 17 · Fly to Melbourne · Return RAV4 · No one-way fee', color:'#ff3b30', daytrip:false },
+    ];
 
-  const melbStops = [
-    { lat:-37.8136, lng:144.9631, num:1, label:'Melbourne', note:'Dec 17–18 · 2 nights · Laneways, markets, penguins' },
-    { lat:-38.3367, lng:144.3253, num:2, label:'Torquay', note:'Dec 19 · Bells Beach, surf culture, GOR km 0' },
-    { lat:-38.4042, lng:144.1869, num:3, label:'Anglesea', note:'Dec 19 · Kangaroos on the golf course' },
-    { lat:-38.5469, lng:143.9811, num:4, label:'Lorne', note:'Dec 19 · Lunch, Erskine Falls, foreshore views' },
-    { lat:-38.6603, lng:143.8644, num:5, label:'Kennett River', note:'Dec 19 · Best wild koalas in Victoria' },
-    { lat:-38.7578, lng:143.6717, num:6, label:'Apollo Bay', note:'Dec 19–20 · 2 nights · Base for western GOR' },
-    { lat:-38.8583, lng:143.5133, num:7, label:'Cape Otway', note:'Dec 20 · Lighthouse, koalas, rainforest' },
-    { lat:-38.6634, lng:143.105,  num:8, label:'Twelve Apostles', note:'Dec 20 · Sunset at the rock stacks · ~2 hrs from Apollo Bay' },
-    { lat:-37.8136, lng:144.9631, num:9, label:'Melbourne (return)', note:'Dec 21 · Return via inland — Geelong or Princes Freeway' },
-  ];
+    const mainLngLat = tasStops.filter(s => !s.daytrip).map(s => [s.lng, s.lat]);
 
-  const gorRoute = melbStops.map(s => [s.lat, s.lng]);
-  L.polyline(gorRoute, { color:'#ff9500', weight:3, opacity:0.8, dashArray:'6 4' }).addTo(mapMelb);
+    mapTas.once('load', () => {
+      try {
+        tripMaplibreAddSky(mapTas);
+      } catch (_) {
+        /* ignore */
+      }
+      tripMaplibreAddRouteGlow(mapTas, 'tas-main', mainLngLat, { core: '#7dd3fc', glow: '#0ea5e9' }, { core: 3.5, glow: 13 });
 
-  melbStops.forEach((s, i) => {
-    const isEnd = i === melbStops.length - 1;
-    const color = isEnd ? '#86868b' : '#ff9500';
-    const icon = L.divIcon({
-      className:'',
-      html:`<div style="width:28px;height:28px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;font-family:var(--font)">${s.num}</div>`,
-      iconSize:[28,28], iconAnchor:[14,14], popupAnchor:[0,-14]
+      tripMaplibreAddDashedLeg(mapTas, 'tas-dt-bruny', [tasStops[0].lng, tasStops[0].lat], [tasStops[1].lng, tasStops[1].lat], '#4ade80');
+      tripMaplibreAddDashedLeg(mapTas, 'tas-dt-maria', [tasStops[0].lng, tasStops[0].lat], [tasStops[2].lng, tasStops[2].lat], '#4ade80');
+      tripMaplibreAddDashedLeg(mapTas, 'tas-dt-bride', [tasStops[5].lng, tasStops[5].lat], [tasStops[7].lng, tasStops[7].lat], '#4ade80');
+
+      tasStops.forEach(s => {
+        const size = s.daytrip ? 24 : 28;
+        const el = document.createElement('div');
+        el.innerHTML = `<div style="width:${size}px;height:${size}px;border-radius:50%;background:${s.color};border:2.5px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-size:${s.daytrip ? 10 : 11}px;font-weight:700;color:#fff;font-family:var(--font),system-ui,sans-serif">${s.num}</div>`;
+        new maplibregl.Marker({ element: el })
+          .setLngLat([s.lng, s.lat])
+          .setPopup(new maplibregl.Popup({ offset: Math.round(size / 2) }).setHTML(`<strong>${s.label}</strong><br/>${s.note}`))
+          .addTo(mapTas);
+      });
+
+      const tasPts = tasStops.map(s => [s.lng, s.lat]);
+      try {
+        mapTas.fitBounds(tripLngLatBounds(tasPts), { padding: 56, duration: 0, maxZoom: 8.6, pitch: 52, bearing: mapTas.getBearing() });
+      } catch (_) {
+        mapTas.setCenter(tasPts[0]);
+      }
     });
-    L.marker([s.lat,s.lng], {icon}).addTo(mapMelb)
-     .bindPopup(`<strong>${s.label}</strong>${s.note}`);
-  });
 
-  requestAnimationFrame(() => {
-    mapTas.invalidateSize();
-    mapMelb.invalidateSize();
-  });
+    const mapMelb = new maplibregl.Map({
+      container: 'map-melb',
+      style,
+      center: [144.2, -38.4],
+      zoom: 6.25,
+      pitch: 48,
+      bearing: 12,
+      maxPitch: 85,
+      scrollZoom: true,
+      boxZoom: true,
+      dragRotate: true,
+      touchPitch: true,
+      doubleClickZoom: true,
+      attributionControl: true,
+      renderWorldCopies: false,
+    });
+    maplibreBindGlobeProjection(mapMelb);
+    try {
+      mapMelb.addControl(new maplibregl.NavigationControl({ showCompass: true, visualizePitch: true }), 'top-right');
+    } catch (_) {
+      try {
+        mapMelb.addControl(new maplibregl.NavigationControl({ showCompass: true }), 'top-right');
+      } catch (_2) {
+        /* ignore */
+      }
+    }
+    try {
+      mapMelb.addControl(new maplibregl.GlobeControl(), 'top-right');
+    } catch (_) {
+      /* older MapLibre */
+    }
+    window._mapMelb = mapMelb;
+
+    const melbStops = [
+      { lat:-37.8136, lng:144.9631, num:1, label:'Melbourne', note:'Dec 17–18 · 2 nights · Laneways, markets, penguins' },
+      { lat:-38.3367, lng:144.3253, num:2, label:'Torquay', note:'Dec 19 · Bells Beach, surf culture, GOR km 0' },
+      { lat:-38.4042, lng:144.1869, num:3, label:'Anglesea', note:'Dec 19 · Kangaroos on the golf course' },
+      { lat:-38.5469, lng:143.9811, num:4, label:'Lorne', note:'Dec 19 · Lunch, Erskine Falls, foreshore views' },
+      { lat:-38.6603, lng:143.8644, num:5, label:'Kennett River', note:'Dec 19 · Best wild koalas in Victoria' },
+      { lat:-38.7578, lng:143.6717, num:6, label:'Apollo Bay', note:'Dec 19–20 · 2 nights · Base for western GOR' },
+      { lat:-38.8583, lng:143.5133, num:7, label:'Cape Otway', note:'Dec 20 · Lighthouse, koalas, rainforest' },
+      { lat:-38.6634, lng:143.105,  num:8, label:'Twelve Apostles', note:'Dec 20 · Sunset at the rock stacks · ~2 hrs from Apollo Bay' },
+      { lat:-37.8136, lng:144.9631, num:9, label:'Melbourne (return)', note:'Dec 21 · Return via inland — Geelong or Princes Freeway' },
+    ];
+
+    const gorLngLat = melbStops.map(s => [s.lng, s.lat]);
+
+    mapMelb.once('load', () => {
+      try {
+        tripMaplibreAddSky(mapMelb);
+      } catch (_) {
+        /* ignore */
+      }
+      tripMaplibreAddRouteGlow(mapMelb, 'melb-gor', gorLngLat, { core: '#fdba74', glow: '#fb923c' }, { core: 3.5, glow: 13 });
+
+      melbStops.forEach((s, i) => {
+        const isEnd = i === melbStops.length - 1;
+        const color = isEnd ? '#86868b' : '#ff9500';
+        const el = document.createElement('div');
+        el.innerHTML = `<div style="width:28px;height:28px;border-radius:50%;background:${color};border:2.5px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;font-family:var(--font),system-ui,sans-serif">${s.num}</div>`;
+        new maplibregl.Marker({ element: el })
+          .setLngLat([s.lng, s.lat])
+          .setPopup(new maplibregl.Popup({ offset: 14 }).setHTML(`<strong>${s.label}</strong><br/>${s.note}`))
+          .addTo(mapMelb);
+      });
+
+      try {
+        mapMelb.fitBounds(tripLngLatBounds(gorLngLat), { padding: 50, duration: 0, maxZoom: 9.2, pitch: 48, bearing: mapMelb.getBearing() });
+      } catch (_) {
+        mapMelb.setCenter(gorLngLat[0]);
+      }
+    });
+
+    requestAnimationFrame(() => {
+      mapTas.resize();
+      mapMelb.resize();
+    });
   } catch (e) {
     console.error('initMaps', e);
   }
