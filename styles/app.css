@@ -534,8 +534,8 @@ body::before{
 /* WHITE BOX */
 .wb{background:var(--glass-fill);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-radius:var(--r-lg);padding:22px;border:var(--glass-border);box-shadow: var(--glass-outer), var(--glass-inner)}
 
-/* EDIT TOOLBAR — outer strip is a bottom anchor only; glass lives on .edit-toolbar-inner
-   (WebKit mis-handles position:fixed when left+right+width disagree; invalid bottom calc drops bottom entirely) */
+/* EDIT TOOLBAR — outer strip; glass on .edit-toolbar-inner. Bottom inset as fallback;
+   iOS PWA: js/app.js setupEditToolbarViewportAnchor() sets top !important from visualViewport. */
 .edit-toolbar{
   position:fixed;top:auto;left:0;right:0;width:auto;margin:0;z-index:1000;
   bottom:12px;

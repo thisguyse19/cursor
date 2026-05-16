@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.28",
+  "appVersion": "1.0.29",
   "versions": [
     {
       "v": "1.0",
@@ -329,10 +329,19 @@
       "v": "1.0.28",
       "date": "2026-05-16",
       "title": "PWA edit bar bottom anchor",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Edit toolbar: fixed outer strip uses left/right 0 with flex-centered inner pill so WebKit does not drop bottom positioning",
         "Layered bottom fallbacks (12px → env → --safe-bottom) and cascaded --safe-bottom definitions so a bad max()/custom property cannot invalidate the whole offset"
+      ]
+    },
+    {
+      "v": "1.0.29",
+      "date": "2026-05-16",
+      "title": "PWA edit bar visualViewport",
+      "latest": true,
+      "changes": [
+        "Edit toolbar position is re-applied from window.visualViewport on load, resize, and when the bar resizes so iOS cannot leave it glued to the top when fixed+bottom breaks under overflow:hidden and the dynamic chrome"
       ]
     }
   ],

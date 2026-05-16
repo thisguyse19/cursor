@@ -2894,6 +2894,69 @@ window.closeBackupModal = closeBackupModal;
 window.doBackupDownload = doBackupDownload;
 window.startBackupRestore = startBackupRestore;
 
+/**
+ * Pin the edit toolbar to the visible bottom edge. iOS WebKit often mis-positions
+ * position:fixed + bottom when html/body use overflow:hidden and the URL bar /
+ * home indicator shift the visual viewport — top ends up at 0. visualViewport + an
+ * explicit top bypasses that.
+ */
+function setupEditToolbarViewportAnchor() {
+  const bar = document.querySelector('.edit-toolbar');
+  if (!bar) return;
+
+  function safeBottomPx() {
+    const raw = getComputedStyle(document.documentElement).getPropertyValue('--safe-bottom').trim();
+    const n = parseFloat(raw);
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  let raf = 0;
+  function schedule() {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      anchorNow();
+    });
+  }
+
+  let layoutRetries = 0;
+  function anchorNow() {
+    const h = bar.offsetHeight;
+    if (h < 4 && layoutRetries < 12) {
+      layoutRetries++;
+      requestAnimationFrame(anchorNow);
+      return;
+    }
+    layoutRetries = 0;
+
+    const gap = 12;
+    const safe = safeBottomPx();
+    const vv = window.visualViewport;
+    let topPx;
+    if (vv) {
+      topPx = vv.offsetTop + vv.height - h - gap - safe;
+    } else {
+      topPx = window.innerHeight - h - gap - safe;
+    }
+    topPx = Math.max(8, topPx);
+    bar.style.setProperty('top', `${topPx}px`, 'important');
+    bar.style.setProperty('bottom', 'auto', 'important');
+  }
+
+  schedule();
+  window.addEventListener('resize', schedule, { passive: true });
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', schedule, { passive: true });
+    window.visualViewport.addEventListener('scroll', schedule, { passive: true });
+  }
+  if (typeof ResizeObserver !== 'undefined') {
+    const ro = new ResizeObserver(schedule);
+    ro.observe(bar);
+    const inner = bar.querySelector('.edit-toolbar-inner');
+    if (inner) ro.observe(inner);
+  }
+}
+
 /** In-app PWA update: new worker waits until the user taps Update, then reloads once (localStorage is kept). */
 function setupServiceWorkerUpdates() {
   if (!('serviceWorker' in navigator)) return;
@@ -2957,6 +3020,7 @@ function setupServiceWorkerUpdates() {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
+  setupEditToolbarViewportAnchor();
   initModalScrollLockObservers();
   setupServiceWorkerUpdates();
   buildAirlineSearchIndex();
