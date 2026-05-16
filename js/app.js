@@ -2964,8 +2964,18 @@ function setupEditToolbarViewportAnchor() {
     bar.style.setProperty('top', `${topPx}px`, 'important');
     bar.style.setProperty('bottom', 'auto', 'important');
 
-    const clearance = Math.ceil(h + gap + safe + 20);
+    const clearanceBase = Math.ceil(h + gap + safe + 20);
+    let clearance = clearanceBase;
+    const swBar = document.getElementById('sw-update-bar');
+    if (swBar && swBar.classList.contains('sw-update-bar--visible')) {
+      const inner = swBar.querySelector('.sw-update-inner');
+      const uh = inner ? Math.max(inner.offsetHeight, inner.getBoundingClientRect().height) : swBar.offsetHeight;
+      if (uh > 4) clearance += Math.ceil(uh + 12);
+    }
     document.documentElement.style.setProperty('--edit-toolbar-clearance', `${clearance}px`);
+
+    const swBottom = Math.max(48, Math.ceil(h + gap + safe + 12));
+    document.documentElement.style.setProperty('--sw-update-bottom', `${swBottom}px`);
   }
 
   schedule();
@@ -3006,12 +3016,17 @@ function setupServiceWorkerUpdates() {
     bar.id = 'sw-update-bar';
     bar.setAttribute('role', 'status');
     bar.innerHTML =
+      '<div class="sw-update-inner">' +
       '<span class="sw-update-msg">A new version is ready. Your saved trip data stays on this device.</span>' +
-      '<button type="button" class="btn btn-blue sw-update-btn">Update</button>';
+      '<button type="button" class="btn btn-blue sw-update-btn">Update</button>' +
+      '</div>';
     bar.querySelector('.sw-update-btn').addEventListener('click', () => onActivate());
     document.body.appendChild(bar);
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => bar.classList.add('sw-update-bar--visible'));
+      requestAnimationFrame(() => {
+        bar.classList.add('sw-update-bar--visible');
+        window.dispatchEvent(new Event('resize'));
+      });
     });
   }
 
