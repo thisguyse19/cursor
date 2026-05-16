@@ -478,7 +478,7 @@ function renderTripCountdownBanner() {
         <div class="trip-cd-kicker">Countdown to first flight</div>
         <div class="trip-cd-num" aria-hidden="true">${until}</div>
         <div class="trip-cd-unit">days to go</div>
-        <div class="trip-cd-sub">${start.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}</div>
+        <div class="trip-cd-sub">${start.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}</div>
       </div>`;
     } else if (until === 1) {
       inner = `<div class="trip-cd-inner">
