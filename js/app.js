@@ -344,7 +344,6 @@ function flightTimelineStripHtml(m) {
   const mid = pill =>
     `<div class="flight-tl-cell flight-tl-cell--mid">
       <div class="flight-tl-time flight-tl-time--route" aria-hidden="true">✈</div>
-      <div class="flight-tl-rail"></div>
       <div class="flight-tl-dot"></div>
       ${pill || ''}
     </div>`;
