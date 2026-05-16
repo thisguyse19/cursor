@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.21",
+  "appVersion": "1.0.22",
   "versions": [
     {
       "v": "1.0",
@@ -257,11 +257,22 @@
       "v": "1.0.21",
       "date": "2026-05-16",
       "title": "iOS PWA bottom toolbar",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Edit toolbar sits flush with the home indicator on iPhone — opaque fill under the safe-area inset fixes the frosted bar gap WebKit sometimes shows in standalone mode",
         "Older iOS safe-area values use the constant() fallback alongside env()",
         "Viewport root uses min-height: -webkit-fill-available so height aligns with the visible screen edge on iOS"
+      ]
+    },
+    {
+      "v": "1.0.22",
+      "date": "2026-05-16",
+      "title": "Globe satellite maps",
+      "latest": true,
+      "changes": [
+        "Trip maps and flight-card routes use MapLibre GL with a 3D globe, darkened Esri World Imagery satellite, and atmosphere sky — pan, zoom, rotate, and tilt like a flight-tracker app",
+        "Great-circle paths with a soft cyan glow on flight cards; main trip maps keep numbered stops, dashed day-trip legs, and orange GOR routing",
+        "PDF map snapshots read from the WebGL canvas for sharper exports"
       ]
     }
   ],
