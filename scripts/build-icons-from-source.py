@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Build packaged PWA / iOS icons from a high-res master image.
 
-Place raster artwork at icons/icon-source-1024.png (any dimensions; it is
-center-cropped to a square). Then run:
+Place raster artwork at icons/icon-source-1024.png or icons/icon-source-1024.PNG
+(any dimensions; it is center-cropped to a square). If both exist, the .PNG file
+is used so uploads from GitHub keep working. Then run:
 
   python3 scripts/build-icons-from-source.py
 
@@ -11,15 +12,28 @@ favicon-32.png, maskable-512.png
 """
 from __future__ import annotations
 
+import shutil
 from pathlib import Path
 
 from PIL import Image
 
 ROOT = Path(__file__).resolve().parent.parent
-SRC = ROOT / "icons" / "icon-source-1024.png"
 OUT = ROOT / "icons"
 MASTER_SIDE = 1024
 MASK_PAD_RATIO = 0.14
+CANONICAL_SOURCE = OUT / "icon-source-1024.png"
+
+
+def resolve_source_path() -> Path:
+    png_upper = OUT / "icon-source-1024.PNG"
+    png_lower = OUT / "icon-source-1024.png"
+    if png_upper.is_file():
+        return png_upper
+    if png_lower.is_file():
+        return png_lower
+    raise SystemExit(
+        f"Missing icon source: add {png_lower} or {png_upper}"
+    )
 
 
 def center_square(im: Image.Image) -> Image.Image:
@@ -35,10 +49,14 @@ def scale_square(im: Image.Image, side: int) -> Image.Image:
 
 
 def main() -> None:
-    if not SRC.is_file():
-        raise SystemExit(f"Missing source icon: {SRC}")
+    src = resolve_source_path()
+    if src != CANONICAL_SOURCE.resolve():
+        shutil.copyfile(src, CANONICAL_SOURCE)
+        if src.name == "icon-source-1024.PNG":
+            src.unlink()
+            print("Normalized upload to", CANONICAL_SOURCE, "(removed duplicate .PNG)")
 
-    base = Image.open(SRC).convert("RGB")
+    base = Image.open(CANONICAL_SOURCE).convert("RGB")
     sq = center_square(base)
     master = scale_square(sq, MASTER_SIDE)
     master.save(OUT / "icon-1024.png", "PNG", optimize=True)
@@ -57,7 +75,7 @@ def main() -> None:
     canvas.paste(fg, (off, off))
     canvas.save(OUT / "maskable-512.png", "PNG", optimize=True)
 
-    print("Wrote icons from", SRC)
+    print("Wrote icons from", CANONICAL_SOURCE)
 
 
 if __name__ == "__main__":
