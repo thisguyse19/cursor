@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.27",
+  "appVersion": "1.0.28",
   "versions": [
     {
       "v": "1.0",
@@ -320,9 +320,19 @@
       "v": "1.0.27",
       "date": "2026-05-16",
       "title": "PWA edit bar positioning",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Fix edit toolbar jumping to the top on iOS: avoid transform on the fixed toolbar and center it with left/right insets plus auto margins instead"
+      ]
+    },
+    {
+      "v": "1.0.28",
+      "date": "2026-05-16",
+      "title": "PWA edit bar bottom anchor",
+      "latest": true,
+      "changes": [
+        "Edit toolbar: fixed outer strip uses left/right 0 with flex-centered inner pill so WebKit does not drop bottom positioning",
+        "Layered bottom fallbacks (12px → env → --safe-bottom) and cascaded --safe-bottom definitions so a bad max()/custom property cannot invalidate the whole offset"
       ]
     }
   ],
