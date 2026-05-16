@@ -12,6 +12,7 @@ let flightEdits = {};
 let flightModalEditingId = null;
 let _flightCardDotsObserver = null;
 const FLIGHT_OVERLAY_KEY = 'tripleFlightOverlay';
+const FLIGHT_BOARD_COLLAPSED_KEY = 'tripleFlightBoardCollapsed';
 const FLIGHT_PATCH_KEYS = [
   'airline',
   'airlineCode',
@@ -105,6 +106,7 @@ async function loadTripData() {
 /** IATA → { code, city, name }; loaded from content/airports.json */
 const AIRPORT_BY_CODE = new Map();
 let AIRPORT_SEARCH_ROWS = [];
+let AIRLINE_SEARCH_ROWS = [];
 
 async function loadAirports() {
   AIRPORT_BY_CODE.clear();
@@ -166,6 +168,67 @@ function filterAirportSuggestions(query, limit = 12) {
   return hits.slice(0, limit).map(h => h.row);
 }
 
+function filterAirlineSuggestions(query, limit = 12) {
+  if (!AIRLINE_SEARCH_ROWS.length) return [];
+  const q = String(query || '')
+    .trim()
+    .toLowerCase();
+  if (!q) return [];
+  const hits = [];
+  for (const row of AIRLINE_SEARCH_ROWS) {
+    if (!row.q.includes(q)) continue;
+    const lc = row.c.toLowerCase();
+    const nn = row.n.toLowerCase();
+    let rank = 80;
+    if (lc === q) rank = 0;
+    else if (lc.startsWith(q)) rank = 1;
+    else if (nn.startsWith(q)) rank = 2;
+    else rank = 3 + row.q.indexOf(q);
+    hits.push({ row, rank });
+  }
+  hits.sort((a, b) => a.rank - b.rank || a.row.n.localeCompare(b.row.n));
+  return hits.slice(0, limit).map(h => h.row);
+}
+
+function buildAirlineSearchIndex() {
+  AIRLINE_SEARCH_ROWS = [];
+  const list = Array.isArray(window.AIRLINE_OPTIONS) ? window.AIRLINE_OPTIONS : [];
+  for (const entry of list) {
+    const n = entry && String(entry.n || '').trim();
+    const c = entry && String(entry.c || '').trim();
+    if (!n || !c) continue;
+    AIRLINE_SEARCH_ROWS.push({ n, c, q: `${n} ${c}`.toLowerCase() });
+  }
+}
+
+function normalizeAirlineField(prefix) {
+  const hid = document.getElementById(prefix + 'airline-code');
+  const vis = document.getElementById(prefix + 'airline-search');
+  if (!hid || !vis) return;
+  if (hid.value && hid.value.trim()) return;
+  const raw = vis.value.trim();
+  if (!raw) return;
+  const rows = filterAirlineSuggestions(raw, 6);
+  if (rows.length === 1) {
+    hid.value = rows[0].c;
+    vis.value = `${rows[0].n} (${rows[0].c})`;
+    return;
+  }
+  const up = raw.toUpperCase();
+  const list = window.AIRLINE_OPTIONS || [];
+  const byCode = list.find(a => a.c === up);
+  if (byCode) {
+    hid.value = byCode.c;
+    vis.value = `${byCode.n} (${byCode.c})`;
+    return;
+  }
+  const byName = list.find(a => a.n.toLowerCase() === raw.toLowerCase());
+  if (byName) {
+    hid.value = byName.c;
+    vis.value = `${byName.n} (${byName.c})`;
+  }
+}
+
 function flightCardCityTagline(m) {
   const c0 = airportCityForCode(m && m.depAirport);
   const c1 = airportCityForCode(m && m.arrAirport);
@@ -179,8 +242,38 @@ function flightCardCityTagline(m) {
   return `${from} to ${to}`;
 }
 
-function closeAllFlightAirportLists() {
+function closeFlightAirlineList(input) {
+  const wrap = input && input.closest && input.closest('.airline-ac-wrap');
+  const list = wrap && wrap.querySelector('.airline-ac-list');
+  if (!list) return;
+  list.hidden = true;
+  list.innerHTML = '';
+  delete input.dataset.acIdx;
+}
+
+function renderFlightAirlineList(input) {
+  const wrap = input.closest('.airline-ac-wrap');
+  const list = wrap && wrap.querySelector('.airline-ac-list');
+  if (!list) return;
+  const rows = filterAirlineSuggestions(input.value, 12);
+  if (!rows.length) {
+    list.hidden = true;
+    list.innerHTML = '';
+    return;
+  }
+  list.innerHTML = rows
+    .map(r => {
+      const label = `${r.n} (${r.c})`;
+      return `<li><button type="button" class="airport-ac-item" role="option" data-code="${flightEsc(r.c)}" data-label="${flightEsc(label)}"><span class="airport-ac-code">${flightEsc(r.c)}</span><span class="airport-ac-meta"><span class="airport-ac-city">${flightEsc(r.n)}</span></span></button></li>`;
+    })
+    .join('');
+  list.hidden = false;
+  delete input.dataset.acIdx;
+}
+
+function closeAllFlightModalTypeaheads() {
   document.querySelectorAll('#flightAddModal .airport-ac-input').forEach(el => closeFlightAirportList(el));
+  document.querySelectorAll('#flightAddModal .airline-ac-input').forEach(el => closeFlightAirlineList(el));
 }
 
 function closeFlightAirportList(input) {
@@ -212,9 +305,9 @@ function renderFlightAirportList(input) {
   delete input.dataset.acIdx;
 }
 
-function highlightFlightAirportItem(input, delta) {
-  const wrap = input.closest('.airport-ac-wrap');
-  const list = wrap && wrap.querySelector('.airport-ac-list');
+function highlightFlightTypeaheadItem(input, delta) {
+  const wrap = input.closest('.airport-ac-wrap, .airline-ac-wrap');
+  const list = wrap && wrap.querySelector('.airport-ac-list, .airline-ac-list');
   if (!list || list.hidden) return;
   const buttons = [...list.querySelectorAll('.airport-ac-item')];
   if (!buttons.length) return;
@@ -226,17 +319,35 @@ function highlightFlightAirportItem(input, delta) {
   if (idx >= 0) buttons[idx].scrollIntoView({ block: 'nearest' });
 }
 
-function initFlightAirportAutocomplete() {
+function initFlightModalTypeahead() {
   const modal = document.getElementById('flightAddModal');
   if (!modal || modal.dataset.acInit === '1') return;
   modal.dataset.acInit = '1';
   modal.addEventListener('input', e => {
     const t = e.target;
-    if (t && t.classList && t.classList.contains('airport-ac-input')) renderFlightAirportList(t);
+    if (!t || !t.classList) return;
+    if (t.classList.contains('airport-ac-input')) renderFlightAirportList(t);
+    if (t.classList.contains('airline-ac-input')) {
+      const hid = document.getElementById(t.id.replace(/search$/, 'code'));
+      if (hid && t.value.trim() === '') hid.value = '';
+      renderFlightAirlineList(t);
+    }
   });
   modal.addEventListener('mousedown', e => {
     const btn = e.target.closest('.airport-ac-item');
     if (!btn || !modal.contains(btn)) return;
+    const airlineWrap = btn.closest('.airline-ac-wrap');
+    if (airlineWrap) {
+      const vis = airlineWrap.querySelector('.airline-ac-input');
+      const hid = airlineWrap.querySelector('input[type="hidden"][id$="airline-code"]');
+      if (vis && hid && btn.dataset.code != null) {
+        e.preventDefault();
+        hid.value = btn.dataset.code;
+        vis.value = btn.dataset.label || '';
+        closeFlightAirlineList(vis);
+      }
+      return;
+    }
     const wrap = btn.closest('.airport-ac-wrap');
     const input = wrap && wrap.querySelector('.airport-ac-input');
     if (!input || !btn.dataset.code) return;
@@ -246,18 +357,21 @@ function initFlightAirportAutocomplete() {
   });
   modal.addEventListener('keydown', e => {
     const t = e.target;
-    if (!t || !t.classList || !t.classList.contains('airport-ac-input')) return;
-    const wrap = t.closest('.airport-ac-wrap');
-    const list = wrap && wrap.querySelector('.airport-ac-list');
+    if (!t || !t.classList) return;
+    const isAirport = t.classList.contains('airport-ac-input');
+    const isAirline = t.classList.contains('airline-ac-input');
+    if (!isAirport && !isAirline) return;
+    const wrap = t.closest('.airport-ac-wrap, .airline-ac-wrap');
+    const list = wrap && wrap.querySelector('.airport-ac-list, .airline-ac-list');
     const open = list && !list.hidden && list.querySelector('.airport-ac-item');
     if (e.key === 'ArrowDown') {
       if (!open) return;
       e.preventDefault();
-      highlightFlightAirportItem(t, 1);
+      highlightFlightTypeaheadItem(t, 1);
     } else if (e.key === 'ArrowUp') {
       if (!open) return;
       e.preventDefault();
-      highlightFlightAirportItem(t, -1);
+      highlightFlightTypeaheadItem(t, -1);
     } else if (e.key === 'Enter') {
       if (!open) return;
       let idx = parseInt(t.dataset.acIdx, 10);
@@ -265,26 +379,47 @@ function initFlightAirportAutocomplete() {
       if (!Number.isFinite(idx) || idx < 0) idx = 0;
       const b = buttons[idx];
       if (b && b.dataset.code) {
-        t.value = b.dataset.code;
-        closeFlightAirportList(t);
+        if (isAirline) {
+          const airlineWrap = t.closest('.airline-ac-wrap');
+          const hid = airlineWrap && airlineWrap.querySelector('input[type="hidden"][id$="airline-code"]');
+          if (hid) hid.value = b.dataset.code;
+          t.value = b.dataset.label || '';
+          closeFlightAirlineList(t);
+        } else {
+          t.value = b.dataset.code;
+          closeFlightAirportList(t);
+        }
         e.preventDefault();
       }
     } else if (e.key === 'Escape') {
       if (list && !list.hidden) {
         e.preventDefault();
-        closeFlightAirportList(t);
+        if (isAirline) closeFlightAirlineList(t);
+        else closeFlightAirportList(t);
       }
     }
   });
   modal.addEventListener('focusout', e => {
     const t = e.target;
-    if (!t.classList || !t.classList.contains('airport-ac-input')) return;
-    const wrap = t.closest('.airport-ac-wrap');
-    const rel = e.relatedTarget;
-    setTimeout(() => {
-      if (rel && wrap && wrap.contains(rel)) return;
-      closeFlightAirportList(t);
-    }, 150);
+    if (!t.classList) return;
+    if (t.classList.contains('airport-ac-input')) {
+      const wrap = t.closest('.airport-ac-wrap');
+      const rel = e.relatedTarget;
+      setTimeout(() => {
+        if (rel && wrap && wrap.contains(rel)) return;
+        closeFlightAirportList(t);
+      }, 150);
+    }
+    if (t.classList.contains('airline-ac-input')) {
+      const wrap = t.closest('.airline-ac-wrap');
+      const rel = e.relatedTarget;
+      const prefix = t.id.replace(/airline-search$/, '');
+      setTimeout(() => {
+        if (rel && wrap && wrap.contains(rel)) return;
+        closeFlightAirlineList(t);
+        normalizeAirlineField(prefix);
+      }, 150);
+    }
   });
 }
 
@@ -371,83 +506,53 @@ function getTripEndDate() {
   return new Date(d.getFullYear(), d.getMonth(), d.getDate());
 }
 
-function populateAirlineSelect(sel) {
-  if (!sel) return;
-  const prev = sel.value;
-  sel.textContent = '';
-  const list = Array.isArray(window.AIRLINE_OPTIONS) ? [...window.AIRLINE_OPTIONS] : [];
-  list.sort((a, b) => a.n.localeCompare(b.n));
-  for (const { n, c } of list) {
-    const o = document.createElement('option');
-    o.value = c;
-    o.textContent = `${n} (${c})`;
-    sel.appendChild(o);
-  }
-  const oth = document.createElement('option');
-  oth.value = '';
-  oth.textContent = 'Other — enter IATA below';
-  sel.appendChild(oth);
-  if (prev !== undefined && [...sel.options].some(op => op.value === prev)) sel.value = prev;
-}
-
-function syncAirlineCustomVisibility(prefix) {
-  const sel = document.getElementById(prefix + 'airline');
-  const cust = document.getElementById(prefix + 'airline-custom');
-  if (!sel || !cust) return;
-  cust.style.display = sel.value ? 'none' : 'block';
-}
-
 function updateConnectionFormVisibility() {
   const connSel = document.getElementById('flight-f-connection');
   const block = document.getElementById('flight-conn-block');
   if (!connSel || !block) return;
-  const direct = connSel.value === 'direct';
-  block.hidden = direct;
-  if (!direct) {
-    populateAirlineSelect(document.getElementById('flight-f-conn-airline'));
-    syncAirlineCustomVisibility('flight-f-conn-');
-  }
+  block.hidden = connSel.value === 'direct';
 }
 
 function airlineNameFromSelect(prefix, code) {
-  const sel = document.getElementById(prefix + 'airline');
-  const cust = document.getElementById(prefix + 'airline-custom');
-  if (!sel) return '—';
-  const opt = sel.options[sel.selectedIndex];
-  if (!opt) return '—';
-  if (!code) return opt.textContent.replace(/\s*\([^)]+\)\s*$/, '').trim() || '—';
-  if (sel.value) return opt.textContent.replace(/\s*\([^)]+\)\s*$/, '').trim() || code;
-  if (cust && cust.value.trim()) return cust.value.trim().toUpperCase();
+  void prefix;
+  if (!code) return '—';
+  const list = window.AIRLINE_OPTIONS || [];
+  const row = list.find(a => a.c === code);
+  if (row) return row.n;
   return code;
 }
 
 function readAirlineCode(prefix) {
-  const sel = document.getElementById(prefix + 'airline');
-  const cust = document.getElementById(prefix + 'airline-custom');
-  let c = (sel && sel.value) || '';
-  if (!c && cust) c = cust.value.trim().toUpperCase();
-  return c.replace(/[^A-Z0-9]/g, '').slice(0, 3);
+  const hid = document.getElementById(prefix + 'airline-code');
+  const vis = document.getElementById(prefix + 'airline-search');
+  let c = (hid && hid.value && hid.value.trim()) || '';
+  if (c) return c.replace(/[^A-Z0-9]/g, '').slice(0, 3);
+  if (vis && vis.value) {
+    const t = vis.value.trim().toUpperCase();
+    const m = t.match(/\(([A-Z0-9]{2,3})\)/);
+    if (m) return m[1].replace(/[^A-Z0-9]/g, '').slice(0, 3);
+    const compact = t.replace(/[^A-Z0-9]/g, '');
+    if (compact.length >= 2) return compact.slice(0, 3);
+  }
+  return '';
 }
 
-function setAirlineSelectFromModel(prefix, m) {
-  const sel = document.getElementById(prefix + 'airline');
-  const cust = document.getElementById(prefix + 'airline-custom');
-  if (!sel) return;
-  populateAirlineSelect(sel);
+function setAirlineFieldsFromModel(prefix, m) {
+  const hid = document.getElementById(prefix + 'airline-code');
+  const vis = document.getElementById(prefix + 'airline-search');
+  if (!hid || !vis) return;
   const { code, digits } = deriveIataAndDigits({
     airlineCode: m && m.airlineCode,
     flightDigits: m && m.flightDigits,
     flightNo: m && m.flightNo,
   });
-  if (code && [...sel.options].some(o => o.value === code)) {
-    sel.value = code;
-    if (cust) cust.value = '';
-  } else if (code && cust) {
-    sel.value = '';
-    cust.value = code;
+  if (code) {
+    hid.value = code;
+    const row = (window.AIRLINE_OPTIONS || []).find(a => a.c === code);
+    vis.value = row ? `${row.n} (${row.c})` : code;
   } else {
-    sel.value = '';
-    if (cust) cust.value = '';
+    hid.value = '';
+    vis.value = '';
   }
   const digEl = document.getElementById(prefix + 'flight-digits');
   if (digEl) digEl.value = digits || '';
@@ -892,13 +997,34 @@ function renderFlights() {
   renderTripCountdownBanner();
 }
 
+function initFlightBoardSectionToggle() {
+  const btn = document.getElementById('flight-board-toggle');
+  const stack = document.getElementById('flight-board-stack');
+  const wrap = document.getElementById('flight-board-section');
+  if (!btn || !stack || !wrap) return;
+  const apply = () => {
+    const collapsed = localStorage.getItem(FLIGHT_BOARD_COLLAPSED_KEY) === '1';
+    wrap.classList.toggle('flight-board-wrap--collapsed', collapsed);
+    btn.textContent = collapsed ? 'Show' : 'Hide';
+    btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+    if (collapsed) stack.setAttribute('inert', '');
+    else stack.removeAttribute('inert');
+  };
+  apply();
+  btn.addEventListener('click', () => {
+    const nextHidden = !(localStorage.getItem(FLIGHT_BOARD_COLLAPSED_KEY) === '1');
+    localStorage.setItem(FLIGHT_BOARD_COLLAPSED_KEY, nextHidden ? '1' : '0');
+    apply();
+  });
+}
+
 function openFlightAddModal() {
   const modal = document.getElementById('flightAddModal');
   if (!modal) {
     console.warn('[Triple] flightAddModal missing');
     return;
   }
-  closeAllFlightAirportLists();
+  closeAllFlightModalTypeaheads();
   flightModalEditingId = null;
   const titleEl = document.getElementById('flight-modal-title');
   if (titleEl) titleEl.textContent = 'Add flight';
@@ -909,16 +1035,16 @@ function openFlightAddModal() {
   }
   const submitEl = document.getElementById('flight-modal-submit');
   if (submitEl) submitEl.textContent = 'Save flight';
-  populateAirlineSelect(document.getElementById('flight-f-airline'));
-  populateAirlineSelect(document.getElementById('flight-f-conn-airline'));
   const ids = [
-    'flight-f-airline-custom',
+    'flight-f-airline-code',
+    'flight-f-airline-search',
     'flight-f-flight-digits',
     'flight-f-dep-ap',
     'flight-f-arr-ap',
     'flight-f-dep',
     'flight-f-arr',
-    'flight-f-conn-airline-custom',
+    'flight-f-conn-airline-code',
+    'flight-f-conn-airline-search',
     'flight-f-conn-flight-digits',
     'flight-f-conn-dep-ap',
     'flight-f-conn-arr-ap',
@@ -929,15 +1055,9 @@ function openFlightAddModal() {
     const el = document.getElementById(id);
     if (el) el.value = '';
   }
-  const mainAir = document.getElementById('flight-f-airline');
-  if (mainAir) mainAir.value = '';
-  const connAir = document.getElementById('flight-f-conn-airline');
-  if (connAir) connAir.value = '';
   const conn = document.getElementById('flight-f-connection');
   if (conn) conn.value = 'direct';
   updateConnectionFormVisibility();
-  syncAirlineCustomVisibility('flight-f-');
-  syncAirlineCustomVisibility('flight-f-conn-');
   modal.classList.add('open');
   setTimeout(() => document.getElementById('flight-f-dep-ap')?.focus(), 50);
 }
@@ -955,7 +1075,7 @@ function openFlightEditModal(id) {
   if (!modal) return;
   const src = getFlightFormSource(id);
   if (!src) return;
-  closeAllFlightAirportLists();
+  closeAllFlightModalTypeaheads();
   flightModalEditingId = id;
   const titleEl = document.getElementById('flight-modal-title');
   if (titleEl) titleEl.textContent = 'Edit flight';
@@ -966,14 +1086,14 @@ function openFlightEditModal(id) {
   }
   const submitEl = document.getElementById('flight-modal-submit');
   if (submitEl) submitEl.textContent = 'Save changes';
-  setAirlineSelectFromModel('flight-f-', src);
+  setAirlineFieldsFromModel('flight-f-', src);
   document.getElementById('flight-f-dep-ap').value = src.depAirport || '';
   document.getElementById('flight-f-arr-ap').value = src.arrAirport || '';
   document.getElementById('flight-f-dep').value = isoToDatetimeLocal(src.departureUtc);
   document.getElementById('flight-f-arr').value = src.arrivalUtc ? isoToDatetimeLocal(src.arrivalUtc) : '';
   const conn = document.getElementById('flight-f-connection');
   if (conn) conn.value = src.connectionKind && FLIGHT_CONNECTION_LABELS[src.connectionKind] ? src.connectionKind : 'direct';
-  setAirlineSelectFromModel('flight-f-conn-', {
+  setAirlineFieldsFromModel('flight-f-conn-', {
     airlineCode: src.connAirlineCode,
     flightDigits: src.connFlightDigits,
     flightNo: src.connFlightNo,
@@ -985,15 +1105,13 @@ function openFlightEditModal(id) {
   const connArrEl = document.getElementById('flight-f-conn-arrival');
   if (connArrEl) connArrEl.value = src.connArrivalUtc ? isoToDatetimeLocal(src.connArrivalUtc) : '';
   updateConnectionFormVisibility();
-  syncAirlineCustomVisibility('flight-f-');
-  syncAirlineCustomVisibility('flight-f-conn-');
   modal.classList.add('open');
   setTimeout(() => document.getElementById('flight-f-dep-ap')?.focus(), 50);
 }
 
 function closeFlightAddModal() {
   flightModalEditingId = null;
-  closeAllFlightAirportLists();
+  closeAllFlightModalTypeaheads();
   document.getElementById('flightAddModal')?.classList.remove('open');
   const titleEl = document.getElementById('flight-modal-title');
   if (titleEl) titleEl.textContent = 'Add flight';
@@ -2380,6 +2498,9 @@ function setupServiceWorkerUpdates() {
       '<button type="button" class="btn btn-blue sw-update-btn">Update</button>';
     bar.querySelector('.sw-update-btn').addEventListener('click', () => onActivate());
     document.body.appendChild(bar);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => bar.classList.add('sw-update-bar--visible'));
+    });
   }
 
   navigator.serviceWorker
@@ -2417,7 +2538,8 @@ function setupServiceWorkerUpdates() {
 window.addEventListener('DOMContentLoaded', () => {
   initModalScrollLockObservers();
   setupServiceWorkerUpdates();
-  initFlightAirportAutocomplete();
+  buildAirlineSearchIndex();
+  initFlightModalTypeahead();
 
   const flightAddBtnEarly = document.getElementById('flight-add-btn');
   if (flightAddBtnEarly) {
@@ -2428,13 +2550,9 @@ window.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  populateAirlineSelect(document.getElementById('flight-f-airline'));
-  populateAirlineSelect(document.getElementById('flight-f-conn-airline'));
   document.getElementById('flight-f-connection')?.addEventListener('change', updateConnectionFormVisibility);
-  document.getElementById('flight-f-airline')?.addEventListener('change', () => syncAirlineCustomVisibility('flight-f-'));
-  document.getElementById('flight-f-conn-airline')?.addEventListener('change', () =>
-    syncAirlineCustomVisibility('flight-f-conn-')
-  );
+
+  initFlightBoardSectionToggle();
 
   (function setupTouchTips() {
     const tip = document.createElement('div');

@@ -126,15 +126,18 @@
     </div>
   </div>
 
-  <div class="section flight-board-wrap">
+  <div class="section flight-board-wrap" id="flight-board-section">
     <div class="flight-board-intro">
-      <div class="sec-header">
+      <div class="sec-header flight-board-sec-header">
         <div class="sec-tag">Schedule</div>
-        <h2 class="sec-title">Your flights</h2>
+        <div class="flight-board-head-row">
+          <h2 class="sec-title flight-board-sec-title">Your flights</h2>
+          <button type="button" class="flight-board-toggle-pill" id="flight-board-toggle" aria-expanded="true" aria-controls="flight-board-stack">Hide</button>
+        </div>
       </div>
       <button type="button" class="btn flight-add-btn-glass" id="flight-add-btn">+ Add flight</button>
     </div>
-    <div class="flight-board-stack">
+    <div class="flight-board-stack" id="flight-board-stack">
       <div id="trip-countdown-banner" class="trip-countdown-banner" role="status" aria-live="polite" aria-label="Next flight"></div>
       <div class="flight-board-carousel">
         <div id="flight-cards-grid" class="flight-cards-scroller"></div>
@@ -553,9 +556,12 @@
         </div>
       </div>
     </div>
-    <label class="flight-modal-label" for="flight-f-airline">Airline</label>
-    <select id="flight-f-airline" class="flight-modal-input flight-modal-select" aria-label="Airline"></select>
-    <input id="flight-f-airline-custom" class="flight-modal-input" type="text" placeholder="IATA airline code (2–3 letters)" maxlength="3" autocomplete="off" style="display:none;margin-top:-6px">
+    <label class="flight-modal-label" for="flight-f-airline-search">Airline</label>
+    <div class="airline-ac-wrap airport-ac-wrap">
+      <input type="hidden" id="flight-f-airline-code" value="">
+      <input id="flight-f-airline-search" class="flight-modal-input airline-ac-input" type="text" placeholder="Airline name or code" maxlength="64" autocomplete="off" spellcheck="false" aria-label="Airline">
+      <ul class="airline-ac-list airport-ac-list" hidden role="listbox" aria-label="Airline suggestions"></ul>
+    </div>
     <label class="flight-modal-label" for="flight-f-flight-digits">Flight number (digits)</label>
     <input id="flight-f-flight-digits" class="flight-modal-input" type="text" inputmode="numeric" placeholder="1–4 digits" maxlength="4" pattern="[0-9]{1,4}" autocomplete="off">
     <div class="flight-datetime-row">
@@ -594,9 +600,12 @@
           </div>
         </div>
       </div>
-      <label class="flight-modal-label" for="flight-f-conn-airline">Connection airline</label>
-      <select id="flight-f-conn-airline" class="flight-modal-input flight-modal-select" aria-label="Connection airline"></select>
-      <input id="flight-f-conn-airline-custom" class="flight-modal-input" type="text" placeholder="IATA code (2–3 letters)" maxlength="3" autocomplete="off" style="display:none;margin-top:-6px">
+      <label class="flight-modal-label" for="flight-f-conn-airline-search">Connection airline</label>
+      <div class="airline-ac-wrap airport-ac-wrap">
+        <input type="hidden" id="flight-f-conn-airline-code" value="">
+        <input id="flight-f-conn-airline-search" class="flight-modal-input airline-ac-input" type="text" placeholder="Airline name or code" maxlength="64" autocomplete="off" spellcheck="false" aria-label="Connection airline">
+        <ul class="airline-ac-list airport-ac-list" hidden role="listbox" aria-label="Airline suggestions"></ul>
+      </div>
       <label class="flight-modal-label" for="flight-f-conn-flight-digits">Connection flight number</label>
       <input id="flight-f-conn-flight-digits" class="flight-modal-input" type="text" inputmode="numeric" placeholder="1–4 digits" maxlength="4" pattern="[0-9]{1,4}" autocomplete="off">
       <div class="flight-datetime-row">
