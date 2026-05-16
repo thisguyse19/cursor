@@ -532,11 +532,13 @@ body::before{
 /* WHITE BOX */
 .wb{background:var(--glass-fill);backdrop-filter:var(--glass-blur);-webkit-backdrop-filter:var(--glass-blur);border-radius:var(--r-lg);padding:22px;border:var(--glass-border);box-shadow: var(--glass-outer), var(--glass-inner)}
 
-/* EDIT TOOLBAR — floating frosted pill above the home-indicator zone (no full-bleed matte) */
+/* EDIT TOOLBAR — floating frosted pill (no transform: WebKit breaks position:fixed + transform on same node) */
 .edit-toolbar{
-  position:fixed;left:50%;transform:translateX(-50%);
+  position:fixed;top:auto;
+  left:max(16px, env(safe-area-inset-left, 0px));right:max(16px, env(safe-area-inset-right, 0px));
   bottom:calc(12px + var(--safe-bottom));z-index:1000;
   width:min(720px, calc(100vw - 32px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)));
+  margin-left:auto;margin-right:auto;
   --tb-pad-base:10px;
   --tb-pad-inline:16px;
   display:flex;justify-content:center;align-items:stretch;
@@ -746,6 +748,7 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
   /* Floating edit toolbar — tighter horizontal inset on phones */
   .edit-toolbar{
     --tb-pad-base:8px;--tb-pad-inline:12px;
+    left:max(10px, env(safe-area-inset-left, 0px));right:max(10px, env(safe-area-inset-right, 0px));
     width:min(720px, calc(100vw - 20px - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px)))}
   .tb-btn{padding:7px 12px;font-size:12px}
 

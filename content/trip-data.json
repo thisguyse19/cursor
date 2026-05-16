@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.26",
+  "appVersion": "1.0.27",
   "versions": [
     {
       "v": "1.0",
@@ -310,10 +310,19 @@
       "v": "1.0.26",
       "date": "2026-05-16",
       "title": "PWA floating edit bar",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Edit controls sit in a centered frosted pill above the home-indicator zone instead of a full-width bar that fought WebKit’s safe-area painting",
         "Installed standalone/fullscreen: page gradient is clipped above the bottom inset so the system home strip can render over a transparent layer; shared --safe-bottom drives toolbar position and scroll padding"
+      ]
+    },
+    {
+      "v": "1.0.27",
+      "date": "2026-05-16",
+      "title": "PWA edit bar positioning",
+      "latest": true,
+      "changes": [
+        "Fix edit toolbar jumping to the top on iOS: avoid transform on the fixed toolbar and center it with left/right insets plus auto margins instead"
       ]
     }
   ],
