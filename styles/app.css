@@ -273,7 +273,12 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
   font-size:clamp(17px,4.8vw,20px);font-weight:700;letter-spacing:-.4px;color:var(--text);
   line-height:1.2;margin:0 0 14px;padding-right:min(108px,26vw)}
 .flight-card-times{display:flex;flex-direction:column;gap:10px}
-.flight-card-leg{display:flex;align-items:baseline;gap:10px;flex-wrap:nowrap}
+.flight-card-leg{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.flight-card-leg-meta{
+  margin-left:auto;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:flex-end;
+  gap:6px 10px;text-align:right;min-width:0;max-width:min(100%,220px)}
+.flight-card-dt{font-size:12px;font-weight:500;color:var(--text-sec);white-space:nowrap;line-height:1.3}
+.flight-card-leg .flight-card-tm{flex-shrink:0;line-height:1.3}
 .flight-card-ico{
   width:22px;height:22px;border-radius:50%;flex-shrink:0;
   background:rgba(0,0,0,.06);color:var(--text-sec);
@@ -293,7 +298,7 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
   padding:3px 9px;border-radius:999px;margin-top:2px;margin-bottom:2px;
   background:rgba(0,113,227,.12);color:var(--blue);border:1px solid rgba(0,113,227,.22)}
 .flight-pill--conn{background:rgba(88,86,214,.1);color:#4338ca;border-color:rgba(88,86,214,.25)}
-.flight-pill--long{font-size:10px;padding:2px 8px}
+.flight-pill--long{font-size:10px;padding:2px 7px;letter-spacing:.03em;max-width:100%}
 .flight-conn-fields{
   box-sizing:border-box;max-width:100%;
   background:rgba(0,113,227,.05);border:1px solid rgba(0,113,227,.14);border-radius:var(--r-md);

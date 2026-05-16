@@ -539,7 +539,7 @@
     <select id="flight-f-airline" class="flight-modal-input flight-modal-select" aria-label="Airline"></select>
     <input id="flight-f-airline-custom" class="flight-modal-input" type="text" placeholder="IATA airline code (2–3 letters)" maxlength="3" autocomplete="off" style="display:none;margin-top:-6px">
     <label class="flight-modal-label" for="flight-f-flight-digits">Flight number (digits)</label>
-    <input id="flight-f-flight-digits" class="flight-modal-input" type="text" inputmode="numeric" placeholder="e.g. 218" autocomplete="off">
+    <input id="flight-f-flight-digits" class="flight-modal-input" type="text" inputmode="numeric" placeholder="1–4 digits" maxlength="4" pattern="[0-9]{1,4}" autocomplete="off">
     <div class="flight-form-row">
       <div>
         <label class="flight-modal-label" for="flight-f-dep-ap">From (IATA)</label>
@@ -574,7 +574,7 @@
       <select id="flight-f-conn-airline" class="flight-modal-input flight-modal-select" aria-label="Connection airline"></select>
       <input id="flight-f-conn-airline-custom" class="flight-modal-input" type="text" placeholder="IATA code (2–3 letters)" maxlength="3" autocomplete="off" style="display:none;margin-top:-6px">
       <label class="flight-modal-label" for="flight-f-conn-flight-digits">Connection flight number</label>
-      <input id="flight-f-conn-flight-digits" class="flight-modal-input" type="text" inputmode="numeric" placeholder="digits only" autocomplete="off">
+      <input id="flight-f-conn-flight-digits" class="flight-modal-input" type="text" inputmode="numeric" placeholder="1–4 digits" maxlength="4" pattern="[0-9]{1,4}" autocomplete="off">
       <div class="flight-form-row">
         <div>
           <label class="flight-modal-label" for="flight-f-conn-dep-ap">From (IATA)</label>
@@ -585,8 +585,16 @@
           <input id="flight-f-conn-arr-ap" class="flight-modal-input" type="text" placeholder="hub" maxlength="4" autocomplete="off">
         </div>
       </div>
-      <label class="flight-modal-label" for="flight-f-conn-arrival">Landing time (local)</label>
-      <input id="flight-f-conn-arrival" class="flight-modal-input flight-modal-datetime" type="datetime-local">
+      <div class="flight-datetime-row">
+        <div class="flight-datetime-field">
+          <label class="flight-modal-label" for="flight-f-conn-departure">Connection departs (local)</label>
+          <input id="flight-f-conn-departure" class="flight-modal-input flight-modal-datetime" type="datetime-local">
+        </div>
+        <div class="flight-datetime-field">
+          <label class="flight-modal-label" for="flight-f-conn-arrival">Connection arrives (local)</label>
+          <input id="flight-f-conn-arrival" class="flight-modal-input flight-modal-datetime" type="datetime-local">
+        </div>
+      </div>
     </div>
     <div class="modal-actions" style="margin-top:18px">
       <button type="button" class="btn btn-outline" onclick="closeFlightAddModal()">Cancel</button>

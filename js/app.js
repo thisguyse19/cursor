@@ -26,6 +26,7 @@ const FLIGHT_PATCH_KEYS = [
   'connFlightDigits',
   'connDepAirport',
   'connArrAirport',
+  'connDepartureUtc',
   'connArrivalUtc',
 ];
 const FLIGHT_CONNECTION_LABELS = {
@@ -281,7 +282,7 @@ function deriveIataAndDigits(m) {
       : '';
   if (!code || !digits) {
     const fn = String(m.flightNo || '').trim();
-    const rx = /^([A-Z0-9]{2,3})\s*(\d+[A-Z]?)$/i;
+    const rx = /^([A-Z0-9]{2,3})\s*(\d{1,4}[A-Z]?)$/i;
     const mm = fn.match(rx);
     if (mm) {
       if (!code) code = mm[1].toUpperCase();
@@ -302,7 +303,7 @@ function flightPillText(m) {
 function flightPillHtml(m) {
   const t = flightPillText(m);
   if (!t) return '';
-  const long = t.length > 9;
+  const long = t.length > 8;
   return `<span class="flight-pill${long ? ' flight-pill--long' : ''}">${flightEsc(t)}</span>`;
 }
 
@@ -319,7 +320,8 @@ function connPillText(m) {
 function connPillHtml(m) {
   const t = connPillText(m);
   if (!t) return '';
-  return `<span class="flight-pill flight-pill--conn">${flightEsc(t)}</span>`;
+  const long = t.length > 8;
+  return `<span class="flight-pill flight-pill--conn${long ? ' flight-pill--long' : ''}">${flightEsc(t)}</span>`;
 }
 
 function dayOffsetDepArr(depDt, arrDt) {
@@ -345,6 +347,14 @@ function formatFlightClockShort(dt) {
   }
 }
 
+function formatFlightLegDay(dt) {
+  try {
+    return dt.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+  } catch {
+    return '';
+  }
+}
+
 function flightLayoverBlockHtml(m) {
   const k = m.connectionKind || 'direct';
   if (k === 'direct') return '';
@@ -357,9 +367,22 @@ function flightLayoverBlockHtml(m) {
   const connP = connPillText(m);
   const parts = [];
   if (connP) parts.push(connP);
+  if (m.connDepartureUtc) {
+    try {
+      const d = new Date(m.connDepartureUtc);
+      const day = formatFlightLegDay(d);
+      const clock = formatFlightClockShort(d);
+      if (day && clock) parts.push(`Departs ${day} · ${clock}`);
+    } catch (_) {
+      /* skip */
+    }
+  }
   if (m.connArrivalUtc) {
     try {
-      parts.push(`Landed ${formatFlightClockShort(new Date(m.connArrivalUtc))}`);
+      const d = new Date(m.connArrivalUtc);
+      const day = formatFlightLegDay(d);
+      const clock = formatFlightClockShort(d);
+      if (day && clock) parts.push(`Arrives ${day} · ${clock}`);
     } catch (_) {
       /* skip */
     }
@@ -384,7 +407,9 @@ function flightCardMainHtml(m) {
       ? `<span class="flight-pill">${flightEsc(String(m.flightNo).trim())}</span>`
       : '';
   const route = `${flightEsc(m.depAirport || '—')} to ${flightEsc(m.arrAirport || '—')}`;
+  const depDay = formatFlightLegDay(depT);
   const depClock = formatFlightClockShort(depT);
+  const arrDay = arrT ? formatFlightLegDay(arrT) : '';
   const arrClock = arrT ? formatFlightClockShort(arrT) : '';
   const arrPlus = arrT && dayOffsetDepArr(depT, arrT) > 0 ? `<sup class="flight-card-plus">+${dayOffsetDepArr(depT, arrT)}</sup>` : '';
   const tagline =
@@ -404,12 +429,18 @@ function flightCardMainHtml(m) {
       <div class="flight-card-leg">
         <span class="flight-card-ico flight-card-ico--dep" aria-hidden="true">↗</span>
         <span class="flight-card-ap">${flightEsc(m.depAirport || '—')}</span>
-        <span class="flight-card-tm">${flightEsc(depClock)}</span>
+        <span class="flight-card-leg-meta">
+          <span class="flight-card-dt">${flightEsc(depDay || '—')}</span>
+          <span class="flight-card-tm">${flightEsc(depClock)}</span>
+        </span>
       </div>
       <div class="flight-card-leg">
         <span class="flight-card-ico flight-card-ico--arr" aria-hidden="true">↘</span>
         <span class="flight-card-ap">${flightEsc(m.arrAirport || '—')}</span>
-        <span class="flight-card-tm">${arrClock ? flightEsc(arrClock) : '—'}${arrPlus}</span>
+        <span class="flight-card-leg-meta">
+          <span class="flight-card-dt">${arrT ? flightEsc(arrDay || '—') : '—'}</span>
+          <span class="flight-card-tm">${arrClock ? flightEsc(arrClock) + arrPlus : '—'}</span>
+        </span>
       </div>
     </div>
     ${layover}`;
@@ -655,6 +686,7 @@ function openFlightAddModal() {
     'flight-f-conn-flight-digits',
     'flight-f-conn-dep-ap',
     'flight-f-conn-arr-ap',
+    'flight-f-conn-departure',
     'flight-f-conn-arrival',
   ];
   for (const id of ids) {
@@ -712,6 +744,8 @@ function openFlightEditModal(id) {
   });
   document.getElementById('flight-f-conn-dep-ap').value = src.connDepAirport || '';
   document.getElementById('flight-f-conn-arr-ap').value = src.connArrAirport || '';
+  const connDepEl = document.getElementById('flight-f-conn-departure');
+  if (connDepEl) connDepEl.value = src.connDepartureUtc ? isoToDatetimeLocal(src.connDepartureUtc) : '';
   const connArrEl = document.getElementById('flight-f-conn-arrival');
   if (connArrEl) connArrEl.value = src.connArrivalUtc ? isoToDatetimeLocal(src.connArrivalUtc) : '';
   updateConnectionFormVisibility();
@@ -746,6 +780,10 @@ function submitFlightAdd() {
     showAlert('Choose an airline (or enter an IATA code) and add the flight number digits.', 'Flight');
     return;
   }
+  if (!/^\d{1,4}$/.test(mainDigits)) {
+    showAlert('The main flight number must be 1–4 digits only.', 'Flight');
+    return;
+  }
   const depIso = new Date(dep).toISOString();
   let arrIso = null;
   const arrVal = document.getElementById('flight-f-arr').value;
@@ -771,6 +809,7 @@ function submitFlightAdd() {
           connFlightDigits: '',
           connDepAirport: '',
           connArrAirport: '',
+          connDepartureUtc: null,
           connArrivalUtc: null,
         }
       : {
@@ -780,12 +819,25 @@ function submitFlightAdd() {
             : '',
           connDepAirport: document.getElementById('flight-f-conn-dep-ap').value.trim().toUpperCase().slice(0, 4),
           connArrAirport: document.getElementById('flight-f-conn-arr-ap').value.trim().toUpperCase().slice(0, 4),
+          connDepartureUtc: (() => {
+            const v = document.getElementById('flight-f-conn-departure')?.value;
+            return v ? new Date(v).toISOString() : null;
+          })(),
           connArrivalUtc: (() => {
             const v = document.getElementById('flight-f-conn-arrival')?.value;
             return v ? new Date(v).toISOString() : null;
           })(),
         }),
   };
+
+  const connDig =
+    connectionKind !== 'direct' && document.getElementById('flight-f-conn-flight-digits')
+      ? document.getElementById('flight-f-conn-flight-digits').value.trim().replace(/\s/g, '')
+      : '';
+  if (connectionKind !== 'direct' && connDig && !/^\d{1,4}$/.test(connDig)) {
+    showAlert('The connection flight number must be 1–4 digits only (or leave it blank).', 'Flight');
+    return;
+  }
 
   if (flightModalEditingId) {
     const eid = flightModalEditingId;
