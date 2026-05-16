@@ -28,10 +28,15 @@
   --ease-spring-drawer:cubic-bezier(0.33,1.14,0.52,1.01);
   --dur-spring:.5s;
 }
-html{font-size:16px;scroll-behavior:smooth}
+html{
+  font-size:16px;
+  height:100%;
+  overflow:hidden;
+  overscroll-behavior:none;
+}
 html.modal-scroll-lock,body.modal-scroll-lock{overflow:hidden;touch-action:none}
-body.modal-scroll-lock{position:fixed;width:100%;left:0;right:0}
-body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.68;letter-spacing:0.012em;
+body{font-family:var(--font);color:var(--text);display:flex;min-height:0;height:100vh;height:100dvh;max-height:100dvh;
+  overflow:hidden;overscroll-behavior:none;-webkit-font-smoothing:antialiased;line-height:1.68;letter-spacing:0.012em;
   background-color:#eceef2;
   background-image:
     radial-gradient(ellipse 120% 90% at 5% -15%, rgba(0,113,227,.13), transparent 52%),
@@ -72,8 +77,18 @@ body{font-family:var(--font);color:var(--text);display:flex;min-height:100vh;-we
 .nav-item.active .nav-icon{background:var(--blue);color:#fff;box-shadow:none}
 .nav-item:not(.active) .nav-icon{background:rgba(0,0,0,.05)}
 
-/* MAIN */
-.main{margin-left:var(--sidebar);flex:1;min-height:100vh;padding-bottom:calc(92px + env(safe-area-inset-bottom, 0px))}
+/* MAIN — sole vertical scroll surface (avoids iOS overscroll past fixed header) */
+.main{
+  margin-left:var(--sidebar);
+  flex:1;
+  min-height:0;
+  overflow-x:hidden;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-y:none;
+  overscroll-behavior-x:none;
+  scroll-behavior:smooth;
+  padding-bottom:calc(92px + env(safe-area-inset-bottom, 0px))}
 .page{display:none}.page.active{display:block}
 
 /* HERO */
@@ -633,9 +648,12 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
   .sidebar.drawer-open{transform:translateX(0);box-shadow:8px 0 40px rgba(0,0,0,.18)}
   .sidebar-nav-scroll{padding-bottom:max(28px, calc(16px + env(safe-area-inset-bottom, 0px)))}
 
-  /* Main content: full width, pushed below mobile header */
-  body{display:block}
-  .main{margin-left:0;padding-top:calc(54px + env(safe-area-inset-top, 0px));padding-bottom:calc(88px + env(safe-area-inset-bottom, 0px))}
+  /* Main scrolls; body stays locked to viewport */
+  .main{
+    margin-left:0;
+    scroll-padding-top:calc(54px + env(safe-area-inset-top, 0px));
+    padding-top:calc(54px + env(safe-area-inset-top, 0px));
+    padding-bottom:calc(88px + env(safe-area-inset-bottom, 0px))}
 
   /* Hero */
   .hero{height:240px;border-radius:0 0 var(--r-lg) var(--r-lg)}
@@ -740,8 +758,15 @@ body.editing .day-card,body.editing .card,body.editing .stay-card,body.editing .
 
 /* PRINT */
 @media print{
+  html,body{height:auto!important;max-height:none!important;overflow:visible!important;overscroll-behavior:auto!important}
   .sidebar,.edit-toolbar,.del-btn,.modal-overlay{display:none!important}
-  .main{margin-left:0!important}
+  .main{
+    margin-left:0!important;
+    overflow:visible!important;
+    flex:none!important;
+    min-height:0!important;
+    height:auto!important;
+    max-height:none!important}
   .page{display:block!important;page-break-after:always}
   .day-content{display:block!important}
   .hero{height:280px;border-radius:0}
