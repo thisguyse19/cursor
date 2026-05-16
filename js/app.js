@@ -296,7 +296,7 @@ function flightPillText(m) {
 function flightPillHtml(m) {
   const t = flightPillText(m);
   if (!t) return '';
-  const long = t.length > 8;
+  const long = t.length > 10;
   return `<span class="flight-pill${long ? ' flight-pill--long' : ''}">${flightEsc(t)}</span>`;
 }
 
@@ -313,7 +313,7 @@ function connPillText(m) {
 function connPillHtml(m) {
   const t = connPillText(m);
   if (!t) return '';
-  const long = t.length > 8;
+  const long = t.length > 10;
   return `<span class="flight-pill flight-pill--conn${long ? ' flight-pill--long' : ''}">${flightEsc(t)}</span>`;
 }
 
@@ -348,45 +348,71 @@ function formatFlightLegDay(dt) {
   }
 }
 
-function flightLayoverBlockHtml(m) {
+function formatConnectionDurationMs(ms) {
+  if (ms == null || !Number.isFinite(ms) || ms <= 0) return '';
+  const totalMin = Math.max(1, Math.round(ms / 60000));
+  const h = Math.floor(totalMin / 60);
+  const mm = totalMin % 60;
+  if (h > 0 && mm > 0) return `${h}h ${mm}m connection time`;
+  if (h > 0) return `${h}h connection time`;
+  return `${mm}m connection time`;
+}
+
+function flightCardLegPairHtml(depAp, arrAp, depIso, arrIso) {
+  const depT = depIso ? new Date(depIso) : null;
+  const arrT = arrIso ? new Date(arrIso) : null;
+  const depOk = depT && !Number.isNaN(depT.getTime());
+  const arrOk = arrT && !Number.isNaN(arrT.getTime());
+  const depDay = depOk ? formatFlightLegDay(depT) : '';
+  const depClock = depOk ? formatFlightClockShort(depT) : '';
+  const arrDay = arrOk ? formatFlightLegDay(arrT) : '';
+  const arrClock = arrOk ? formatFlightClockShort(arrT) : '';
+  const arrPlus =
+    depOk && arrOk && dayOffsetDepArr(depT, arrT) > 0
+      ? `<sup class="flight-card-plus">+${dayOffsetDepArr(depT, arrT)}</sup>`
+      : '';
+  return `<div class="flight-card-leg">
+        <span class="flight-card-ico flight-card-ico--dep" aria-hidden="true">↗</span>
+        <span class="flight-card-ap">${flightEsc(depAp || '—')}</span>
+        <span class="flight-card-leg-meta">
+          <span class="flight-card-dt">${flightEsc(depDay || '—')}</span>
+          <span class="flight-card-tm">${flightEsc(depClock || '—')}</span>
+        </span>
+      </div>
+      <div class="flight-card-leg">
+        <span class="flight-card-ico flight-card-ico--arr" aria-hidden="true">↘</span>
+        <span class="flight-card-ap">${flightEsc(arrAp || '—')}</span>
+        <span class="flight-card-leg-meta">
+          <span class="flight-card-dt">${arrOk ? flightEsc(arrDay || '—') : '—'}</span>
+          <span class="flight-card-tm">${arrClock ? flightEsc(arrClock) + arrPlus : '—'}</span>
+        </span>
+      </div>`;
+}
+
+function flightCardConnectionFollowHtml(m) {
   const k = m.connectionKind || 'direct';
   if (k === 'direct') return '';
-  const hub =
+  const chunks = [];
+  const { arrIso } = effectiveDepArr(m);
+  if (arrIso && m.connDepartureUtc) {
+    const gapMs = new Date(m.connDepartureUtc).getTime() - new Date(arrIso).getTime();
+    const gapFmt = formatConnectionDurationMs(gapMs);
+    if (gapFmt) chunks.push(`<div class="flight-card-conn-gap">${flightEsc(gapFmt)}</div>`);
+  }
+  if (!m.connDepartureUtc && !m.connArrivalUtc) return chunks.join('');
+
+  const hubAp =
     (m.connArrAirport && m.connArrAirport.trim()) ||
     (m.connDepAirport && m.connDepAirport.trim()) ||
-    (m.viaAirport && String(m.viaAirport).trim()) ||
     '';
-  const kindLbl = FLIGHT_CONNECTION_LABELS[k] || 'Connection';
-  const connP = connPillText(m);
-  const parts = [];
-  if (connP) parts.push(connP);
-  if (m.connDepartureUtc) {
-    try {
-      const d = new Date(m.connDepartureUtc);
-      const day = formatFlightLegDay(d);
-      const clock = formatFlightClockShort(d);
-      if (day && clock) parts.push(`Departs ${day} · ${clock}`);
-    } catch (_) {
-      /* skip */
-    }
-  }
-  if (m.connArrivalUtc) {
-    try {
-      const d = new Date(m.connArrivalUtc);
-      const day = formatFlightLegDay(d);
-      const clock = formatFlightClockShort(d);
-      if (day && clock) parts.push(`Arrives ${day} · ${clock}`);
-    } catch (_) {
-      /* skip */
-    }
-  }
-  if (hub) parts.push(`at ${hub}`);
-  const summary = parts.length ? parts.join(' · ') : kindLbl;
-  return `<div class="flight-card-divider" role="presentation"></div>
-    <div class="flight-card-layover">
-      <span class="flight-card-layover-text">${flightEsc(summary)}</span>
-      <span class="flight-card-layover-chev" aria-hidden="true">›</span>
-    </div>`;
+  const leg2ArrAp = (m.arrAirport && m.arrAirport.trim()) || '';
+  const leg2DepAp = hubAp || leg2ArrAp || '—';
+  const connP = connPillHtml(m);
+  if (connP) chunks.push(`<div class="flight-card-conn-pill">${connP}</div>`);
+  chunks.push(
+    flightCardLegPairHtml(leg2DepAp, leg2ArrAp || '—', m.connDepartureUtc || '', m.connArrivalUtc || '')
+  );
+  return chunks.join('');
 }
 
 function flightCardMainHtml(m) {
@@ -400,16 +426,19 @@ function flightCardMainHtml(m) {
       ? `<span class="flight-pill">${flightEsc(String(m.flightNo).trim())}</span>`
       : '';
   const route = `${flightEsc(m.depAirport || '—')} to ${flightEsc(m.arrAirport || '—')}`;
-  const depDay = formatFlightLegDay(depT);
-  const depClock = formatFlightClockShort(depT);
-  const arrDay = arrT ? formatFlightLegDay(arrT) : '';
-  const arrClock = arrT ? formatFlightClockShort(arrT) : '';
-  const arrPlus = arrT && dayOffsetDepArr(depT, arrT) > 0 ? `<sup class="flight-card-plus">+${dayOffsetDepArr(depT, arrT)}</sup>` : '';
   const tagline =
     m.label && String(m.label).trim()
       ? `<div class="flight-card-tagline">${flightEsc(String(m.label).trim())}</div>`
       : '';
-  const layover = flightLayoverBlockHtml(m);
+  const hasConn = m.connectionKind && m.connectionKind !== 'direct';
+  const hubAp =
+    hasConn &&
+    ((m.connArrAirport && m.connArrAirport.trim()) || (m.connDepAirport && m.connDepAirport.trim()))
+      ? (m.connArrAirport && m.connArrAirport.trim()) || (m.connDepAirport && m.connDepAirport.trim())
+      : '';
+  const leg1ArrAp = hubAp || m.arrAirport || '—';
+  const leg1Block = flightCardLegPairHtml(m.depAirport || '—', leg1ArrAp, depIso, arrIso || '');
+  const connectionFollow = flightCardConnectionFollowHtml(m);
 
   return `<div class="flight-card-hd">
       <span class="flight-card-star" aria-hidden="true">★</span>
@@ -419,24 +448,9 @@ function flightCardMainHtml(m) {
     ${tagline}
     <div class="flight-card-route">${route}</div>
     <div class="flight-card-times">
-      <div class="flight-card-leg">
-        <span class="flight-card-ico flight-card-ico--dep" aria-hidden="true">↗</span>
-        <span class="flight-card-ap">${flightEsc(m.depAirport || '—')}</span>
-        <span class="flight-card-leg-meta">
-          <span class="flight-card-dt">${flightEsc(depDay || '—')}</span>
-          <span class="flight-card-tm">${flightEsc(depClock)}</span>
-        </span>
-      </div>
-      <div class="flight-card-leg">
-        <span class="flight-card-ico flight-card-ico--arr" aria-hidden="true">↘</span>
-        <span class="flight-card-ap">${flightEsc(m.arrAirport || '—')}</span>
-        <span class="flight-card-leg-meta">
-          <span class="flight-card-dt">${arrT ? flightEsc(arrDay || '—') : '—'}</span>
-          <span class="flight-card-tm">${arrClock ? flightEsc(arrClock) + arrPlus : '—'}</span>
-        </span>
-      </div>
-    </div>
-    ${layover}`;
+      ${leg1Block}
+      ${connectionFollow}
+    </div>`;
 }
 
 function normalizeBodyScroll() {
