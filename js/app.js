@@ -1255,8 +1255,26 @@ function initFlightBoardSectionToggle() {
   const wrap = document.getElementById('flight-board-section');
   const addBtn = document.getElementById('flight-add-btn');
   if (!btn || !stack || !wrap) return;
-  const apply = () => {
+
+  /** Must match .22s opacity on #flight-board-stack / #flight-add-btn in app.css */
+  const FLIGHT_BOARD_FADE_MS = 220;
+  /** Slightly longer than --dur-spring (0.5s) max-height on #flight-board-stack */
+  const FLIGHT_BOARD_SPACE_MS = 520;
+
+  let fadeTimer = 0;
+  let spaceTimer = 0;
+  let animating = false;
+
+  const clearTimers = () => {
+    if (fadeTimer) clearTimeout(fadeTimer);
+    if (spaceTimer) clearTimeout(spaceTimer);
+    fadeTimer = 0;
+    spaceTimer = 0;
+  };
+
+  const applyFromStorage = () => {
     const collapsed = localStorage.getItem(FLIGHT_BOARD_COLLAPSED_KEY) === '1';
+    wrap.classList.toggle('flight-board-wrap--board-faded', collapsed);
     wrap.classList.toggle('flight-board-wrap--collapsed', collapsed);
     btn.textContent = collapsed ? 'Show' : 'Hide';
     btn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
@@ -1269,14 +1287,59 @@ function initFlightBoardSectionToggle() {
       if (addBtn) addBtn.removeAttribute('inert');
     }
   };
-  apply();
+
+  applyFromStorage();
+
   btn.addEventListener('click', () => {
-    const wasCollapsed = localStorage.getItem(FLIGHT_BOARD_COLLAPSED_KEY) === '1';
-    const nextCollapsed = !wasCollapsed;
-    localStorage.setItem(FLIGHT_BOARD_COLLAPSED_KEY, nextCollapsed ? '1' : '0');
-    apply();
-    if (wasCollapsed && !nextCollapsed) {
-      setTimeout(() => initFlightCardMiniMaps(), 300);
+    if (animating) return;
+    const collapsed = localStorage.getItem(FLIGHT_BOARD_COLLAPSED_KEY) === '1';
+    const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!collapsed) {
+      localStorage.setItem(FLIGHT_BOARD_COLLAPSED_KEY, '1');
+      btn.textContent = 'Show';
+      btn.setAttribute('aria-expanded', 'false');
+      if (reduceMotion) {
+        applyFromStorage();
+        return;
+      }
+      animating = true;
+      btn.disabled = true;
+      clearTimers();
+      wrap.classList.add('flight-board-wrap--board-faded');
+      stack.setAttribute('inert', '');
+      if (addBtn) addBtn.setAttribute('inert', '');
+      fadeTimer = setTimeout(() => {
+        wrap.classList.add('flight-board-wrap--collapsed');
+        teardownFlightCardMiniMaps();
+        animating = false;
+        btn.disabled = false;
+        fadeTimer = 0;
+      }, FLIGHT_BOARD_FADE_MS);
+    } else {
+      localStorage.setItem(FLIGHT_BOARD_COLLAPSED_KEY, '0');
+      btn.textContent = 'Hide';
+      btn.setAttribute('aria-expanded', 'true');
+      if (reduceMotion) {
+        applyFromStorage();
+        requestAnimationFrame(() => initFlightCardMiniMaps());
+        return;
+      }
+      animating = true;
+      btn.disabled = true;
+      clearTimers();
+      wrap.classList.remove('flight-board-wrap--collapsed');
+      stack.setAttribute('inert', '');
+      if (addBtn) addBtn.setAttribute('inert', '');
+      spaceTimer = setTimeout(() => {
+        wrap.classList.remove('flight-board-wrap--board-faded');
+        stack.removeAttribute('inert');
+        if (addBtn) addBtn.removeAttribute('inert');
+        animating = false;
+        btn.disabled = false;
+        spaceTimer = 0;
+        requestAnimationFrame(() => initFlightCardMiniMaps());
+      }, FLIGHT_BOARD_SPACE_MS);
     }
   });
 }

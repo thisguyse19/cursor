@@ -317,10 +317,16 @@ body::before{
 .flight-board-toggle-pill:hover{background:var(--btn-fill-hover);box-shadow:var(--btn-shadow-hover)}
 .flight-board-toggle-pill:active{transform:scale(.96);opacity:.9}
 #flight-board-stack{
-  transition:opacity .4s var(--ease-spring),max-height var(--dur-spring) var(--ease-spring),margin .45s var(--ease-spring),padding .42s ease;
-  max-height:2800px;overflow:hidden}
+  max-height:2800px;
+  overflow:hidden;
+  opacity:1;
+  /* Height/opacity animate in separate phases from JS — durations must match FLIGHT_BOARD_* in app.js */
+  transition:max-height var(--dur-spring) var(--ease-spring),margin var(--dur-spring) var(--ease-spring),padding .42s ease,opacity .22s ease}
+.flight-board-wrap--board-faded #flight-board-stack,
+.flight-board-wrap--board-faded #flight-add-btn{
+  opacity:0}
 .flight-board-wrap--collapsed #flight-board-stack{
-  max-height:0;opacity:0;margin:0;padding:0;pointer-events:none}
+  max-height:0;margin:0;padding:0;pointer-events:none}
 .flight-board-intro{display:flex;flex-direction:column;align-items:flex-start;gap:0}
 .flight-board-intro .sec-header{margin-bottom:0;width:100%}
 .flight-board-intro .sec-sub{margin-bottom:0}
@@ -329,18 +335,19 @@ body::before{
   color:var(--blue);border-color:rgba(0,113,227,.25);
   background:linear-gradient(155deg,rgba(0,113,227,.12),rgba(255,255,255,.55));
   max-height:120px;overflow:hidden;transform-origin:top left;
-  transition:max-height var(--dur-spring) var(--ease-spring),opacity .42s var(--ease-spring),margin var(--dur-spring) var(--ease-spring),
-    padding .44s ease,transform .45s var(--ease-spring),box-shadow .22s ease,border-color .22s ease,visibility 0s linear;
+  opacity:1;
+  transition:max-height var(--dur-spring) var(--ease-spring),opacity .22s ease,margin var(--dur-spring) var(--ease-spring),
+    padding .4s ease,transform .25s ease,box-shadow .22s ease,border-color .22s ease,visibility 0s linear;
   visibility:visible;-webkit-tap-highlight-color:transparent;touch-action:manipulation}
 .flight-board-wrap:not(.flight-board-wrap--collapsed) .flight-add-btn-glass:hover{
   box-shadow:var(--glass-hover),var(--glass-inner);transform:translateY(-1px);color:var(--blue-h)}
 .flight-board-wrap:not(.flight-board-wrap--collapsed) .flight-add-btn-glass:active{transform:translateY(0)}
 .flight-board-wrap--collapsed .flight-add-btn-glass{
-  max-height:0;opacity:0;margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;
-  transform:translateY(-10px) scale(0.94);pointer-events:none;visibility:hidden;
+  max-height:0;margin-top:0;margin-bottom:0;padding-top:0;padding-bottom:0;
+  pointer-events:none;visibility:hidden;
   border-color:transparent;
-  transition:max-height var(--dur-spring) var(--ease-spring),opacity .34s ease,margin var(--dur-spring) var(--ease-spring),
-    padding .44s ease,transform .45s var(--ease-spring),box-shadow .22s ease,visibility 0s linear .34s}
+  transition:max-height var(--dur-spring) var(--ease-spring),opacity .22s ease,margin var(--dur-spring) var(--ease-spring),
+    padding .4s ease,visibility 0s linear var(--dur-spring),box-shadow .22s ease,border-color .22s ease}
 .flight-cards-scroller{
   display:flex;gap:14px;overflow-x:auto;overflow-y:visible;margin-top:12px;padding:8px 0 10px;
   scroll-snap-type:x mandatory;scroll-padding-inline:0;
@@ -1020,7 +1027,7 @@ html.auth-cached #auth-overlay{display:none!important}
   #sw-update-bar{transition:transform .12s ease,opacity .12s ease!important}
   .mobile-overlay{transition:opacity .14s ease!important}
   .sidebar{transition:transform .16s ease,box-shadow .16s ease!important}
-  #flight-board-stack{transition:opacity .14s ease,max-height .2s ease,margin .18s ease!important}
+  #flight-board-stack{transition:max-height .2s ease,margin .18s ease,opacity .14s ease!important}
   .flight-board-wrap--collapsed .flight-add-btn-glass{
     transition:max-height .2s ease,opacity .14s ease,margin .18s ease,visibility 0s linear .12s!important}
   .flight-add-btn-glass{
