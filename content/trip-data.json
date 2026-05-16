@@ -261,7 +261,7 @@
       "changes": [
         "Edit toolbar sits flush with the home indicator on iPhone — opaque fill under the safe-area inset fixes the frosted bar gap WebKit sometimes shows in standalone mode",
         "Older iOS safe-area values use the constant() fallback alongside env()",
-        "Viewport min-height uses -webkit-fill-available so the layout matches the visible screen edge"
+        "Viewport root uses min-height: -webkit-fill-available so height aligns with the visible screen edge on iOS"
       ]
     }
   ],

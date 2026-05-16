@@ -37,7 +37,7 @@ html{
   overscroll-behavior:none;
 }
 html.modal-scroll-lock,body.modal-scroll-lock{overflow:hidden;touch-action:none}
-body{font-family:var(--font);color:var(--text);display:flex;min-height:0;min-height:-webkit-fill-available;height:100vh;height:100dvh;max-height:100dvh;
+body{font-family:var(--font);color:var(--text);display:flex;min-height:0;height:100vh;height:100dvh;max-height:100dvh;
   overflow:hidden;overscroll-behavior:none;-webkit-font-smoothing:antialiased;line-height:1.68;letter-spacing:0.012em;
   background-color:#eceef2;
   background-image:
