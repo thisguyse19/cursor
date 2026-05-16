@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.17",
+  "appVersion": "1.0.18",
   "versions": [
     {
       "v": "1.0",
@@ -213,11 +213,23 @@
       "v": "1.0.17",
       "date": "2026-05-16",
       "title": "Airport quick-search & automatic route titles",
-      "latest": true,
+      "latest": false,
       "changes": [
         "World IATA airport index bundled as content/airports.json for fast offline lookup",
         "Add / edit flight: From and To moved to the top — type a city, airport name, or code to see a frosted suggestion list (same for connection From and Connect at)",
         "Manual trip label field removed; cards show an automatic title from origin city to final city (e.g. Singapore to Hobart), including connections"
+      ]
+    },
+    {
+      "v": "1.0.18",
+      "date": "2026-05-16",
+      "title": "Airline search, flight board toggle & motion polish",
+      "latest": true,
+      "changes": [
+        "Airline field uses the same frosted quick-type list as airports (main and connection flights)",
+        "Hide / Show pill beside Your flights collapses the countdown and card carousel (saved on this device)",
+        "Smoother modal, auth, drawer, tooltips, suggestion lists, and update bar motion; lighter press feedback on key controls",
+        "Respects Reduce Motion for heavy animations"
       ]
     }
   ],
