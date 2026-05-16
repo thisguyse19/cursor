@@ -29,6 +29,15 @@
 <link rel="stylesheet" href="styles/app.css">
 </head>
 <body>
+<!-- Sync token key + hash with js/app.js (_AK / _AH) -->
+<script>
+(function () {
+  try {
+    if (localStorage.getItem('tripAuthToken') === '9172fe8ff387c2cc69d2a0bb8723a6544bf2252c60b18048f5e8a493b6aa6190')
+      document.documentElement.classList.add('auth-cached');
+  } catch (e) {}
+})();
+</script>
 
 <!-- ═══ AUTH OVERLAY ═══ -->
 <div id="auth-overlay">
@@ -132,7 +141,7 @@
         <div class="sec-tag">Schedule</div>
         <div class="flight-board-head-row">
           <h2 class="sec-title flight-board-sec-title">Your flights</h2>
-          <button type="button" class="flight-board-toggle-pill" id="flight-board-toggle" aria-expanded="true" aria-controls="flight-board-stack">Hide</button>
+          <button type="button" class="flight-board-toggle-pill" id="flight-board-toggle" aria-expanded="true" aria-controls="flight-board-stack flight-add-btn">Hide</button>
         </div>
       </div>
       <button type="button" class="btn flight-add-btn-glass" id="flight-add-btn">+ Add flight</button>

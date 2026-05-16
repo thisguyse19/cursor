@@ -1,5 +1,5 @@
 {
-  "appVersion": "1.0.18",
+  "appVersion": "1.0.19",
   "versions": [
     {
       "v": "1.0",
@@ -224,12 +224,23 @@
       "v": "1.0.18",
       "date": "2026-05-16",
       "title": "Airline search, flight board toggle & motion polish",
-      "latest": true,
+      "latest": false,
       "changes": [
         "Airline field uses the same frosted quick-type list as airports (main and connection flights)",
         "Hide / Show pill beside Your flights collapses the countdown and card carousel (saved on this device)",
         "Smoother modal, auth, drawer, tooltips, suggestion lists, and update bar motion; lighter press feedback on key controls",
         "Respects Reduce Motion for heavy animations"
+      ]
+    },
+    {
+      "v": "1.0.19",
+      "date": "2026-05-16",
+      "title": "Springy drawer, flight hide polish, instant remembered auth",
+      "latest": true,
+      "changes": [
+        "Mobile drawer and flight-board expand/collapse use spring-style easing (native-feel overshoot)",
+        "Hiding Your flights also hides the + Add flight control",
+        "Remembered login: password gate is suppressed before first paint — no flash on PWA launch"
       ]
     }
   ],
