@@ -5,11 +5,13 @@ let VERSIONS;
 let DAYS_TAS1, DAYS_TAS2, DAYS_MELB;
 let STAYS, CHECKLIST, CL_META, COSTS, TIPS;
 
-const TRIP_DATA_URL = new URL('../content/trip-data.json', import.meta.url);
-const PDF_CSS_URL = new URL('../styles/pdf-export.css', import.meta.url);
+function contentUrl(path) {
+  const base = document.baseURI || window.location.href;
+  return new URL(path.replace(/^\//, ''), base).href;
+}
 
 async function loadTripData() {
-  const res = await fetch(TRIP_DATA_URL);
+  const res = await fetch(contentUrl('content/trip-data.json'));
   if (!res.ok) throw new Error(`trip-data.json HTTP ${res.status}`);
   const d = await res.json();
   APP_VERSION = d.appVersion;
@@ -667,7 +669,7 @@ async function doExportPDF(isLandscape) {
   const totalPP  = document.getElementById('total-pp')?.textContent    || budget;
   const totalGrp = document.getElementById('total-group')?.textContent || '';
 
-  const pdfCssRaw = await fetch(PDF_CSS_URL).then(r => {
+  const pdfCssRaw = await fetch(contentUrl('styles/pdf-export.css')).then(r => {
     if (!r.ok) throw new Error(`pdf-export.css HTTP ${r.status}`);
     return r.text();
   });
@@ -824,6 +826,7 @@ ${checklistHtml}
 // VERSION HISTORY
 // ═══════════════════════════════════════
 function openVersionModal() {
+  if (!VERSIONS || !Array.isArray(VERSIONS)) return;
   const list = document.getElementById('versionList');
   list.innerHTML = VERSIONS.slice().sort(compareVersionDesc).map(v => `
     <div class="ver-entry">
@@ -1159,15 +1162,26 @@ async function submitAuth() {
 
 window.addEventListener('DOMContentLoaded', () => {
   (async () => {
+    let dataLoaded = false;
     try {
       await loadTripData();
+      dataLoaded = true;
     } catch (e) {
       console.error(e);
-      alert('Could not load content/trip-data.json. Run a local static server (for example: npx serve) instead of opening this file directly.');
-      return;
+      alert('Could not load content/trip-data.json. If testing locally, use a static server (e.g. npx serve). On GitHub Pages, verify content/trip-data.json is published.');
     }
-    checkAuth();
-    init();
+    try {
+      checkAuth();
+    } catch (e) {
+      console.error('checkAuth', e);
+    }
+    if (dataLoaded) {
+      try {
+        init();
+      } catch (e) {
+        console.error('init', e);
+      }
+    }
   })();
 });
 
@@ -1175,6 +1189,7 @@ window.addEventListener('DOMContentLoaded', () => {
 // ONBOARDING & WHAT'S NEW
 // ═══════════════════════════════════════
 function maybeShowOnboarding() {
+  if (APP_VERSION == null || !VERSIONS || !Array.isArray(VERSIONS)) return;
   const welcomed = localStorage.getItem('tripWelcomeSeen');
   const lastSeen = localStorage.getItem('tripLastSeenVersion');
 
@@ -1191,6 +1206,7 @@ function maybeShowOnboarding() {
 }
 
 function openWhatsNewModal() {
+  if (!VERSIONS || !Array.isArray(VERSIONS)) return;
   const latest = VERSIONS.find(v => v.latest);
   if (!latest) return;
   document.getElementById('whatsNewSub').textContent =
