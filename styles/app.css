@@ -328,8 +328,10 @@ body::before{
 .flight-board-carousel--desktop-1 .flight-cards-scroller .flight-card{
   flex:0 0 100%;width:100%;max-width:none}
 .flight-board-carousel--desktop-2 .flight-cards-scroller .flight-card,
-.flight-board-carousel--desktop-paged .flight-cards-scroller .flight-card{
+.flight-board-carousel--desktop-paged:not(.flight-board-carousel--desktop-one-up) .flight-cards-scroller .flight-card{
   flex:0 0 calc((100% - 14px) / 2);width:calc((100% - 14px) / 2);max-width:none}
+.flight-board-carousel--desktop-one-up .flight-cards-scroller .flight-card{
+  flex:0 0 100%;width:100%;max-width:none}
 .flight-board-carousel--desktop-2 .flight-cards-scroller{
   overflow-x:hidden;scroll-snap-type:none}
 .flight-card-index{

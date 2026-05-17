@@ -12,6 +12,8 @@ let flightEdits = {};
 let flightModalEditingId = null;
 let _flightCardDotsObserver = null;
 let _flightDesktopCarouselBound = false;
+/** Min carousel track width (px) to show two flight cards side-by-side on desktop. */
+const FLIGHT_DESKTOP_TWO_UP_MIN = 680;
 const FLIGHT_OVERLAY_KEY = 'tripleFlightOverlay';
 const FLIGHT_BOARD_COLLAPSED_KEY = 'tripleFlightBoardCollapsed';
 const CL_SORT_KEY = 'tripleClSort';
@@ -1159,23 +1161,34 @@ function usesDesktopFlightCarousel() {
   return true;
 }
 
-/** Desktop browser layout by flight count: 1 = full width, 2 = split, 3+ = two per page. */
-function getDesktopFlightLayout(cardCount) {
+function desktopFlightTrackTwoUp(trackEl) {
+  return (trackEl?.clientWidth || 0) >= FLIGHT_DESKTOP_TWO_UP_MIN;
+}
+
+/** Desktop layout: 1 = full width; 2 wide = split; 2 narrow / 3+ = paged (2 or 1 per page by width). */
+function getDesktopFlightLayout(cardCount, trackEl) {
+  const twoUp = desktopFlightTrackTwoUp(trackEl);
   if (cardCount <= 1) return { mode: 'single', perPage: 1 };
-  if (cardCount === 2) return { mode: 'pair', perPage: 2 };
-  return { mode: 'paged', perPage: 2 };
+  if (cardCount === 2) {
+    if (twoUp) return { mode: 'pair', perPage: 2 };
+    return { mode: 'paged', perPage: 1 };
+  }
+  return { mode: 'paged', perPage: twoUp ? 2 : 1 };
 }
 
 function applyDesktopFlightCarouselLayout(carousel, cardCount) {
-  const { mode, perPage } = getDesktopFlightLayout(cardCount);
+  const track = carousel.querySelector('.flight-carousel-track');
+  const { mode, perPage } = getDesktopFlightLayout(cardCount, track);
   carousel.classList.remove(
     'flight-board-carousel--desktop-1',
     'flight-board-carousel--desktop-2',
-    'flight-board-carousel--desktop-paged'
+    'flight-board-carousel--desktop-paged',
+    'flight-board-carousel--desktop-one-up'
   );
   if (mode === 'single') carousel.classList.add('flight-board-carousel--desktop-1');
   else if (mode === 'pair') carousel.classList.add('flight-board-carousel--desktop-2');
   else carousel.classList.add('flight-board-carousel--desktop-paged');
+  if (perPage === 1 && cardCount > 1) carousel.classList.add('flight-board-carousel--desktop-one-up');
   carousel.dataset.perPage = String(perPage);
   carousel.dataset.desktopMode = mode;
   return { mode, perPage };
@@ -1187,7 +1200,8 @@ function scrollDesktopFlightCarousel(dir) {
   if (!grid || !carousel || !usesDesktopFlightCarousel()) return;
   const cards = [...grid.querySelectorAll('.flight-card')];
   if (!cards.length) return;
-  const { mode, perPage } = getDesktopFlightLayout(cards.length);
+  const track = carousel.querySelector('.flight-carousel-track');
+  const { mode, perPage } = getDesktopFlightLayout(cards.length, track);
   if (mode !== 'paged') return;
   const gap = 14;
   const step = (cards[0].offsetWidth + gap) * perPage;
@@ -1210,7 +1224,8 @@ function updateDesktopFlightCarouselNav() {
     carousel.classList.remove(
       'flight-board-carousel--desktop-1',
       'flight-board-carousel--desktop-2',
-      'flight-board-carousel--desktop-paged'
+      'flight-board-carousel--desktop-paged',
+      'flight-board-carousel--desktop-one-up'
     );
     prev.hidden = true;
     next.hidden = true;
