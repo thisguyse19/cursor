@@ -302,7 +302,29 @@ body::before{
 #sw-update-bar .sw-update-btn{flex-shrink:0;padding:8px 18px;font-size:13px;margin:0}
 
 .flight-board-stack{width:100%;max-width:100%;box-sizing:border-box}
-.flight-board-carousel{width:100%;box-sizing:border-box}
+.flight-board-carousel{width:100%;box-sizing:border-box;position:relative}
+.flight-carousel-track{min-width:0;width:100%}
+.flight-carousel-nav{
+  display:none;flex-shrink:0;align-items:center;justify-content:center;
+  width:36px;height:36px;padding:0;border-radius:50%;border:var(--btn-border);
+  background:var(--btn-fill);backdrop-filter:var(--btn-blur);-webkit-backdrop-filter:var(--btn-blur);
+  box-shadow:var(--btn-shadow);color:var(--blue);font-size:22px;font-weight:600;line-height:1;
+  cursor:pointer;font-family:var(--font);-webkit-tap-highlight-color:transparent;
+  transition:background .15s,box-shadow .15s,opacity .15s,transform .15s}
+.flight-carousel-nav:hover:not(:disabled){background:var(--btn-fill-hover);box-shadow:var(--btn-shadow-hover)}
+.flight-carousel-nav:disabled{opacity:.35;cursor:default}
+.flight-board-carousel--desktop{
+  display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;column-gap:10px}
+.flight-board-carousel--desktop .flight-carousel-nav{display:inline-flex}
+.flight-board-carousel--desktop .flight-carousel-track{grid-column:2}
+.flight-board-carousel--desktop .flight-card-dots{display:none!important}
+.flight-board-carousel--desktop .flight-cards-scroller{
+  overflow-x:hidden;scroll-snap-type:x mandatory;scroll-padding-inline:0;
+  -webkit-overflow-scrolling:auto}
+.flight-board-carousel--desktop .flight-cards-scroller .flight-card{
+  flex:0 0 calc((100% - 14px) / 2);width:calc((100% - 14px) / 2);max-width:none;scroll-snap-align:start}
+.flight-board-carousel--desktop.flight-board-carousel--one-up .flight-cards-scroller .flight-card{
+  flex:0 0 100%;width:100%}
 .flight-board-wrap{padding-bottom:8px}
 .flight-board-sec-header{width:100%;margin-bottom:0}
 .flight-board-head-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%}
