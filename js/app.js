@@ -12,8 +12,6 @@ let flightEdits = {};
 let flightModalEditingId = null;
 let _flightCardDotsObserver = null;
 let _flightDesktopCarouselBound = false;
-/** Min track width (px) to show two flight cards per page on desktop browser. */
-const FLIGHT_DESKTOP_TWO_UP_MIN = 680;
 const FLIGHT_OVERLAY_KEY = 'tripleFlightOverlay';
 const FLIGHT_BOARD_COLLAPSED_KEY = 'tripleFlightBoardCollapsed';
 const CL_SORT_KEY = 'tripleClSort';
@@ -1161,9 +1159,26 @@ function usesDesktopFlightCarousel() {
   return true;
 }
 
-function getFlightCardsPerPage(trackEl) {
-  const w = trackEl?.clientWidth || 0;
-  return w >= FLIGHT_DESKTOP_TWO_UP_MIN ? 2 : 1;
+/** Desktop browser layout by flight count: 1 = full width, 2 = split, 3+ = two per page. */
+function getDesktopFlightLayout(cardCount) {
+  if (cardCount <= 1) return { mode: 'single', perPage: 1 };
+  if (cardCount === 2) return { mode: 'pair', perPage: 2 };
+  return { mode: 'paged', perPage: 2 };
+}
+
+function applyDesktopFlightCarouselLayout(carousel, cardCount) {
+  const { mode, perPage } = getDesktopFlightLayout(cardCount);
+  carousel.classList.remove(
+    'flight-board-carousel--desktop-1',
+    'flight-board-carousel--desktop-2',
+    'flight-board-carousel--desktop-paged'
+  );
+  if (mode === 'single') carousel.classList.add('flight-board-carousel--desktop-1');
+  else if (mode === 'pair') carousel.classList.add('flight-board-carousel--desktop-2');
+  else carousel.classList.add('flight-board-carousel--desktop-paged');
+  carousel.dataset.perPage = String(perPage);
+  carousel.dataset.desktopMode = mode;
+  return { mode, perPage };
 }
 
 function scrollDesktopFlightCarousel(dir) {
@@ -1172,7 +1187,8 @@ function scrollDesktopFlightCarousel(dir) {
   if (!grid || !carousel || !usesDesktopFlightCarousel()) return;
   const cards = [...grid.querySelectorAll('.flight-card')];
   if (!cards.length) return;
-  const perPage = getFlightCardsPerPage(carousel.querySelector('.flight-carousel-track'));
+  const { mode, perPage } = getDesktopFlightLayout(cards.length);
+  if (mode !== 'paged') return;
   const gap = 14;
   const step = (cards[0].offsetWidth + gap) * perPage;
   const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -1191,7 +1207,11 @@ function updateDesktopFlightCarouselNav() {
   carousel.classList.toggle('flight-board-carousel--desktop', enabled);
 
   if (!enabled) {
-    carousel.classList.remove('flight-board-carousel--one-up');
+    carousel.classList.remove(
+      'flight-board-carousel--desktop-1',
+      'flight-board-carousel--desktop-2',
+      'flight-board-carousel--desktop-paged'
+    );
     prev.hidden = true;
     next.hidden = true;
     prev.disabled = true;
@@ -1199,18 +1219,16 @@ function updateDesktopFlightCarouselNav() {
     return;
   }
 
-  const track = carousel.querySelector('.flight-carousel-track');
-  const perPage = getFlightCardsPerPage(track);
-  carousel.classList.toggle('flight-board-carousel--one-up', perPage === 1);
-  carousel.dataset.perPage = String(perPage);
-
   const cards = [...grid.querySelectorAll('.flight-card')];
-  const needsNav = cards.length > perPage;
+  const { mode, perPage } = applyDesktopFlightCarouselLayout(carousel, cards.length);
+
+  const needsNav = mode === 'paged' && cards.length > perPage;
   prev.hidden = !needsNav;
   next.hidden = !needsNav;
   if (!needsNav) {
     prev.disabled = true;
     next.disabled = true;
+    if (mode !== 'paged') grid.scrollLeft = 0;
     return;
   }
 
@@ -1319,15 +1337,22 @@ function setupFlightCardDots() {
   };
 }
 
-function flightCardHtml(m) {
+function flightCardHtml(m, index, total) {
   const bits = [m.status, m.terminal && `Terminal ${m.terminal}`, m.gate && `Gate ${m.gate}`, m.checkIn].filter(Boolean);
   const statusLine = bits.join(' · ');
   const delayNote =
     m.delayMinutes != null && m.delayMinutes > 0
       ? `<div class="flight-delay">+${flightEsc(m.delayMinutes)}m delay (from live file)</div>`
       : '';
+  const idx = Number(index);
+  const tot = Number(total);
+  const indexBadge =
+    tot > 0 && idx >= 1
+      ? `<span class="flight-card-index" aria-label="Flight ${idx} of ${tot}">${idx}/${tot}</span>`
+      : '';
 
   return `<div class="flight-card flight-card--simple glass-card" data-flight-id="${flightEsc(m.id)}">
+    ${indexBadge}
     <div class="flight-card-btns">
       <button type="button" class="flight-card-edit" title="Edit details" aria-label="Edit flight" onclick="openFlightEditModal('${flightEsc(
         m.id
@@ -1350,7 +1375,7 @@ function renderFlights() {
 
   grid.classList.toggle('flight-cards-scroller--empty', rows.length === 0);
   grid.innerHTML = rows.length
-    ? rows.map(flightCardHtml).join('')
+    ? rows.map((m, i) => flightCardHtml(m, i + 1, rows.length)).join('')
     : '<div class="flight-empty flight-empty--solo">No flights here yet. Use <strong>+ Add flight</strong> or restore data from a backup.</div>';
 
   setupFlightCardDots();

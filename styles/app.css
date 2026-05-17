@@ -321,10 +321,24 @@ body::before{
 .flight-board-carousel--desktop .flight-cards-scroller{
   overflow-x:hidden;scroll-snap-type:x mandatory;scroll-padding-inline:0;
   -webkit-overflow-scrolling:auto}
-.flight-board-carousel--desktop .flight-cards-scroller .flight-card{
-  flex:0 0 calc((100% - 14px) / 2);width:calc((100% - 14px) / 2);max-width:none;scroll-snap-align:start}
-.flight-board-carousel--desktop.flight-board-carousel--one-up .flight-cards-scroller .flight-card{
-  flex:0 0 100%;width:100%}
+.flight-board-carousel--desktop-1 .flight-cards-scroller .flight-card,
+.flight-board-carousel--desktop-2 .flight-cards-scroller .flight-card,
+.flight-board-carousel--desktop-paged .flight-cards-scroller .flight-card{
+  scroll-snap-align:start}
+.flight-board-carousel--desktop-1 .flight-cards-scroller .flight-card{
+  flex:0 0 100%;width:100%;max-width:none}
+.flight-board-carousel--desktop-2 .flight-cards-scroller .flight-card,
+.flight-board-carousel--desktop-paged .flight-cards-scroller .flight-card{
+  flex:0 0 calc((100% - 14px) / 2);width:calc((100% - 14px) / 2);max-width:none}
+.flight-board-carousel--desktop-2 .flight-cards-scroller{
+  overflow-x:hidden;scroll-snap-type:none}
+.flight-card-index{
+  position:absolute;top:10px;left:10px;z-index:9;
+  font-size:11px;font-weight:700;letter-spacing:.02em;line-height:1;
+  color:var(--text-sec);padding:4px 8px;border-radius:8px;
+  background:rgba(255,255,255,.72);border:1px solid rgba(0,0,0,.08);
+  backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+  pointer-events:none;user-select:none}
 .flight-board-wrap{padding-bottom:8px}
 .flight-board-sec-header{width:100%;margin-bottom:0}
 .flight-board-head-row{display:flex;align-items:center;gap:10px;flex-wrap:wrap;width:100%}
