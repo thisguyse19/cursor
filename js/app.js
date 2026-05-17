@@ -11,6 +11,9 @@ let flightHiddenIds = new Set();
 let flightEdits = {};
 let flightModalEditingId = null;
 let _flightCardDotsObserver = null;
+let _flightDesktopCarouselBound = false;
+/** Min track width (px) to show two flight cards per page on desktop browser. */
+const FLIGHT_DESKTOP_TWO_UP_MIN = 680;
 const FLIGHT_OVERLAY_KEY = 'tripleFlightOverlay';
 const FLIGHT_BOARD_COLLAPSED_KEY = 'tripleFlightBoardCollapsed';
 const CL_SORT_KEY = 'tripleClSort';
@@ -1148,10 +1151,116 @@ function removeFlightCard(id) {
   renderFlights();
 }
 
+function usesDesktopFlightCarousel() {
+  try {
+    if (window.matchMedia && window.matchMedia('(max-width: 768px)').matches) return false;
+    if (isAlreadyInstalledWebApp()) return false;
+  } catch (e) {
+    return false;
+  }
+  return true;
+}
+
+function getFlightCardsPerPage(trackEl) {
+  const w = trackEl?.clientWidth || 0;
+  return w >= FLIGHT_DESKTOP_TWO_UP_MIN ? 2 : 1;
+}
+
+function scrollDesktopFlightCarousel(dir) {
+  const grid = document.getElementById('flight-cards-grid');
+  const carousel = document.getElementById('flight-board-carousel');
+  if (!grid || !carousel || !usesDesktopFlightCarousel()) return;
+  const cards = [...grid.querySelectorAll('.flight-card')];
+  if (!cards.length) return;
+  const perPage = getFlightCardsPerPage(carousel.querySelector('.flight-carousel-track'));
+  const gap = 14;
+  const step = (cards[0].offsetWidth + gap) * perPage;
+  const reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  grid.scrollTo({ left: grid.scrollLeft + dir * step, behavior: reduceMotion ? 'auto' : 'smooth' });
+  setTimeout(() => refreshFlightCardMiniMapSizes(), 400);
+}
+
+function updateDesktopFlightCarouselNav() {
+  const carousel = document.getElementById('flight-board-carousel');
+  const grid = document.getElementById('flight-cards-grid');
+  const prev = document.getElementById('flight-carousel-prev');
+  const next = document.getElementById('flight-carousel-next');
+  if (!carousel || !grid || !prev || !next) return;
+
+  const enabled = usesDesktopFlightCarousel();
+  carousel.classList.toggle('flight-board-carousel--desktop', enabled);
+
+  if (!enabled) {
+    carousel.classList.remove('flight-board-carousel--one-up');
+    prev.hidden = true;
+    next.hidden = true;
+    prev.disabled = true;
+    next.disabled = true;
+    return;
+  }
+
+  const track = carousel.querySelector('.flight-carousel-track');
+  const perPage = getFlightCardsPerPage(track);
+  carousel.classList.toggle('flight-board-carousel--one-up', perPage === 1);
+  carousel.dataset.perPage = String(perPage);
+
+  const cards = [...grid.querySelectorAll('.flight-card')];
+  const needsNav = cards.length > perPage;
+  prev.hidden = !needsNav;
+  next.hidden = !needsNav;
+  if (!needsNav) {
+    prev.disabled = true;
+    next.disabled = true;
+    return;
+  }
+
+  const maxScroll = Math.max(0, grid.scrollWidth - grid.clientWidth);
+  const sl = grid.scrollLeft;
+  prev.disabled = sl <= 2;
+  next.disabled = sl >= maxScroll - 2;
+}
+
+function setupFlightCardDesktopCarousel() {
+  const carousel = document.getElementById('flight-board-carousel');
+  const grid = document.getElementById('flight-cards-grid');
+  const prev = document.getElementById('flight-carousel-prev');
+  const next = document.getElementById('flight-carousel-next');
+  if (!carousel || !grid || !prev || !next) return;
+
+  updateDesktopFlightCarouselNav();
+
+  if (_flightDesktopCarouselBound) return;
+  _flightDesktopCarouselBound = true;
+
+  const onResize = () => {
+    const wasDesktop = carousel.classList.contains('flight-board-carousel--desktop');
+    updateDesktopFlightCarouselNav();
+    if (wasDesktop !== usesDesktopFlightCarousel()) setupFlightCardDots();
+    requestAnimationFrame(() => refreshFlightCardMiniMapSizes());
+  };
+  const onScroll = () => updateDesktopFlightCarouselNav();
+
+  window.addEventListener('resize', onResize, { passive: true });
+  grid.addEventListener('scroll', onScroll, { passive: true });
+  prev.addEventListener('click', () => scrollDesktopFlightCarousel(-1));
+  next.addEventListener('click', () => scrollDesktopFlightCarousel(1));
+}
+
 function setupFlightCardDots() {
   const grid = document.getElementById('flight-cards-grid');
   const dotsEl = document.getElementById('flight-card-dots');
   if (!grid || !dotsEl) return;
+
+  if (usesDesktopFlightCarousel()) {
+    if (_flightCardDotsObserver) {
+      _flightCardDotsObserver.disconnect();
+      _flightCardDotsObserver = null;
+    }
+    dotsEl.replaceChildren();
+    dotsEl.hidden = true;
+    dotsEl.setAttribute('aria-hidden', 'true');
+    return;
+  }
 
   if (_flightCardDotsObserver) {
     _flightCardDotsObserver.disconnect();
@@ -1245,8 +1354,12 @@ function renderFlights() {
     : '<div class="flight-empty flight-empty--solo">No flights here yet. Use <strong>+ Add flight</strong> or restore data from a backup.</div>';
 
   setupFlightCardDots();
+  setupFlightCardDesktopCarousel();
   renderTripCountdownBanner();
-  requestAnimationFrame(() => initFlightCardMiniMaps());
+  requestAnimationFrame(() => {
+    initFlightCardMiniMaps();
+    updateDesktopFlightCarouselNav();
+  });
 }
 
 function initFlightBoardSectionToggle() {
